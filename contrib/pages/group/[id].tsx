@@ -57,7 +57,7 @@ export default function GroupPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-dvh gap-3 text-[#57534E]">
         <p>Group not found or you are not a member.</p>
-        <button onClick={() => router.push('/dashboard')} className="text-[#6366F1] text-sm">← Back to dashboard</button>
+        <button onClick={() => router.push('/dashboard')} className="text-[#FF5841] text-sm">← Back to dashboard</button>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function GroupPage() {
                 <IconExport size={14} /> Export PDF
               </button>
             )}
-            <button onClick={() => setShowNewTask(true)} className="h-8 px-3 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
+            <button onClick={() => setShowNewTask(true)} className="h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
               <IconPlus size={14} /> Add task
             </button>
           </div>
@@ -95,7 +95,7 @@ export default function GroupPage() {
           {(['tasks', 'activity', 'members'] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
-                tab === t ? 'text-[#6366F1] border-[#6366F1]' : 'text-[#A8A29E] border-transparent'
+                tab === t ? 'text-[#FF5841] border-[#FF5841]' : 'text-[#A8A29E] border-transparent'
               }`}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -129,7 +129,7 @@ export default function GroupPage() {
               {(['all', 'todo', 'inprogress', 'done'] as StatusFilter[]).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
                   className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
-                    statusFilter === s ? 'bg-[#EEF2FF] text-[#6366F1] border-[#C7D2FE]' : 'bg-white text-[#57534E] border-[#E7E5E4]'
+                    statusFilter === s ? 'bg-[#FFF0EE] text-[#FF5841] border-[#FFCFC9]' : 'bg-white text-[#57534E] border-[#E7E5E4]'
                   }`}
                 >
                   {{ all: `All (${tasks.length})`, todo: `To Do (${tasks.filter(t=>t.status==='todo').length})`, inprogress: `In Progress (${tasks.filter(t=>t.status==='inprogress').length})`, done: `Done (${tasks.filter(t=>t.status==='done').length})` }[s]}
@@ -206,7 +206,7 @@ export default function GroupPage() {
           <button key={item.id} onClick={item.action}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
               (item.id === tab || (item.id === 'dashboard')) && item.id !== 'dashboard'
-                ? 'text-[#6366F1]' : 'text-[#A8A29E]'
+                ? 'text-[#FF5841]' : 'text-[#A8A29E]'
             }`}
           >
             {item.icon}
@@ -218,8 +218,8 @@ export default function GroupPage() {
       {/* Mobile FAB */}
       {tab === 'tasks' && (
         <button onClick={() => setShowNewTask(true)}
-          className="md:hidden fixed right-5 z-40 bg-[#6366F1] text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: 'calc(60px + env(safe-area-inset-bottom) + 16px)', width: 52, height: 52, boxShadow: '0 4px 16px rgba(99,102,241,.4)' }}
+          className="md:hidden fixed right-5 z-40 bg-[#FF5841] text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
+          style={{ bottom: 'calc(60px + env(safe-area-inset-bottom) + 16px)', width: 52, height: 52, boxShadow: '0 4px 16px rgba(255,88,65,.4)' }}
         >
           <IconPlus size={22} />
         </button>

@@ -58,17 +58,17 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Task title</label>
             <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Write executive summary"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Description <span className="font-normal text-[#A8A29E]">(optional)</span></label>
             <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} placeholder="Add details…"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none resize-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none resize-none" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Assign to</label>
             <select value={assignee} onChange={(e) => setAssignee(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none bg-white">
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white">
               <option value="">Select member…</option>
               {members.map((m) => (
                 <option key={m.profile_id} value={m.profile_id}>
@@ -80,12 +80,12 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
             <input type="date" value={due} onChange={(e) => setDue(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none" />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="pt-1 border-t border-[#E7E5E4]">
             <button type="submit" disabled={creating}
-              className="w-full h-11 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
               {creating ? 'Adding…' : 'Add task'}
             </button>
           </div>

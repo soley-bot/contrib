@@ -1,11 +1,11 @@
 import type { ActivityLog } from '@/types';
 
 const ACTION_META: Record<string, { emoji: string; color: string; label: (meta: Record<string, unknown> | null) => string }> = {
-  task_created:  { emoji: '📝', color: '#6366F1', label: (m) => `created task "${m?.task_title ?? ''}"` },
-  task_assigned: { emoji: '👤', color: '#6366F1', label: (m) => `was assigned "${m?.task_title ?? ''}"` },
+  task_created:  { emoji: '📝', color: '#FF5841', label: (m) => `created task "${m?.task_title ?? ''}"` },
+  task_assigned: { emoji: '👤', color: '#FF5841', label: (m) => `was assigned "${m?.task_title ?? ''}"` },
   task_done:     { emoji: '✅', color: '#16A34A', label: (m) => `completed "${m?.task_title ?? ''}"` },
   file_uploaded: { emoji: '📎', color: '#2563EB', label: (m) => `uploaded evidence for "${m?.task_title ?? ''}"` },
-  member_joined: { emoji: '👋', color: '#6366F1', label: () => 'joined the group' },
+  member_joined: { emoji: '👋', color: '#FF5841', label: () => 'joined the group' },
 };
 
 function formatTime(iso: string): string {
