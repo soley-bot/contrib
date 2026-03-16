@@ -52,7 +52,8 @@ export default function Signup() {
       return;
     }
 
-    const returnTo = typeof router.query.returnTo === 'string' ? router.query.returnTo : '/dashboard';
+    const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+    const returnTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard';
     router.push(returnTo);
   }
 

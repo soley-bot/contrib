@@ -91,13 +91,13 @@ contrib/
 │   ├── join/
 │   │   └── [token].tsx       ← Join via invite link
 │   └── api/
-│       ├── groups/
-│       ├── tasks/
-│       └── report/
+│       └── auth/
+│           └── signup.ts
 ├── components/               ← Reusable UI only. Short names.
 │   ├── nav.tsx
 │   ├── task-card.tsx
 │   ├── task-modal.tsx
+│   ├── task-form.tsx
 │   ├── member-row.tsx
 │   ├── feed-item.tsx
 │   └── invite-banner.tsx
@@ -108,7 +108,9 @@ contrib/
 ├── hooks/                    ← Custom React hooks
 │   ├── use-user.ts
 │   ├── use-group.ts
-│   └── use-tasks.ts
+│   ├── use-groups.ts
+│   ├── use-tasks.ts
+│   └── use-activity.ts
 ├── types/                    ← TypeScript interfaces
 │   └── index.ts              ← All types in one file
 ├── styles/

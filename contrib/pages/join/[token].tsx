@@ -9,7 +9,8 @@ export default function JoinPage() {
   const { token } = router.query;
   const { user, loading: userLoading } = useUser();
   const [group, setGroup] = useState<Group | null>(null);
-  const [status, setStatus] = useState<'loading' | 'found' | 'not-found' | 'joining' | 'joined' | 'already'>('loading');
+  const [status, setStatus] = useState<'loading' | 'found' | 'not-found' | 'joining' | 'joined' | 'already' | 'error'>('loading');
+  const [joinError, setJoinError] = useState('');
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -45,10 +46,12 @@ export default function JoinPage() {
     if (!group || !user) return;
     setStatus('joining');
 
-    await supabase.from('group_members').insert({
+    const { error: insertError } = await supabase.from('group_members').insert({
       group_id: group.id,
       profile_id: user.id,
     });
+
+    if (insertError) { setJoinError(insertError.message); setStatus('error'); return; }
 
     await supabase.from('activity_log').insert({
       group_id: group.id,
@@ -63,6 +66,19 @@ export default function JoinPage() {
 
   if (status === 'loading' || userLoading) {
     return <div className="flex items-center justify-center min-h-dvh text-[#6B7280]">Loading…</div>;
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-dvh gap-3 px-5 text-center">
+        <p className="text-3xl">⚠️</p>
+        <p className="text-lg font-semibold">Failed to join</p>
+        <p className="text-sm text-[#6B7280]">{joinError}</p>
+        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#6366F1] text-sm font-medium">
+          Back to dashboard
+        </button>
+      </div>
+    );
   }
 
   if (status === 'not-found') {

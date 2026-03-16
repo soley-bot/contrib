@@ -42,6 +42,7 @@ export interface Task {
 export type ActivityAction =
   | 'task_created'
   | 'task_assigned'
+  | 'task_updated'
   | 'task_done'
   | 'file_uploaded'
   | 'member_joined';
