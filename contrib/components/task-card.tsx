@@ -12,7 +12,7 @@ const STATUS_BADGE: Record<string, string> = {
   done: 'bg-[#DCFCE7] text-[#16A34A]',
 };
 const LEFT_BORDER: Record<string, string> = {
-  todo: 'border-l-[#C7D2FE]',
+  todo: 'border-l-[#FFCFC9]',
   inprogress: 'border-l-[#D97706]',
   done: 'border-l-[#16A34A]',
 };
@@ -32,7 +32,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
     >
       <p className="text-[14px] font-medium text-[#1C1917] mb-2">{task.title}</p>
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="w-5 h-5 rounded-full bg-[#EEF2FF] text-[#6366F1] text-[9px] font-bold flex items-center justify-center flex-shrink-0">
+        <div className="w-5 h-5 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[9px] font-bold flex items-center justify-center flex-shrink-0">
           {initials}
         </div>
         <span className="text-xs text-[#57534E]">{task.assignee?.name ?? '—'}</span>
