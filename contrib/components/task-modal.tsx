@@ -20,25 +20,26 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
 
 export default function TaskModal({ task, members, userId, isLead, onClose, onUpdated }: TaskModalProps) {
   const [status, setStatus] = useState<TaskStatus>(task.status);
-  const [evidenceUrl, setEvidenceUrl] = useState(task.evidence_url ?? '');
+  const [evidenceUrl, setEvidenceUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   const canChangeStatus = isLead || task.assignee_id === userId;
 
   async function handleSave() {
-    if (status === task.status && evidenceUrl === (task.evidence_url ?? '')) {
+    if (status === task.status && !evidenceUrl.trim()) {
       onClose();
       return;
     }
     setSaving(true);
     const updates: Partial<Task> = { status };
     if (status === 'done') updates.completed_at = new Date().toISOString();
+    else if (task.status === 'done') updates.completed_at = null;
     if (evidenceUrl.trim()) updates.evidence_url = evidenceUrl.trim();
 
     await supabase.from('tasks').update(updates).eq('id', task.id);
 
     if (status !== task.status) {
-      const action = status === 'done' ? 'task_done' : 'task_assigned';
+      const action = status === 'done' ? 'task_done' : 'task_updated';
       await supabase.from('activity_log').insert({
         group_id: task.group_id,
         actor_id: userId,

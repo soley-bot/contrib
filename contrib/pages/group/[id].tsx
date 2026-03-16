@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Nav from '@/components/nav';
 import TaskCard from '@/components/task-card';
 import TaskModal from '@/components/task-modal';
+import TaskForm from '@/components/task-form';
 import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
 import InviteBanner from '@/components/invite-banner';
@@ -10,9 +11,9 @@ import { IconPlus, IconExport, IconHome, IconBoard, IconActivity, IconUsers, Ico
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
-import { supabase } from '@/lib/supabase';
+import { useActivity } from '@/hooks/use-activity';
 import { generateReport } from '@/lib/pdf';
-import type { Task, ActivityLog, TaskStatus } from '@/types';
+import type { Task, TaskStatus } from '@/types';
 
 type Tab = 'tasks' | 'activity' | 'members';
 type StatusFilter = 'all' | TaskStatus;
@@ -29,63 +30,22 @@ export default function GroupPage() {
   const groupId = typeof id === 'string' ? id : undefined;
 
   const { user, profile, loading: userLoading } = useUser();
-  const { group, members, isLead, loading: groupLoading, refresh: refreshGroup } = useGroup(groupId, user?.id);
+  const { group, members, isLead, loading: groupLoading } = useGroup(groupId, user?.id);
   const { tasks, refresh: refreshTasks } = useTasks(groupId);
+  const { activity, refresh: refreshActivity } = useActivity(groupId);
 
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [activity, setActivity] = useState<ActivityLog[]>([]);
   const [showNewTask, setShowNewTask] = useState(false);
-
-  const [taskTitle, setTaskTitle] = useState('');
-  const [taskDesc, setTaskDesc] = useState('');
-  const [taskAssignee, setTaskAssignee] = useState('');
-  const [taskDue, setTaskDue] = useState('');
-  const [taskError, setTaskError] = useState('');
-  const [creatingTask, setCreatingTask] = useState(false);
 
   useEffect(() => {
     if (!userLoading && !user) router.replace('/signup');
   }, [user, userLoading, router]);
 
-  useEffect(() => {
-    if (groupId) fetchActivity();
-  }, [groupId]);
-
-  async function fetchActivity() {
-    const { data } = await supabase
-      .from('activity_log')
-      .select('*, actor:profiles!activity_log_actor_id_fkey(*)')
-      .eq('group_id', groupId!)
-      .order('created_at', { ascending: false });
-    setActivity((data as ActivityLog[]) ?? []);
-  }
-
-  async function handleCreateTask(e: React.FormEvent) {
-    e.preventDefault();
-    setTaskError('');
-    if (!taskTitle.trim() || !taskAssignee) { setTaskError('Title and assignee are required.'); return; }
-    setCreatingTask(true);
-    const { data: task, error } = await supabase
-      .from('tasks')
-      .insert({ group_id: groupId, title: taskTitle.trim(), description: taskDesc.trim() || null, assignee_id: taskAssignee, due_date: taskDue || null, status: 'todo' })
-      .select().single();
-
-    if (error || !task) { setTaskError(error?.message ?? 'Failed to create task.'); setCreatingTask(false); return; }
-
-    await supabase.from('activity_log').insert({ group_id: groupId, actor_id: user!.id, action: 'task_created', task_id: task.id, meta: { task_title: taskTitle.trim() } });
-
-    refreshTasks(); fetchActivity();
-    setShowNewTask(false); setTaskTitle(''); setTaskDesc(''); setTaskAssignee(''); setTaskDue(''); setCreatingTask(false);
-  }
-
-  async function handleExport() {
+  function handleExport() {
     if (!group) return;
-    const { data: allActivity } = await supabase
-      .from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)')
-      .eq('group_id', groupId!);
-    generateReport(group, members, tasks, (allActivity as ActivityLog[]) ?? []);
+    generateReport(group, members, tasks, activity);
   }
 
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
@@ -106,7 +66,6 @@ export default function GroupPage() {
     <div className="min-h-dvh bg-[#FAFAF9]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
 
-      {/* Main content — offset for desktop sidebar */}
       <div className="md:pl-[220px]">
 
         {/* Desktop topbar */}
@@ -270,58 +229,19 @@ export default function GroupPage() {
       {selectedTask && (
         <TaskModal task={selectedTask} members={members} userId={user!.id} isLead={isLead}
           onClose={() => setSelectedTask(null)}
-          onUpdated={() => { refreshTasks(); fetchActivity(); setSelectedTask(null); }}
+          onUpdated={() => { refreshTasks(); refreshActivity(); setSelectedTask(null); }}
         />
       )}
 
-      {/* New task sheet */}
-      {showNewTask && (
-        <div className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowNewTask(false); }}>
-          <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px] max-h-[90dvh] overflow-y-auto">
-            <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
-              <h2 className="text-base font-semibold text-[#1C1917]">Add Task</h2>
-              <button onClick={() => setShowNewTask(false)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
-            </div>
-            <form onSubmit={handleCreateTask} className="p-5 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Task title</label>
-                <input type="text" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="e.g. Write executive summary"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Description <span className="font-normal text-[#A8A29E]">(optional)</span></label>
-                <textarea value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} rows={3} placeholder="Add details…"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none resize-none" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Assign to</label>
-                <select value={taskAssignee} onChange={(e) => setTaskAssignee(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none bg-white">
-                  <option value="">Select member…</option>
-                  {members.map((m) => (
-                    <option key={m.profile_id} value={m.profile_id}>
-                      {m.profile?.name ?? m.profile_id}{m.profile_id === user?.id ? ' (me)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
-                <input type="date" value={taskDue} onChange={(e) => setTaskDue(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#6366F1] outline-none" />
-              </div>
-              {taskError && <p className="text-sm text-red-500">{taskError}</p>}
-              <div className="pt-1 border-t border-[#E7E5E4]">
-                <button type="submit" disabled={creatingTask}
-                  className="w-full h-11 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
-                  {creatingTask ? 'Adding…' : 'Add task'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {/* New task form */}
+      {showNewTask && groupId && (
+        <TaskForm
+          groupId={groupId}
+          members={members}
+          userId={user!.id}
+          onCreated={() => { refreshTasks(); refreshActivity(); }}
+          onClose={() => setShowNewTask(false)}
+        />
       )}
     </div>
   );

@@ -24,6 +24,7 @@ function actionLabel(action: string, meta: Record<string, unknown> | null): stri
   switch (action) {
     case 'task_created': return `Created task: ${meta?.task_title ?? ''}`;
     case 'task_assigned': return `Assigned task: ${meta?.task_title ?? ''}`;
+    case 'task_updated': return `Updated task: ${meta?.task_title ?? ''}`;
     case 'task_done': return `Completed task: ${meta?.task_title ?? ''}`;
     case 'file_uploaded': return `Uploaded evidence for: ${meta?.task_title ?? ''}`;
     case 'member_joined': return 'Joined the group';

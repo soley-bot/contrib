@@ -3,14 +3,14 @@ import { useRouter } from 'next/router';
 import Nav from '@/components/nav';
 import { IconPlus, IconChevronRight } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
+import { useGroups } from '@/hooks/use-groups';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
-import type { Group } from '@/types';
 
 export default function Dashboard() {
   const router = useRouter();
   const { user, profile, loading } = useUser();
-  const [groups, setGroups] = useState<Group[]>([]);
+  const { groups, refresh: refreshGroups } = useGroups(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [subject, setSubject] = useState('');
@@ -21,20 +21,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (!loading && !user) router.replace('/signup');
   }, [user, loading, router]);
-
-  useEffect(() => {
-    if (user) fetchGroups();
-  }, [user]);
-
-  async function fetchGroups() {
-    const { data } = await supabase
-      .from('group_members')
-      .select('group:groups(*)')
-      .eq('profile_id', user!.id);
-    if (data) {
-      setGroups(data.map((row: { group: unknown }) => row.group as Group).filter(Boolean));
-    }
-  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -52,9 +38,12 @@ export default function Dashboard() {
 
     if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
 
-    await supabase.from('group_members').insert({ group_id: group.id, profile_id: user!.id });
+    const { error: joinError } = await supabase.from('group_members').insert({ group_id: group.id, profile_id: user!.id });
+    if (joinError) { setFormError(joinError.message); setCreating(false); return; }
+
     await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
 
+    refreshGroups();
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
     router.push(`/group/${group.id}`);
   }
