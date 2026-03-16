@@ -1,6 +1,7 @@
 import { IconCalendar } from '@/components/icons';
 import type { Task } from '@/types';
 
+
 const STATUS_LABEL: Record<string, string> = {
   todo: 'To Do',
   inprogress: 'In Progress',
@@ -19,10 +20,11 @@ const LEFT_BORDER: Record<string, string> = {
 
 interface TaskCardProps {
   task: Task;
+  evidenceCount?: number;
   onClick: (task: Task) => void;
 }
 
-export default function TaskCard({ task, onClick }: TaskCardProps) {
+export default function TaskCard({ task, evidenceCount = 0, onClick }: TaskCardProps) {
   const initials = task.assignee?.name?.slice(0, 2).toUpperCase() ?? '??';
 
   return (
@@ -41,6 +43,11 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             <IconCalendar size={12} />
             {task.due_date}
           </span>
+        )}
+        {task.status === 'done' && (
+          evidenceCount > 0
+            ? <span className="text-[11px] font-medium text-[#16A34A]">evidence ({evidenceCount})</span>
+            : <span className="text-[11px] text-[#A8A29E]">no evidence</span>
         )}
         <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[task.status]}`}>
           {STATUS_LABEL[task.status]}
