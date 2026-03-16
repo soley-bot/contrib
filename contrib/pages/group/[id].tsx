@@ -12,6 +12,7 @@ import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
 import { useActivity } from '@/hooks/use-activity';
+import { useGroupEvidence } from '@/hooks/use-group-evidence';
 import { generateReport } from '@/lib/pdf';
 import type { Task, TaskStatus } from '@/types';
 
@@ -33,6 +34,8 @@ export default function GroupPage() {
   const { group, members, isLead, loading: groupLoading } = useGroup(groupId, user?.id);
   const { tasks, refresh: refreshTasks } = useTasks(groupId);
   const { activity, refresh: refreshActivity } = useActivity(groupId);
+  const taskIds = tasks.map((t) => t.id);
+  const { evidenceByTask, refresh: refreshEvidence } = useGroupEvidence(taskIds);
 
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -45,7 +48,7 @@ export default function GroupPage() {
 
   function handleExport() {
     if (!group) return;
-    generateReport(group, members, tasks, activity);
+    generateReport(group, members, tasks, activity, evidenceByTask);
   }
 
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
@@ -66,7 +69,7 @@ export default function GroupPage() {
     <div className="min-h-dvh bg-[#FAFAF9]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
 
-      <div className="md:pl-[220px]">
+      <div className="pt-14 md:pt-0 md:pl-[220px]">
 
         {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
@@ -139,7 +142,9 @@ export default function GroupPage() {
 
             {/* Mobile: flat list */}
             <div className="md:hidden">
-              {filteredTasks.map((task) => <TaskCard key={task.id} task={task} onClick={setSelectedTask} />)}
+              {filteredTasks.map((task) => (
+                <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />
+              ))}
               {filteredTasks.length === 0 && <p className="text-sm text-[#A8A29E] text-center py-8">No tasks here.</p>}
             </div>
 
@@ -156,7 +161,9 @@ export default function GroupPage() {
                       <span className="text-[12px] font-semibold uppercase tracking-wider text-[#A8A29E]">{col.label}</span>
                       <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
                     </div>
-                    {colTasks.map((task) => <TaskCard key={task.id} task={task} onClick={setSelectedTask} />)}
+                    {colTasks.map((task) => (
+                      <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />
+                    ))}
                   </div>
                 );
               })}
@@ -229,7 +236,7 @@ export default function GroupPage() {
       {selectedTask && (
         <TaskModal task={selectedTask} members={members} userId={user!.id} isLead={isLead}
           onClose={() => setSelectedTask(null)}
-          onUpdated={() => { refreshTasks(); refreshActivity(); setSelectedTask(null); }}
+          onUpdated={() => { refreshTasks(); refreshActivity(); refreshEvidence(); setSelectedTask(null); }}
         />
       )}
 

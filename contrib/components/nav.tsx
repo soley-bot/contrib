@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabase';
 import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers } from '@/components/icons';
@@ -13,11 +14,24 @@ interface NavProps {
 
 export default function Nav({ profile, group, onTabChange, activeTab }: NavProps) {
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     router.push('/');
   }
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
 
   const initials = profile?.name?.slice(0, 2).toUpperCase() ?? '??';
 
@@ -36,10 +50,29 @@ export default function Nav({ profile, group, onTabChange, activeTab }: NavProps
             {group.name}
           </span>
         )}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#FF5841] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+        <div className="relative flex items-center gap-2" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="w-7 h-7 rounded-full bg-[#FF5841] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 active:opacity-80"
+          >
             {initials}
-          </div>
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-9 w-44 bg-white border border-[#E7E5E4] rounded-[10px] shadow-lg py-1 z-50"
+              style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}>
+              {profile && (
+                <div className="px-3 py-2 border-b border-[#F3F4F6]">
+                  <p className="text-[13px] font-semibold text-[#1C1917] truncate">{profile.name}</p>
+                </div>
+              )}
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
+              >
+                <IconLogout size={15} /> Sign out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

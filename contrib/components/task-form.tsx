@@ -67,15 +67,25 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Assign to</label>
-            <select value={assignee} onChange={(e) => setAssignee(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white">
-              <option value="">Select member…</option>
+            <div className="flex flex-wrap gap-2 pt-0.5">
               {members.map((m) => (
-                <option key={m.profile_id} value={m.profile_id}>
+                <button
+                  key={m.profile_id}
+                  type="button"
+                  onClick={() => setAssignee(m.profile_id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
+                    assignee === m.profile_id
+                      ? 'bg-[#FF5841] text-white border-[#FF5841]'
+                      : 'bg-white text-[#57534E] border-[#E7E5E4]'
+                  }`}
+                >
+                  <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center flex-shrink-0 ${assignee === m.profile_id ? 'bg-white/20 text-white' : 'bg-[#FFF0EE] text-[#FF5841]'}`}>
+                    {m.profile?.name?.slice(0, 2).toUpperCase() ?? '??'}
+                  </span>
                   {m.profile?.name ?? m.profile_id}{m.profile_id === userId ? ' (me)' : ''}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
