@@ -105,12 +105,11 @@ export default function Signup() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Sophea Chea"
               className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">University</label>
+            <label className="text-[13px] font-medium text-[#57534E]">School</label>
             <input
               type="text"
               value={university}
@@ -125,7 +124,7 @@ export default function Signup() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@university.edu.kh"
+              placeholder="yourname@gmail.com"
               className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
             />
           </div>

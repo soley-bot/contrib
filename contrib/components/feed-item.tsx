@@ -1,11 +1,21 @@
 import type { ActivityLog } from '@/types';
 
 const ACTION_META: Record<string, { emoji: string; color: string; label: (meta: Record<string, unknown> | null) => string }> = {
-  task_created:  { emoji: '📝', color: '#FF5841', label: (m) => `created task "${m?.task_title ?? ''}"` },
-  task_assigned: { emoji: '👤', color: '#FF5841', label: (m) => `was assigned "${m?.task_title ?? ''}"` },
-  task_done:     { emoji: '✅', color: '#16A34A', label: (m) => `completed "${m?.task_title ?? ''}"` },
-  file_uploaded: { emoji: '📎', color: '#2563EB', label: (m) => `uploaded evidence for "${m?.task_title ?? ''}"` },
-  member_joined: { emoji: '👋', color: '#FF5841', label: () => 'joined the group' },
+  task_created:         { emoji: '📝', color: '#FF5841', label: (m) => `created task "${m?.task_title ?? ''}"` },
+  task_assigned:        { emoji: '👤', color: '#FF5841', label: (m) => `was assigned "${m?.task_title ?? ''}"` },
+  task_updated:         { emoji: '🔄', color: '#D97706', label: (m) => `updated task "${m?.task_title ?? ''}"` },
+  task_done:            { emoji: '✅', color: '#16A34A', label: (m) => `completed "${m?.task_title ?? ''}"` },
+  task_edited:          { emoji: '✏️', color: '#D97706', label: (m) => `edited task "${m?.task_title ?? ''}"` },
+  task_deleted:         { emoji: '🗑️', color: '#A8A29E', label: (m) => `deleted task "${m?.task_title ?? ''}"` },
+  task_reassigned:      { emoji: '👤', color: '#FF5841', label: (m) => `reassigned "${m?.task_title ?? ''}" to ${m?.to_name ?? ''}` },
+  file_uploaded:        { emoji: '📎', color: '#2563EB', label: (m) => `uploaded evidence for "${m?.task_title ?? ''}"` },
+  evidence_added:       { emoji: '📎', color: '#2563EB', label: (m) => `added evidence for "${m?.task_title ?? ''}"` },
+  evidence_version_added: { emoji: '📎', color: '#2563EB', label: (m) => `added new version of evidence for "${m?.task_title ?? ''}"` },
+  member_joined:        { emoji: '👋', color: '#FF5841', label: () => 'joined the group' },
+  member_left:          { emoji: '👋', color: '#A8A29E', label: () => 'left the group' },
+  member_removed:       { emoji: '🚫', color: '#A8A29E', label: (m) => `removed ${m?.removed_name ?? 'a member'} from the group` },
+  group_updated:        { emoji: '⚙️', color: '#57534E', label: () => 'updated group details' },
+  lead_transferred:     { emoji: '👑', color: '#FF5841', label: (m) => `transferred lead to ${m?.to_name ?? ''}` },
 };
 
 function formatTime(iso: string): string {

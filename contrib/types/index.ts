@@ -38,8 +38,22 @@ export interface Task {
   due_date: string | null;
   evidence_url: string | null;
   completed_at: string | null;
+  deleted_at: string | null;
   created_at: string;
   assignee?: Profile;
+}
+
+export type EvidenceType = 'file' | 'link' | 'note';
+
+export interface Evidence {
+  id: string;
+  task_id: string;
+  uploaded_by: string;
+  type: EvidenceType;
+  content: string;
+  version_number: number;
+  created_at: string;
+  uploader?: Profile;
 }
 
 export type ActivityAction =
@@ -48,7 +62,16 @@ export type ActivityAction =
   | 'task_updated'
   | 'task_done'
   | 'file_uploaded'
-  | 'member_joined';
+  | 'evidence_added'
+  | 'evidence_version_added'
+  | 'member_joined'
+  | 'task_edited'
+  | 'task_deleted'
+  | 'task_reassigned'
+  | 'group_updated'
+  | 'member_left'
+  | 'member_removed'
+  | 'lead_transferred';
 
 export interface ActivityLog {
   id: string;

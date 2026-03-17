@@ -44,6 +44,16 @@ create table public.tasks (
   created_at timestamptz not null default now()
 );
 
+create table public.evidence (
+  id             uuid        primary key default gen_random_uuid(),
+  task_id        uuid        not null references public.tasks(id) on delete cascade,
+  uploaded_by    uuid        not null references public.profiles(id),
+  type           text        not null check (type in ('file', 'link', 'note')),
+  content        text        not null,
+  version_number integer     not null default 1,
+  created_at     timestamptz not null default now()
+);
+
 create table public.activity_log (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -60,6 +70,7 @@ alter table public.profiles enable row level security;
 alter table public.groups enable row level security;
 alter table public.group_members enable row level security;
 alter table public.tasks enable row level security;
+alter table public.evidence enable row level security;
 alter table public.activity_log enable row level security;
 
 -- profiles
@@ -120,6 +131,22 @@ create policy "Assignee and lead can update tasks"
       where id = tasks.group_id and lead_id = auth.uid()
     )
   );
+
+-- evidence
+create policy "Group members can view evidence"
+  on public.evidence for select
+  using (
+    exists (
+      select 1 from public.tasks t
+      join public.group_members gm on gm.group_id = t.group_id
+      where t.id = evidence.task_id
+        and gm.profile_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert own evidence"
+  on public.evidence for insert
+  with check (auth.uid() = uploaded_by);
 
 -- activity_log
 create policy "Group members can read activity"

@@ -1,12 +1,15 @@
 import type { GroupMember, Task } from '@/types';
+import { IconTrash } from '@/components/icons';
 
 interface MemberRowProps {
   member: GroupMember;
   tasks: Task[];
-  isLead: boolean;
+  isThisMemberLead: boolean;
+  canRemove: boolean;
+  onRemove?: () => void;
 }
 
-export default function MemberRow({ member, tasks, isLead }: MemberRowProps) {
+export default function MemberRow({ member, tasks, isThisMemberLead, canRemove, onRemove }: MemberRowProps) {
   const name = member.profile?.name ?? '—';
   const university = member.profile?.university ?? '';
   const initials = name.slice(0, 2).toUpperCase();
@@ -22,7 +25,7 @@ export default function MemberRow({ member, tasks, isLead }: MemberRowProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[14px] font-medium text-[#1C1917]">{name}</span>
-          {isLead && (
+          {isThisMemberLead && (
             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFF0EE] text-[#FF5841]">
               Lead
             </span>
@@ -41,6 +44,15 @@ export default function MemberRow({ member, tasks, isLead }: MemberRowProps) {
           </span>
         </div>
       </div>
+      {canRemove && onRemove && (
+        <button
+          onClick={onRemove}
+          className="p-2 text-[#A8A29E] hover:text-red-500 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
+          title="Remove member"
+        >
+          <IconTrash size={15} />
+        </button>
+      )}
     </div>
   );
 }
