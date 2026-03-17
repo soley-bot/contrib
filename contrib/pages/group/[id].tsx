@@ -7,7 +7,7 @@ import TaskForm from '@/components/task-form';
 import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
 import InviteBanner from '@/components/invite-banner';
-import { IconPlus, IconExport, IconActivity, IconList, IconCheck } from '@/components/icons';
+import { IconPlus, IconExport, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
@@ -94,31 +94,21 @@ export default function GroupPage() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex items-center border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-30" style={{ scrollbarWidth: 'none' }}>
-          <div className="flex overflow-x-auto flex-1" style={{ scrollbarWidth: 'none' }}>
-            {(['tasks', 'activity', 'members'] as Tab[]).map((t) => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
-                  tab === t ? 'text-[#FF5841] border-[#FF5841]' : 'text-[#A8A29E] border-transparent'
-                }`}
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
-          {isLead && (
-            <button onClick={handleExport}
-              className="md:hidden flex-shrink-0 flex items-center gap-1.5 px-3 py-2 mr-1 text-[12px] font-medium text-[#57534E] hover:text-[#FF5841] transition-colors"
-              title="Export PDF"
+        <div className="flex border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {(['tasks', 'activity', 'members'] as Tab[]).map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
+                tab === t ? 'text-[#FF5841] border-[#FF5841]' : 'text-[#A8A29E] border-transparent'
+              }`}
             >
-              <IconExport size={16} /> Export
+              {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
-          )}
+          ))}
         </div>
 
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
-          <div className="max-w-5xl mx-auto px-4 py-4 pb-20 md:pb-4">
+          <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
             <InviteBanner token={group.invite_token} />
 
             {/* Stats row */}
@@ -152,7 +142,9 @@ export default function GroupPage() {
 
             {/* Mobile: flat list */}
             <div className="md:hidden">
-              {filteredTasks.map((task) => <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />)}
+              {filteredTasks.map((task) => (
+                <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />
+              ))}
               {filteredTasks.length === 0 && <p className="text-sm text-[#A8A29E] text-center py-8">No tasks here.</p>}
             </div>
 
@@ -169,7 +161,9 @@ export default function GroupPage() {
                       <span className="text-[12px] font-semibold uppercase tracking-wider text-[#A8A29E]">{col.label}</span>
                       <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
                     </div>
-                    {colTasks.map((task) => <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />)}
+                    {colTasks.map((task) => (
+                      <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />
+                    ))}
                   </div>
                 );
               })}
@@ -179,7 +173,7 @@ export default function GroupPage() {
 
         {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
-          <div className="max-w-2xl mx-auto px-4 py-4 pb-6 md:pb-4">
+          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">Recent activity</p>
             {activity.length === 0
               ? <p className="text-sm text-[#A8A29E] text-center py-8">No activity yet.</p>
@@ -190,22 +184,49 @@ export default function GroupPage() {
 
         {/* ── MEMBERS TAB ── */}
         {tab === 'members' && (
-          <div className="max-w-2xl mx-auto px-4 py-4 pb-6 md:pb-4">
+          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">
               {members.length} member{members.length !== 1 ? 's' : ''}
             </p>
             {members.map((m) => (
               <MemberRow key={m.id} member={m} tasks={tasks} isLead={m.profile_id === group.lead_id} />
             ))}
+            {isLead && (
+              <button onClick={handleExport}
+                className="w-full mt-6 h-11 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                <IconExport size={16} /> Export Contribution Report (PDF)
+              </button>
+            )}
           </div>
         )}
       </div>
 
+      {/* ── MOBILE BOTTOM NAV ── */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E7E5E4] flex"
+        style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {[
+          { id: 'dashboard', label: 'Groups',   icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
+          { id: 'tasks',     label: 'Tasks',    icon: <IconBoard size={22} />,    action: () => setTab('tasks') },
+          { id: 'activity',  label: 'Activity', icon: <IconActivity size={22} />, action: () => setTab('activity') },
+          { id: 'members',   label: 'Members',  icon: <IconUsers size={22} />,    action: () => setTab('members') },
+        ].map((item) => (
+          <button key={item.id} onClick={item.action}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
+              (item.id === tab || (item.id === 'dashboard')) && item.id !== 'dashboard'
+                ? 'text-[#FF5841]' : 'text-[#A8A29E]'
+            }`}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
       {/* Mobile FAB */}
       {tab === 'tasks' && (
         <button onClick={() => setShowNewTask(true)}
-          className="md:hidden fixed right-5 bottom-6 z-40 bg-[#FF5841] text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
-          style={{ width: 52, height: 52, boxShadow: '0 4px 16px rgba(255,88,65,.4)' }}
+          className="md:hidden fixed right-5 z-40 bg-[#FF5841] text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
+          style={{ bottom: 'calc(60px + env(safe-area-inset-bottom) + 16px)', width: 52, height: 52, boxShadow: '0 4px 16px rgba(255,88,65,.4)' }}
         >
           <IconPlus size={22} />
         </button>

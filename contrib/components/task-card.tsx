@@ -1,6 +1,7 @@
 import { IconCalendar } from '@/components/icons';
 import type { Task } from '@/types';
 
+
 const STATUS_LABEL: Record<string, string> = {
   todo: 'To Do',
   inprogress: 'In Progress',
@@ -45,7 +46,7 @@ export default function TaskCard({ task, evidenceCount = 0, onClick }: TaskCardP
         )}
         {task.status === 'done' && (
           evidenceCount > 0
-            ? <span className="text-[11px] font-medium text-[#16A34A]">📎 {evidenceCount} evidence</span>
+            ? <span className="text-[11px] font-medium text-[#16A34A]">evidence ({evidenceCount})</span>
             : <span className="text-[11px] text-[#A8A29E]">no evidence</span>
         )}
         <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[task.status]}`}>

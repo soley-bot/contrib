@@ -58,6 +58,8 @@ export type ActivityAction =
   | 'task_updated'
   | 'task_done'
   | 'file_uploaded'
+  | 'evidence_added'
+  | 'evidence_version_added'
   | 'member_joined';
 
 export interface ActivityLog {

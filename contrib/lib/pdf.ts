@@ -21,7 +21,9 @@ function actionLabel(action: string, meta: Record<string, unknown> | null): stri
     case 'task_assigned': return `Assigned task: ${meta?.task_title ?? ''}`;
     case 'task_updated':  return `Updated task: ${meta?.task_title ?? ''}`;
     case 'task_done':     return `Completed task: ${meta?.task_title ?? ''}`;
-    case 'file_uploaded': return `Uploaded evidence for: ${meta?.task_title ?? ''}`;
+    case 'file_uploaded':           return `Uploaded evidence for: ${meta?.task_title ?? ''}`;
+    case 'evidence_added':          return `Added evidence for: ${meta?.task_title ?? ''}`;
+    case 'evidence_version_added':  return `Added new evidence version for: ${meta?.task_title ?? ''}`;
     case 'member_joined': return 'Joined the group';
     default: return action;
   }
@@ -276,7 +278,7 @@ export function generateReport(
         doc.text(t.title, ML + 6, y, { maxWidth: CW - 6 });
         y += 4;
 
-        // Sub-line: completed date (left) + evidence versions (right)
+        // Sub-line: completed date (left) + evidence (right)
         doc.setFontSize(7.5);
         if (t.completed_at) {
           setColor(doc, GRAY_LIGHT);

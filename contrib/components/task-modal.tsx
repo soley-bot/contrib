@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
-import type { Task, GroupMember, TaskStatus, Evidence } from '@/types';
+import EvidenceList from '@/components/evidence-list';
+import EvidenceForm from '@/components/evidence-form';
+import { useEvidence } from '@/hooks/use-evidence';
+import type { Task, GroupMember, TaskStatus } from '@/types';
 
 interface TaskModalProps {
   task: Task;
@@ -13,87 +16,45 @@ interface TaskModalProps {
 }
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
-  { value: 'todo', label: 'To Do' },
+  { value: 'todo',       label: 'To Do' },
   { value: 'inprogress', label: 'In Progress' },
-  { value: 'done', label: 'Done' },
+  { value: 'done',       label: 'Done' },
 ];
 
 export default function TaskModal({ task, members, userId, isLead, onClose, onUpdated }: TaskModalProps) {
   const [status, setStatus] = useState<TaskStatus>(task.status);
-  const [newEvidenceUrl, setNewEvidenceUrl] = useState('');
-  const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const { evidence, refresh: refreshEvidence } = useEvidence(task.id);
 
   const canChangeStatus = isLead || task.assignee_id === userId;
-
-  useEffect(() => {
-    supabase
-      .from('evidence')
-      .select('*')
-      .eq('task_id', task.id)
-      .order('created_at', { ascending: true })
-      .then(({ data }) => setEvidenceList(data ?? []));
-  }, [task.id]);
+  const hasEvidence = evidence.length > 0;
 
   async function handleSave() {
-    const url = newEvidenceUrl.trim();
-    if (status === task.status && !url) {
-      onClose();
-      return;
-    }
+    if (status === task.status) { onClose(); return; }
     setSaving(true);
-
-    if (status !== task.status) {
-      const updates: Partial<Task> = { status };
-      if (status === 'done') updates.completed_at = new Date().toISOString();
-      else if (task.status === 'done') updates.completed_at = null;
-      await supabase.from('tasks').update(updates).eq('id', task.id);
-      await supabase.from('activity_log').insert({
-        group_id: task.group_id,
-        actor_id: userId,
-        action: status === 'done' ? 'task_done' : 'task_updated',
-        task_id: task.id,
-        meta: { task_title: task.title },
-      });
-    }
-
-    if (url) {
-      await supabase.from('evidence').insert({
-        task_id: task.id,
-        uploaded_by: userId,
-        type: 'link',
-        content: url,
-        version_number: evidenceList.length + 1,
-      });
-      await supabase.from('activity_log').insert({
-        group_id: task.group_id,
-        actor_id: userId,
-        action: 'file_uploaded',
-        task_id: task.id,
-        meta: { task_title: task.title, url },
-      });
-    }
-
+    const updates: Partial<Task> = { status };
+    if (status === 'done') updates.completed_at = new Date().toISOString();
+    else if (task.status === 'done') updates.completed_at = null;
+    await supabase.from('tasks').update(updates).eq('id', task.id);
+    await supabase.from('activity_log').insert({
+      group_id: task.group_id, actor_id: userId,
+      action: status === 'done' ? 'task_done' : 'task_updated',
+      task_id: task.id, meta: { task_title: task.title },
+    });
     setSaving(false);
     onUpdated();
-    onClose();
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
+    <div className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px] max-h-[90dvh] overflow-y-auto"
-        style={{ animation: 'slideUp .25s ease' }}
-      >
+        style={{ animation: 'slideUp .25s ease' }}>
         <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
           <h2 className="text-base font-semibold text-[#1C1917] truncate">{task.title}</h2>
-          <button onClick={onClose} className="text-[#57534E] hover:text-[#1C1917] ml-2 p-1">
-            <IconClose size={16} />
-          </button>
+          <button onClick={onClose} className="text-[#57534E] hover:text-[#1C1917] ml-2 p-1"><IconClose size={16} /></button>
         </div>
 
         <div className="p-5 flex flex-col gap-4">
@@ -123,72 +84,52 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
 
           <div>
             <p className="text-[13px] font-medium text-[#57534E] mb-1.5">Status</p>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as TaskStatus)}
+            <select value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}
               disabled={!canChangeStatus}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-[#FF5841] outline-none disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-[#FF5841] outline-none disabled:opacity-50 disabled:cursor-not-allowed bg-white">
+              {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
 
           <div>
-            <p className="text-[13px] font-medium text-[#57534E] mb-1.5">
-              Evidence <span className="font-normal text-[#A8A29E]">(optional)</span>
-            </p>
-
-            {evidenceList.length > 0 && (
-              <div className="mb-2 flex flex-col gap-1.5 p-3 bg-[#FAFAF9] rounded-md border border-[#E7E5E4]">
-                {evidenceList.map((e, i) => (
-                  <a
-                    key={e.id}
-                    href={e.content}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-xs text-[#FF5841] min-w-0"
-                  >
-                    <span className="shrink-0 w-4 h-4 rounded-full bg-[#FFF0EE] flex items-center justify-center text-[9px] font-bold text-[#FF5841]">
-                      {i + 1}
-                    </span>
-                    <span className="truncate">{e.content}</span>
-                    <span className="shrink-0">↗</span>
-                  </a>
-                ))}
-              </div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[13px] font-medium text-[#57534E]">
+                Evidence {hasEvidence && <span className="font-normal text-[#16A34A]">({evidence.length} version{evidence.length !== 1 ? 's' : ''})</span>}
+              </p>
+              {!showForm && (
+                <button onClick={() => setShowForm(true)} className="text-[12px] font-medium text-[#FF5841]">
+                  {hasEvidence ? '+ New version' : '+ Add'}
+                </button>
+              )}
+            </div>
+            {status === 'done' && !hasEvidence && !showForm && (
+              <p className="text-[12px] text-[#A8A29E] mb-2">Add evidence (optional but recommended)</p>
             )}
-
-            <input
-              type="url"
-              value={newEvidenceUrl}
-              onChange={(e) => setNewEvidenceUrl(e.target.value)}
-              placeholder="Add evidence URL…"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
-            />
+            {hasEvidence && <EvidenceList evidence={evidence} />}
+            {showForm && (
+              <EvidenceForm
+                taskId={task.id} taskTitle={task.title}
+                groupId={task.group_id} userId={userId}
+                nextVersion={evidence.length + 1}
+                onSaved={() => { refreshEvidence(); setShowForm(false); }}
+                onCancel={() => setShowForm(false)}
+              />
+            )}
           </div>
         </div>
 
         <div className="px-5 py-3 border-t border-[#E7E5E4]">
           {canChangeStatus ? (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {saving ? 'Saving…' : (
-                <><IconCheck size={14} /> Save changes</>
-              )}
+            <button onClick={handleSave} disabled={saving}
+              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+              {saving ? 'Saving…' : <><IconCheck size={14} /> Save changes</>}
             </button>
           ) : (
             <p className="text-center text-xs text-[#A8A29E]">Only the assignee or lead can update this task.</p>
           )}
         </div>
       </div>
-      <style jsx>{`
-        @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-      `}</style>
+      <style jsx>{`@keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }`}</style>
     </div>
   );
 }
