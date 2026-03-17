@@ -4,11 +4,16 @@
     {
       "name": "Next.js Dev",
       "runtimeExecutable": "node",
-      "runtimeArgs": [
-        "C:\\Users\\USer\\Desktop\\Contrib\\contrib\\node_modules\\next\\dist\\bin\\next",
-        "dev",
-        "C:\\Users\\USer\\Desktop\\Contrib\\contrib\\.claude\\worktrees\\sleepy-borg\\contrib"
-      ],
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
+      "cwd": "contrib",
+      "port": 3000,
+      "autoPort": true,
+      "startUrl": "/group/7e4f7739-f230-440c-af63-043eae1ca148"
+    },
+    {
+      "name": "Next.js Production",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
       "port": 3000
     }
   ]

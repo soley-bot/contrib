@@ -88,6 +88,15 @@ export function IconCalendar({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
+export function IconLink({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M7 9l-1 1a3.2 3.2 0 01-4.5-4.5l2.3-2.3a3.2 3.2 0 014.5 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M9 7l1-1a3.2 3.2 0 014.5 4.5l-2.3 2.3a3.2 3.2 0 01-4.5 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M6 10l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
 export function IconChevronRight({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none">

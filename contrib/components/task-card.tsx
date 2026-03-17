@@ -1,6 +1,7 @@
 import { IconCalendar, IconPencil, IconTrash } from '@/components/icons';
 import type { Task } from '@/types';
 
+
 const STATUS_LABEL: Record<string, string> = {
   todo: 'To Do',
   inprogress: 'In Progress',
@@ -21,12 +22,13 @@ interface TaskCardProps {
   task: Task;
   isLead: boolean;
   currentUserId: string;
+  evidenceCount?: number;
   onClick: (task: Task) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
 
-export default function TaskCard({ task, isLead, currentUserId, onClick, onEdit, onDelete }: TaskCardProps) {
+export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 0, onClick, onEdit, onDelete }: TaskCardProps) {
   const initials = task.assignee?.name?.slice(0, 2).toUpperCase() ?? '??';
   const canEdit = isLead || task.assignee_id === currentUserId;
 
@@ -68,6 +70,11 @@ export default function TaskCard({ task, isLead, currentUserId, onClick, onEdit,
             <IconCalendar size={12} />
             {task.due_date}
           </span>
+        )}
+        {task.status === 'done' && (
+          evidenceCount > 0
+            ? <span className="text-[11px] font-medium text-[#16A34A]">evidence ({evidenceCount})</span>
+            : <span className="text-[11px] text-[#A8A29E]">no evidence</span>
         )}
         <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[task.status]}`}>
           {STATUS_LABEL[task.status]}

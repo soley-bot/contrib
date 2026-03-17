@@ -151,7 +151,7 @@ export default function Landing() {
               <Link href="/signup" className="inline-flex items-center justify-center h-12 px-8 text-white text-[15px] font-semibold rounded-md transition-colors bg-[#FF5841] hover:bg-[#E04030]">
                 Get started — it&apos;s free
               </Link>
-              <Link href="/login" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-medium rounded-md border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] transition-colors">
+              <Link href="/login" className="inline-flex items-center justify-center h-12 px-4 text-[15px] font-medium text-[#6B7280] hover:text-[#111827] transition-colors">
                 Log in →
               </Link>
             </div>
