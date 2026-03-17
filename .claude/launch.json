@@ -2,9 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "Next.js dev",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["contrib/node_modules/next/dist/bin/next", "dev", "contrib"],
+      "name": "Next.js Dev",
+      "runtimeExecutable": "C:\\Windows\\System32\\cmd.exe",
+      "runtimeArgs": ["/c", "cd", "contrib", "&&", "npm", "run", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "Next.js Production",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
       "port": 3000
     }
   ]
