@@ -2,9 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "Next.js dev",
+      "name": "Next.js Dev",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["contrib/node_modules/next/dist/bin/next", "dev", "contrib"],
+      "runtimeArgs": [
+        "C:\\Users\\USer\\Desktop\\Contrib\\contrib\\node_modules\\next\\dist\\bin\\next",
+        "dev",
+        "C:\\Users\\USer\\Desktop\\Contrib\\contrib\\.claude\\worktrees\\sleepy-borg\\contrib"
+      ],
       "port": 3000
     }
   ]

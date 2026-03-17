@@ -1,4 +1,4 @@
-import { IconCalendar } from '@/components/icons';
+import { IconCalendar, IconPencil, IconTrash } from '@/components/icons';
 import type { Task } from '@/types';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -19,18 +19,45 @@ const LEFT_BORDER: Record<string, string> = {
 
 interface TaskCardProps {
   task: Task;
+  isLead: boolean;
+  currentUserId: string;
   onClick: (task: Task) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
 }
 
-export default function TaskCard({ task, onClick }: TaskCardProps) {
+export default function TaskCard({ task, isLead, currentUserId, onClick, onEdit, onDelete }: TaskCardProps) {
   const initials = task.assignee?.name?.slice(0, 2).toUpperCase() ?? '??';
+  const canEdit = isLead || task.assignee_id === currentUserId;
 
   return (
     <div
       onClick={() => onClick(task)}
-      className={`bg-white border border-[#E7E5E4] border-l-4 ${LEFT_BORDER[task.status]} rounded-[10px] px-3.5 pt-3.5 pb-3.5 pl-[18px] mb-2.5 cursor-pointer active:shadow-md transition-shadow`}
+      className={`group bg-white border border-[#E7E5E4] border-l-4 ${LEFT_BORDER[task.status]} rounded-[10px] px-3.5 pt-3.5 pb-3.5 pl-[18px] mb-2.5 cursor-pointer active:shadow-md transition-shadow`}
     >
-      <p className="text-[14px] font-medium text-[#1C1917] mb-2">{task.title}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[14px] font-medium text-[#1C1917] mb-2 flex-1">{task.title}</p>
+        <div className="flex items-center gap-0.5 flex-shrink-0 -mt-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          {canEdit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(task); }}
+              className="p-1.5 rounded-md text-[#A8A29E] hover:text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
+              title="Edit task"
+            >
+              <IconPencil size={13} />
+            </button>
+          )}
+          {isLead && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(task); }}
+              className="p-1.5 rounded-md text-[#A8A29E] hover:text-red-500 hover:bg-red-50 transition-colors"
+              title="Delete task"
+            >
+              <IconTrash size={13} />
+            </button>
+          )}
+        </div>
+      </div>
       <div className="flex items-center gap-2 flex-wrap">
         <div className="w-5 h-5 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[9px] font-bold flex items-center justify-center flex-shrink-0">
           {initials}

@@ -24,6 +24,7 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
       .from('tasks')
       .select('*, assignee:profiles!tasks_assignee_id_fkey(*)')
       .eq('group_id', id)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
     setTasks((data as Task[]) ?? []);
   }
