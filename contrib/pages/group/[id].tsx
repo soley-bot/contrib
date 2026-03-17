@@ -1,28 +1,33 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { supabase } from '@/lib/supabase';
 import Nav from '@/components/nav';
 import TaskCard from '@/components/task-card';
 import TaskModal from '@/components/task-modal';
 import TaskForm from '@/components/task-form';
+import EditTaskModal from '@/components/edit-task-modal';
+import EditGroupModal from '@/components/edit-group-modal';
+import TransferLeadModal from '@/components/transfer-lead-modal';
+import ConfirmModal from '@/components/confirm-modal';
 import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
 import InviteBanner from '@/components/invite-banner';
-import { IconPlus, IconExport, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
+import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
 import { useActivity } from '@/hooks/use-activity';
 import { useGroupEvidence } from '@/hooks/use-group-evidence';
 import { generateReport } from '@/lib/pdf';
-import type { Task, TaskStatus } from '@/types';
+import type { Task, TaskStatus, GroupMember } from '@/types';
 
 type Tab = 'tasks' | 'activity' | 'members';
 type StatusFilter = 'all' | TaskStatus;
 
 const STATUS_COLS: { status: TaskStatus; label: string; countClass: string }[] = [
-  { status: 'todo',       label: 'To Do',       countClass: 'bg-[#F5F5F4] text-[#57534E]' },
-  { status: 'inprogress', label: 'In Progress',  countClass: 'bg-[#FEF3C7] text-[#D97706]' },
-  { status: 'done',       label: 'Done',         countClass: 'bg-[#DCFCE7] text-[#16A34A]' },
+  { status: 'todo',       label: 'To Do',      countClass: 'bg-[#F5F5F4] text-[#57534E]' },
+  { status: 'inprogress', label: 'In Progress', countClass: 'bg-[#FEF3C7] text-[#D97706]' },
+  { status: 'done',       label: 'Done',        countClass: 'bg-[#DCFCE7] text-[#16A34A]' },
 ];
 
 export default function GroupPage() {
@@ -31,7 +36,7 @@ export default function GroupPage() {
   const groupId = typeof id === 'string' ? id : undefined;
 
   const { user, profile, loading: userLoading } = useUser();
-  const { group, members, isLead, loading: groupLoading } = useGroup(groupId, user?.id);
+  const { group, members, isLead, loading: groupLoading, refresh: refreshGroup } = useGroup(groupId, user?.id);
   const { tasks, refresh: refreshTasks } = useTasks(groupId);
   const { activity, refresh: refreshActivity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
@@ -41,10 +46,72 @@ export default function GroupPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewTask, setShowNewTask] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [showEditGroup, setShowEditGroup] = useState(false);
+  const [showDeleteGroup, setShowDeleteGroup] = useState(false);
+  const [showTransferLead, setShowTransferLead] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null);
 
   useEffect(() => {
     if (!userLoading && !user) router.replace('/signup');
   }, [user, userLoading, router]);
+
+  function handleDeleteTaskClick(task: Task) {
+    setTaskToDelete(task);
+  }
+
+  async function executeDeleteTask() {
+    if (!taskToDelete || !user) return;
+    await supabase.from('activity_log').insert({
+      group_id: taskToDelete.group_id,
+      actor_id: user.id,
+      action: 'task_deleted',
+      task_id: taskToDelete.id,
+      meta: { task_title: taskToDelete.title },
+    });
+    await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('id', taskToDelete.id);
+    setTaskToDelete(null);
+    refreshTasks();
+    refreshActivity();
+  }
+
+  async function executeDeleteGroup() {
+    if (!group) return;
+    await supabase.from('groups').delete().eq('id', group.id);
+    router.push('/dashboard');
+  }
+
+  async function executeLeaveGroup() {
+    if (!user || !group) return;
+    const myMembership = members.find((m) => m.profile_id === user.id);
+    if (!myMembership) return;
+    await supabase.from('activity_log').insert({
+      group_id: group.id,
+      actor_id: user.id,
+      action: 'member_left',
+      task_id: null,
+      meta: null,
+    });
+    await supabase.from('group_members').delete().eq('id', myMembership.id);
+    router.push('/dashboard');
+  }
+
+  async function executeRemoveMember() {
+    if (!memberToRemove || !user || !group) return;
+    await supabase.from('activity_log').insert({
+      group_id: group.id,
+      actor_id: user.id,
+      action: 'member_removed',
+      task_id: null,
+      meta: { removed_name: memberToRemove.profile?.name ?? '' },
+    });
+    await supabase.from('group_members').delete().eq('id', memberToRemove.id);
+    setMemberToRemove(null);
+    refreshGroup();
+    refreshActivity();
+  }
 
   function handleExport() {
     if (!group) return;
@@ -53,8 +120,11 @@ export default function GroupPage() {
 
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
   const isMember = members.some((m) => m.profile_id === user?.id);
+  const nonLeadMembers = members.filter((m) => m.profile_id !== group?.lead_id);
 
-  if (userLoading || groupLoading) return <div className="flex items-center justify-center min-h-dvh text-[#57534E]">Loading…</div>;
+  if (userLoading || groupLoading) {
+    return <div className="flex items-center justify-center min-h-dvh text-[#57534E]">Loading…</div>;
+  }
 
   if (!group || !isMember) {
     return (
@@ -80,6 +150,16 @@ export default function GroupPage() {
             <span className="text-[#D6D3D1]">›</span>
             <span className="font-semibold text-[#1C1917]">{group.name}</span>
             <span className="text-[#A8A29E]">{group.subject}</span>
+            {isLead && (
+              <div className="flex items-center gap-0.5 ml-1">
+                <button onClick={() => setShowEditGroup(true)} className="p-1.5 text-[#A8A29E] hover:text-[#57534E] hover:bg-[#F5F5F4] rounded-md transition-colors" title="Edit group">
+                  <IconPencil size={13} />
+                </button>
+                <button onClick={() => setShowDeleteGroup(true)} className="p-1.5 text-[#A8A29E] hover:text-red-500 hover:bg-red-50 rounded-md transition-colors" title="Delete group">
+                  <IconTrash size={13} />
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             {isLead && (
@@ -114,7 +194,7 @@ export default function GroupPage() {
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
               {[
-                { label: 'Total tasks', value: tasks.length, color: '' },
+                { label: 'Total tasks', value: tasks.length,                                        color: '' },
                 { label: 'Done',        value: tasks.filter(t => t.status === 'done').length,       color: '#16A34A' },
                 { label: 'In progress', value: tasks.filter(t => t.status === 'inprogress').length, color: '#D97706' },
                 { label: 'To do',       value: tasks.filter(t => t.status === 'todo').length,       color: '#A8A29E' },
@@ -127,7 +207,7 @@ export default function GroupPage() {
               ))}
             </div>
 
-            {/* Mobile: status filter tabs */}
+            {/* Mobile: status filter */}
             <div className="flex gap-2 mb-4 overflow-x-auto md:hidden" style={{ scrollbarWidth: 'none' }}>
               {(['all', 'todo', 'inprogress', 'done'] as StatusFilter[]).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
@@ -142,31 +222,44 @@ export default function GroupPage() {
 
             {/* Mobile: flat list */}
             <div className="md:hidden">
-              {filteredTasks.map((task) => (
-                <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />
-              ))}
-              {filteredTasks.length === 0 && <p className="text-sm text-[#A8A29E] text-center py-8">No tasks here.</p>}
+              {tasks.length === 0
+                ? <p className="text-sm text-[#A8A29E] text-center py-8">No tasks yet. Add your first task to get started.</p>
+                : filteredTasks.length === 0
+                ? <p className="text-sm text-[#A8A29E] text-center py-8">No tasks here.</p>
+                : filteredTasks.map((task) => (
+                    <TaskCard key={task.id} task={task} isLead={isLead} currentUserId={user!.id}
+                      evidenceCount={evidenceByTask[task.id]?.length ?? 0}
+                      onClick={setSelectedTask} onEdit={setEditingTask} onDelete={handleDeleteTaskClick}
+                    />
+                  ))
+              }
             </div>
 
             {/* Desktop: kanban */}
             <div className="hidden md:grid grid-cols-3 gap-4">
-              {STATUS_COLS.map((col) => {
-                const colTasks = tasks.filter(t => t.status === col.status);
-                return (
-                  <div key={col.status}>
-                    <div className="flex items-center gap-1.5 mb-3">
-                      {col.status === 'todo'       && <IconList size={14} />}
-                      {col.status === 'inprogress' && <IconActivity size={14} />}
-                      {col.status === 'done'       && <IconCheck size={14} />}
-                      <span className="text-[12px] font-semibold uppercase tracking-wider text-[#A8A29E]">{col.label}</span>
-                      <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
-                    </div>
-                    {colTasks.map((task) => (
-                      <TaskCard key={task.id} task={task} evidenceCount={evidenceByTask[task.id]?.length ?? 0} onClick={setSelectedTask} />
-                    ))}
-                  </div>
-                );
-              })}
+              {tasks.length === 0
+                ? <p className="col-span-3 text-sm text-[#A8A29E] text-center py-8">No tasks yet. Add your first task to get started.</p>
+                : STATUS_COLS.map((col) => {
+                    const colTasks = tasks.filter(t => t.status === col.status);
+                    return (
+                      <div key={col.status}>
+                        <div className="flex items-center gap-1.5 mb-3">
+                          {col.status === 'todo'       && <IconList size={14} />}
+                          {col.status === 'inprogress' && <IconActivity size={14} />}
+                          {col.status === 'done'       && <IconCheck size={14} />}
+                          <span className="text-[12px] font-semibold uppercase tracking-wider text-[#A8A29E]">{col.label}</span>
+                          <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
+                        </div>
+                        {colTasks.map((task) => (
+                          <TaskCard key={task.id} task={task} isLead={isLead} currentUserId={user!.id}
+                            evidenceCount={evidenceByTask[task.id]?.length ?? 0}
+                            onClick={setSelectedTask} onEdit={setEditingTask} onDelete={handleDeleteTaskClick}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })
+              }
             </div>
           </div>
         )}
@@ -189,14 +282,45 @@ export default function GroupPage() {
               {members.length} member{members.length !== 1 ? 's' : ''}
             </p>
             {members.map((m) => (
-              <MemberRow key={m.id} member={m} tasks={tasks} isLead={m.profile_id === group.lead_id} />
+              <MemberRow key={m.id} member={m} tasks={tasks}
+                isThisMemberLead={m.profile_id === group.lead_id}
+                canRemove={isLead && m.profile_id !== user?.id}
+                onRemove={() => setMemberToRemove(m)}
+              />
             ))}
-            {isLead && (
-              <button onClick={handleExport}
-                className="w-full mt-6 h-11 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                <IconExport size={16} /> Export Contribution Report (PDF)
-              </button>
+            {nonLeadMembers.length === 0 && isLead && (
+              <p className="text-sm text-[#A8A29E] text-center py-4">Invite members using the link above.</p>
             )}
+
+            {/* Group actions */}
+            <div className="mt-6 flex flex-col gap-2">
+              {isLead && (
+                <>
+                  <button onClick={() => setShowTransferLead(true)}
+                    className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                    Transfer Lead
+                  </button>
+                  <button onClick={handleExport}
+                    className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                    <IconExport size={15} /> Export Report (PDF)
+                  </button>
+                  <button onClick={() => setShowEditGroup(true)}
+                    className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
+                    <IconPencil size={15} /> Edit Group
+                  </button>
+                  <button onClick={() => setShowDeleteGroup(true)}
+                    className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
+                    <IconTrash size={15} /> Delete Group
+                  </button>
+                </>
+              )}
+              {!isLead && (
+                <button onClick={() => setShowLeaveConfirm(true)}
+                  className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                  Leave Group
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -232,22 +356,71 @@ export default function GroupPage() {
         </button>
       )}
 
-      {/* Task detail modal */}
+      {/* ── MODALS ── */}
       {selectedTask && (
         <TaskModal task={selectedTask} members={members} userId={user!.id} isLead={isLead}
           onClose={() => setSelectedTask(null)}
           onUpdated={() => { refreshTasks(); refreshActivity(); refreshEvidence(); setSelectedTask(null); }}
         />
       )}
-
-      {/* New task form */}
       {showNewTask && groupId && (
-        <TaskForm
-          groupId={groupId}
-          members={members}
-          userId={user!.id}
+        <TaskForm groupId={groupId} members={members} userId={user!.id}
           onCreated={() => { refreshTasks(); refreshActivity(); }}
           onClose={() => setShowNewTask(false)}
+        />
+      )}
+      {editingTask && (
+        <EditTaskModal task={editingTask} members={members} userId={user!.id}
+          onClose={() => setEditingTask(null)}
+          onUpdated={() => { refreshTasks(); refreshActivity(); setEditingTask(null); }}
+        />
+      )}
+      {taskToDelete && (
+        <ConfirmModal
+          title="Delete task"
+          message={`Delete "${taskToDelete.title}"? This cannot be undone.`}
+          confirmLabel="Delete" destructive
+          onConfirm={executeDeleteTask}
+          onCancel={() => setTaskToDelete(null)}
+        />
+      )}
+
+      {showEditGroup && (
+        <EditGroupModal group={group} userId={user!.id}
+          onClose={() => setShowEditGroup(false)}
+          onUpdated={() => { refreshGroup(); refreshActivity(); setShowEditGroup(false); }}
+        />
+      )}
+      {showDeleteGroup && (
+        <ConfirmModal
+          title="Delete group"
+          message="Are you sure? This will permanently delete all tasks and activity. This cannot be undone."
+          confirmLabel="Delete group" destructive
+          onConfirm={executeDeleteGroup}
+          onCancel={() => setShowDeleteGroup(false)}
+        />
+      )}
+      {showTransferLead && (
+        <TransferLeadModal group={group} members={members} userId={user!.id}
+          onClose={() => setShowTransferLead(false)}
+          onUpdated={() => { refreshGroup(); refreshActivity(); setShowTransferLead(false); }}
+        />
+      )}
+      {showLeaveConfirm && (
+        <ConfirmModal
+          title="Leave group" message="Are you sure you want to leave this group?"
+          confirmLabel="Leave" destructive
+          onConfirm={executeLeaveGroup}
+          onCancel={() => setShowLeaveConfirm(false)}
+        />
+      )}
+      {memberToRemove && (
+        <ConfirmModal
+          title="Remove member"
+          message={`Remove ${memberToRemove.profile?.name ?? 'this member'} from the group? Their activity history will remain visible.`}
+          confirmLabel="Remove" destructive
+          onConfirm={executeRemoveMember}
+          onCancel={() => setMemberToRemove(null)}
         />
       )}
     </div>

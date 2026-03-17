@@ -104,3 +104,17 @@ export function IconChevronRight({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
+export function IconPencil({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+export function IconTrash({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M3 4h10M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M13 4l-.8 9a1 1 0 01-1 .9H4.8a1 1 0 01-1-.9L3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
