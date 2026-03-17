@@ -7,6 +7,9 @@ create table public.profiles (
   id uuid references auth.users(id) on delete cascade primary key,
   name text not null,
   university text not null,
+  faculty text,
+  year_of_study text,
+  avatar_url text,
   created_at timestamptz not null default now()
 );
 

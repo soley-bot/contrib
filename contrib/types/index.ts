@@ -2,6 +2,9 @@ export interface Profile {
   id: string;
   name: string;
   university: string;
+  faculty: string | null;
+  year_of_study: string | null;
+  avatar_url: string | null;
   created_at: string;
 }
 

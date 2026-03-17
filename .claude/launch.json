@@ -2,10 +2,20 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "Next.js dev",
+      "name": "Next.js Dev",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["contrib/node_modules/next/dist/bin/next", "dev", "contrib"],
-      "port": 3000
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
+      "cwd": "C:\\Users\\USer\\Desktop\\Contrib\\contrib\\.claude\\worktrees\\eloquent-jackson\\contrib",
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "Next.js Production",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "start"],
+      "cwd": "C:\\Users\\USer\\Desktop\\Contrib\\contrib\\.claude\\worktrees\\eloquent-jackson\\contrib",
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }
