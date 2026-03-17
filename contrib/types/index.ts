@@ -39,6 +39,19 @@ export interface Task {
   assignee?: Profile;
 }
 
+export type EvidenceType = 'file' | 'link' | 'note';
+
+export interface Evidence {
+  id: string;
+  task_id: string;
+  uploaded_by: string;
+  type: EvidenceType;
+  content: string;
+  version_number: number;
+  created_at: string;
+  uploader?: Profile;
+}
+
 export type ActivityAction =
   | 'task_created'
   | 'task_assigned'

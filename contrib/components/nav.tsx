@@ -25,12 +25,17 @@ export default function Nav({ profile, group, onTabChange, activeTab }: NavProps
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-white border-b border-[#E7E5E4] flex items-center justify-between px-4 gap-2">
-        <span
-          className="text-base font-extrabold text-[#FF5841] cursor-pointer"
-          onClick={() => router.push('/dashboard')}
-        >
-          Contrib
-        </span>
+        {group ? (
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-1 text-[#57534E] hover:text-[#1C1917] transition-colors flex-shrink-0"
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <span className="text-[13px] font-medium">Groups</span>
+          </button>
+        ) : (
+          <span className="text-base font-extrabold text-[#FF5841]">Contrib</span>
+        )}
         {group && (
           <span className="text-[15px] font-semibold text-[#1C1917] flex-1 text-center truncate px-2">
             {group.name}

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
-import type { Task, GroupMember, TaskStatus } from '@/types';
+import type { Task, GroupMember, TaskStatus, Evidence } from '@/types';
 
 interface TaskModalProps {
   task: Task;
@@ -20,42 +20,57 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
 
 export default function TaskModal({ task, members, userId, isLead, onClose, onUpdated }: TaskModalProps) {
   const [status, setStatus] = useState<TaskStatus>(task.status);
-  const [evidenceUrl, setEvidenceUrl] = useState('');
+  const [newEvidenceUrl, setNewEvidenceUrl] = useState('');
+  const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
   const [saving, setSaving] = useState(false);
 
   const canChangeStatus = isLead || task.assignee_id === userId;
 
+  useEffect(() => {
+    supabase
+      .from('evidence')
+      .select('*')
+      .eq('task_id', task.id)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => setEvidenceList(data ?? []));
+  }, [task.id]);
+
   async function handleSave() {
-    if (status === task.status && !evidenceUrl.trim()) {
+    const url = newEvidenceUrl.trim();
+    if (status === task.status && !url) {
       onClose();
       return;
     }
     setSaving(true);
-    const updates: Partial<Task> = { status };
-    if (status === 'done') updates.completed_at = new Date().toISOString();
-    else if (task.status === 'done') updates.completed_at = null;
-    if (evidenceUrl.trim()) updates.evidence_url = evidenceUrl.trim();
-
-    await supabase.from('tasks').update(updates).eq('id', task.id);
 
     if (status !== task.status) {
-      const action = status === 'done' ? 'task_done' : 'task_updated';
+      const updates: Partial<Task> = { status };
+      if (status === 'done') updates.completed_at = new Date().toISOString();
+      else if (task.status === 'done') updates.completed_at = null;
+      await supabase.from('tasks').update(updates).eq('id', task.id);
       await supabase.from('activity_log').insert({
         group_id: task.group_id,
         actor_id: userId,
-        action,
+        action: status === 'done' ? 'task_done' : 'task_updated',
         task_id: task.id,
         meta: { task_title: task.title },
       });
     }
 
-    if (evidenceUrl.trim() && evidenceUrl !== task.evidence_url) {
+    if (url) {
+      await supabase.from('evidence').insert({
+        task_id: task.id,
+        uploaded_by: userId,
+        type: 'link',
+        content: url,
+        version_number: evidenceList.length + 1,
+      });
       await supabase.from('activity_log').insert({
         group_id: task.group_id,
         actor_id: userId,
         action: 'file_uploaded',
         task_id: task.id,
-        meta: { task_title: task.title },
+        meta: { task_title: task.title, url },
       });
     }
 
@@ -72,7 +87,6 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
       <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px] max-h-[90dvh] overflow-y-auto"
         style={{ animation: 'slideUp .25s ease' }}
       >
-        {/* Drag handle (mobile) */}
         <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
@@ -123,21 +137,36 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
 
           <div>
             <p className="text-[13px] font-medium text-[#57534E] mb-1.5">
-              Evidence URL <span className="font-normal text-[#A8A29E]">(optional)</span>
+              Evidence <span className="font-normal text-[#A8A29E]">(optional)</span>
             </p>
-            {task.evidence_url && !evidenceUrl ? (
-              <a href={task.evidence_url} target="_blank" rel="noopener noreferrer" className="text-sm text-[#FF5841]">
-                View evidence ↗
-              </a>
-            ) : (
-              <input
-                type="url"
-                value={evidenceUrl}
-                onChange={(e) => setEvidenceUrl(e.target.value)}
-                placeholder="https://drive.google.com/..."
-                className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
-              />
+
+            {evidenceList.length > 0 && (
+              <div className="mb-2 flex flex-col gap-1.5 p-3 bg-[#FAFAF9] rounded-md border border-[#E7E5E4]">
+                {evidenceList.map((e, i) => (
+                  <a
+                    key={e.id}
+                    href={e.content}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-xs text-[#FF5841] min-w-0"
+                  >
+                    <span className="shrink-0 w-4 h-4 rounded-full bg-[#FFF0EE] flex items-center justify-center text-[9px] font-bold text-[#FF5841]">
+                      {i + 1}
+                    </span>
+                    <span className="truncate">{e.content}</span>
+                    <span className="shrink-0">↗</span>
+                  </a>
+                ))}
+              </div>
             )}
+
+            <input
+              type="url"
+              value={newEvidenceUrl}
+              onChange={(e) => setNewEvidenceUrl(e.target.value)}
+              placeholder="Add evidence URL…"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
+            />
           </div>
         </div>
 

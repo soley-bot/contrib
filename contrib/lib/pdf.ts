@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import type { Group, Task, ActivityLog, GroupMember } from '@/types';
+import type { Group, Task, ActivityLog, GroupMember, Evidence } from '@/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -80,7 +80,8 @@ export function generateReport(
   group: Group,
   members: GroupMember[],
   tasks: Task[],
-  activity: ActivityLog[]
+  activity: ActivityLog[],
+  evidenceByTask: Record<string, Evidence[]> = {}
 ): void {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   let y = 18;
@@ -264,25 +265,31 @@ export function generateReport(
       y += 5;
     } else {
       completedTasks.forEach((t) => {
-        ({ y } = checkPage(doc, y, 6));
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
+        ({ y } = checkPage(doc, y, 10));
 
-        // Orange bullet
+        // Orange bullet + title
         doc.setFillColor(ORANGE[0], ORANGE[1], ORANGE[2]);
         doc.circle(ML + 3, y - 1, 0.8, 'F');
-
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
         setColor(doc, GRAY_DARK);
-        doc.text(t.title, ML + 6, y, { maxWidth: 110 });
+        doc.text(t.title, ML + 6, y, { maxWidth: CW - 6 });
+        y += 4;
 
-        setColor(doc, GRAY_LIGHT);
+        // Sub-line: completed date (left) + evidence versions (right)
+        doc.setFontSize(7.5);
         if (t.completed_at) {
-          doc.text(`Completed ${fmtDateTime(t.completed_at)}`, ML + 120, y, { maxWidth: 58 });
+          setColor(doc, GRAY_LIGHT);
+          doc.text(`Completed ${fmtDateTime(t.completed_at)}`, ML + 6, y);
         }
-
-        if (t.evidence_url) {
-          doc.setTextColor(ORANGE[0], ORANGE[1], ORANGE[2]);
-          doc.text('[evidence]', PW - MR - 2, y, { align: 'right' });
+        const taskEvidence = evidenceByTask[t.id] ?? [];
+        if (taskEvidence.length > 0) {
+          const label = `[evidence — ${taskEvidence.map((e) => `v${e.version_number}`).join(', ')}]`;
+          doc.setTextColor(22, 163, 74);
+          doc.text(label, PW - MR - 2, y, { align: 'right' });
+        } else {
+          setColor(doc, GRAY_LIGHT);
+          doc.text('[no evidence]', PW - MR - 2, y, { align: 'right' });
         }
 
         setColor(doc, GRAY_DARK);

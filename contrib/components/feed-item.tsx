@@ -1,7 +1,7 @@
 import type { ActivityLog } from '@/types';
 
 const ACTION_META: Record<string, { emoji: string; color: string; label: (meta: Record<string, unknown> | null) => string }> = {
-  task_created:  { emoji: '📝', color: '#FF5841', label: (m) => `created task "${m?.task_title ?? ''}"` },
+  task_created:  { emoji: '📝', color: '#FF5841', label: (m) => `assigned "${m?.task_title ?? ''}" to ${m?.assignee_name ?? 'a member'}` },
   task_assigned: { emoji: '👤', color: '#FF5841', label: (m) => `was assigned "${m?.task_title ?? ''}"` },
   task_done:     { emoji: '✅', color: '#16A34A', label: (m) => `completed "${m?.task_title ?? ''}"` },
   file_uploaded: { emoji: '📎', color: '#2563EB', label: (m) => `uploaded evidence for "${m?.task_title ?? ''}"` },
