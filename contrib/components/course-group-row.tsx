@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ProgressBar from '@/components/progress-bar';
 import type { Group } from '@/types';
 
@@ -6,11 +7,21 @@ interface CourseGroupRowProps {
   taskTotal: number;
   taskDone: number;
   memberCount: number;
+  inviteLink?: string;
   onDownloadPdf: () => void;
   downloading: boolean;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, onDownloadPdf, downloading }: CourseGroupRowProps) {
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, inviteLink, onDownloadPdf, downloading }: CourseGroupRowProps) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    if (!inviteLink) return;
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   return (
     <div className="bg-white border border-[#E7E5E4] rounded-[10px] p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
       <div className="flex items-start justify-between gap-3">
@@ -25,13 +36,23 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
             </p>
           </div>
         </div>
-        <button
-          onClick={onDownloadPdf}
-          disabled={downloading}
-          className="flex-shrink-0 h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
-        >
-          {downloading ? 'Exporting…' : 'PDF'}
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {inviteLink && (
+            <button
+              onClick={handleCopy}
+              className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            >
+              {copied ? <span className="text-green-600">Copied!</span> : 'Copy link'}
+            </button>
+          )}
+          <button
+            onClick={onDownloadPdf}
+            disabled={downloading}
+            className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+          >
+            {downloading ? 'Exporting…' : 'PDF'}
+          </button>
+        </div>
       </div>
       <div className="mt-3">
         <ProgressBar value={taskDone} max={taskTotal} />

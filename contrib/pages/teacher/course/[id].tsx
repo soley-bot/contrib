@@ -34,7 +34,7 @@ export default function CourseDetail() {
   }, [course, isOwner, courseLoading, router]);
 
   useEffect(() => {
-    setInviteBase(`${window.location.origin}/join/course/`);
+    setInviteBase(`${window.location.origin}/join/`);
   }, []);
 
   async function handleDownloadPdf(group: Group) {
@@ -44,7 +44,7 @@ export default function CourseDetail() {
       supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
     ]);
-    generateReport(group, (membersData as GroupMember[]) ?? [], (tasksData as Task[]) ?? [], (activityData as ActivityLog[]) ?? []);
+    generateReport(group, (membersData as GroupMember[]) ?? [], (tasksData as Task[]) ?? [], (activityData as ActivityLog[]) ?? [], profile?.name ?? undefined);
     setDownloadingId(null);
   }
 
@@ -59,16 +59,12 @@ export default function CourseDetail() {
       .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token, course_id: courseId })
       .select().single();
     if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
-    await supabase.from('group_members').insert({ group_id: group.id, profile_id: user!.id });
-    await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
     refresh();
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
   if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh text-[#57534E]">Loading…</div>;
   if (!course) return null;
-
-  const courseInviteLink = `${inviteBase}${course.invite_token}`;
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
@@ -90,20 +86,6 @@ export default function CourseDetail() {
         </div>
 
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
-          {/* Course invite link for students */}
-          <div className="mb-4 p-3 bg-[#FFF0EE] rounded-[8px] border border-[#FFD5CF]">
-            <p className="text-[11px] font-semibold text-[#FF5841] uppercase tracking-wide mb-1">Student invite link</p>
-            <p className="text-[12px] text-[#57534E] break-all font-mono">{inviteBase ? courseInviteLink : 'Loading…'}</p>
-            {inviteBase && (
-              <button
-                onClick={() => navigator.clipboard.writeText(courseInviteLink)}
-                className="mt-1.5 text-[11px] text-[#FF5841] font-medium hover:underline"
-              >
-                Copy link
-              </button>
-            )}
-          </div>
-
           {groups.length === 0 ? (
             <div className="text-center py-16 text-[#A8A29E]">
               <p className="text-4xl mb-3">👥</p>
@@ -118,6 +100,7 @@ export default function CourseDetail() {
                   taskTotal={taskTotal}
                   taskDone={taskDone}
                   memberCount={memberCount}
+                  inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
                 />

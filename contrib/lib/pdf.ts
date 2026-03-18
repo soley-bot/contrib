@@ -83,6 +83,7 @@ export function generateReport(
   members: GroupMember[],
   tasks: Task[],
   activity: ActivityLog[],
+  teacherName?: string,
   evidenceByTask: Record<string, Evidence[]> = {}
 ): void {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -125,6 +126,7 @@ export function generateReport(
     ['Group name', group.name],
     ['Subject',    group.subject],
     ['Due date',   fmtDate(group.due_date)],
+    ...(teacherName ? [['Instructor', teacherName] as [string, string]] : []),
     ['Report generated', fmtDateTime(new Date().toISOString())],
   ];
 
