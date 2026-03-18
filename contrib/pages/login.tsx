@@ -88,7 +88,10 @@ export default function Login() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[13px] font-medium text-[#57534E]">Password</label>
+              <Link href="/forgot-password" className="text-[13px] text-[#C53678] font-medium">Forgot password?</Link>
+            </div>
             <input
               type="password"
               value={password}
