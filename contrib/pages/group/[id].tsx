@@ -115,7 +115,7 @@ export default function GroupPage() {
 
   function handleExport() {
     if (!group) return;
-    generateReport(group, members, tasks, activity, evidenceByTask);
+    generateReport(group, members, tasks, activity, profile?.name ?? undefined, evidenceByTask);
   }
 
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
