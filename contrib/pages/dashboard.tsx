@@ -10,7 +10,7 @@ import { generateInviteToken } from '@/lib/invite';
 export default function Dashboard() {
   const router = useRouter();
   const { user, profile, loading } = useUser();
-  const { groups, refresh: refreshGroups } = useGroups(user?.id);
+  const { groups, loading: groupsLoading, refresh: refreshGroups } = useGroups(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [subject, setSubject] = useState('');
@@ -70,10 +70,17 @@ export default function Dashboard() {
 
         {/* Content */}
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
-          {groups.length === 0 ? (
-            <div className="text-center py-20 text-[#A8A29E]">
+          {!groupsLoading && groups.length === 0 ? (
+            <div className="text-center py-20">
               <p className="text-4xl mb-3">📚</p>
-              <p className="text-sm">No groups yet. Create one to get started.</p>
+              <p className="text-[15px] font-semibold text-[#1C1917] mb-2">No groups yet</p>
+              <p className="text-sm text-[#A8A29E] mb-6">Create your first group and invite your teammates.</p>
+              <button
+                onClick={() => setShowModal(true)}
+                className="inline-flex items-center gap-2 h-11 px-6 bg-[#FF5841] hover:bg-[#E04030] text-white text-[14px] font-medium rounded-md transition-colors"
+              >
+                <IconPlus size={16} /> Create your first group
+              </button>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
