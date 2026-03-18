@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import ProgressBar from '@/components/progress-bar';
-import type { Group } from '@/types';
+import type { Group, GroupMember } from '@/types';
 
 interface CourseGroupRowProps {
   group: Group;
   taskTotal: number;
   taskDone: number;
   memberCount: number;
+  members?: GroupMember[];
   inviteLink?: string;
   onDownloadPdf: () => void;
   downloading: boolean;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, inviteLink, onDownloadPdf, downloading }: CourseGroupRowProps) {
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -57,6 +58,24 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
       <div className="mt-3">
         <ProgressBar value={taskDone} max={taskTotal} />
       </div>
+      {members && members.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {members.map((m) => (
+            <div
+              key={m.id}
+              className="flex items-center gap-1.5 bg-[#F5F5F4] rounded-full px-2.5 py-1"
+              title={m.profile?.name ?? ''}
+            >
+              <div className="w-5 h-5 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                {(m.profile?.name ?? '?').slice(0, 1).toUpperCase()}
+              </div>
+              <span className="text-[11px] text-[#57534E] font-medium max-w-[80px] truncate">
+                {m.profile?.name ?? 'Unknown'}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ export default function CourseDetail() {
   const courseId = typeof router.query.id === 'string' ? router.query.id : undefined;
   const { user, profile, loading, refreshProfile } = useUser();
   const { course, groups, isOwner, loading: courseLoading, refresh } = useCourse(courseId, user?.id);
+  const [groupMembers, setGroupMembers] = useState<Record<string, GroupMember[]>>({});
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -36,6 +37,22 @@ export default function CourseDetail() {
   useEffect(() => {
     setInviteBase(`${window.location.origin}/join/`);
   }, []);
+
+  useEffect(() => {
+    if (groups.length === 0) return;
+    const ids = groups.map(({ group }) => group.id);
+    supabase
+      .from('group_members')
+      .select('*, profile:profiles(*)')
+      .in('group_id', ids)
+      .order('joined_at', { ascending: true })
+      .then(({ data }) => {
+        const map: Record<string, GroupMember[]> = {};
+        ids.forEach((id) => { map[id] = []; });
+        (data as GroupMember[] ?? []).forEach((m) => { map[m.group_id]?.push(m); });
+        setGroupMembers(map);
+      });
+  }, [groups]);
 
   async function handleDownloadPdf(group: Group) {
     setDownloadingId(group.id);
@@ -100,6 +117,7 @@ export default function CourseDetail() {
                   taskTotal={taskTotal}
                   taskDone={taskDone}
                   memberCount={memberCount}
+                  members={groupMembers[group.id]}
                   inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
