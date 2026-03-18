@@ -74,7 +74,7 @@ export default function JoinPage() {
         <p className="text-3xl">⚠️</p>
         <p className="text-lg font-semibold">Failed to join</p>
         <p className="text-sm text-[#6B7280]">{joinError}</p>
-        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#6366F1] text-sm font-medium">
+        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#C53678] text-sm font-medium">
           Back to dashboard
         </button>
       </div>
@@ -87,7 +87,7 @@ export default function JoinPage() {
         <p className="text-3xl">🔗</p>
         <p className="text-lg font-semibold">Invite link not found</p>
         <p className="text-sm text-[#6B7280]">This invite link is invalid or has been removed.</p>
-        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#6366F1] text-sm font-medium">
+        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#C53678] text-sm font-medium">
           Back to dashboard
         </button>
       </div>
@@ -100,7 +100,7 @@ export default function JoinPage() {
         <p className="text-3xl">✅</p>
         <p className="text-lg font-semibold">You&apos;re already a member</p>
         <p className="text-sm text-[#6B7280]">{group.name}</p>
-        <button onClick={() => router.push(`/group/${group.id}`)} className="mt-2 h-10 px-5 bg-[#6366F1] text-white text-sm font-medium rounded-md hover:bg-[#4F46E5]">
+        <button onClick={() => router.push(`/group/${group.id}`)} className="mt-2 h-10 px-5 bg-[#FF5841] text-white text-sm font-medium rounded-md hover:bg-[#E04030]">
           Open group
         </button>
       </div>
@@ -119,7 +119,7 @@ export default function JoinPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh px-5">
       <div className="bg-white border border-[#E5E7EB] rounded-[10px] p-6 max-w-sm w-full text-center shadow-sm">
-        <div className="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#6366F1] font-bold text-xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 rounded-xl bg-[#FFF0EE] text-[#FF5841] font-bold text-xl flex items-center justify-center mx-auto mb-4">
           {group?.name.slice(0, 2).toUpperCase()}
         </div>
         <h1 className="text-lg font-bold text-[#111827] mb-1">{group?.name}</h1>
@@ -127,7 +127,7 @@ export default function JoinPage() {
         <button
           onClick={handleJoin}
           disabled={status === 'joining'}
-          className="w-full h-11 bg-[#6366F1] hover:bg-[#4F46E5] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60"
+          className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60"
         >
           {status === 'joining' ? 'Joining…' : 'Join group'}
         </button>
