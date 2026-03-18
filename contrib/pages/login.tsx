@@ -43,15 +43,18 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
       setError(authError.message);
       setLoading(false);
       return;
     }
     const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-    const returnTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard';
-    router.push(returnTo);
+    const hasReturnTo = raw.startsWith('/') && !raw.startsWith('//');
+    if (hasReturnTo) { router.push(raw); return; }
+    const { data: profile } = await supabase
+      .from('profiles').select('role').eq('id', authData.user.id).single();
+    router.push(profile?.role === 'teacher' ? '/teacher' : '/dashboard');
   }
 
   return (
@@ -83,7 +86,7 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="yourname@gmail.com"
+              placeholder="sophea@gmail.com"
               className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
             />
           </div>

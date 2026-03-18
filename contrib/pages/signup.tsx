@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import RoleToggle from '@/components/role-toggle';
+import type { UserRole } from '@/types';
 
 function GoogleIcon() {
   return (
@@ -20,6 +22,7 @@ export default function Signup() {
   const [university, setUniversity] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -54,7 +57,7 @@ export default function Signup() {
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name, university }),
+      body: JSON.stringify({ email, password, name, university, role }),
     });
     const json = await res.json();
     if (!res.ok) {
@@ -72,8 +75,8 @@ export default function Signup() {
     }
 
     const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-    const returnTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard';
-    router.push(returnTo);
+    const hasReturnTo = raw.startsWith('/') && !raw.startsWith('//');
+    router.push(hasReturnTo ? raw : role === 'teacher' ? '/teacher' : '/dashboard');
   }
 
   return (
@@ -118,13 +121,14 @@ export default function Signup() {
               className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
             />
           </div>
+          <RoleToggle value={role} onChange={setRole} />
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="yourname@gmail.com"
+              placeholder="sophea@gmail.com"
               className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
             />
           </div>

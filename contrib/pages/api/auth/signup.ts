@@ -10,10 +10,11 @@ const adminClient = createClient(
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { email, password, name, university } = req.body;
+  const { email, password, name, university, role } = req.body;
   if (!email || !password || !name || !university) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
+  const safeRole = role === 'teacher' ? 'teacher' : 'student';
 
   // Create auth user without sending a confirmation email
   const { data, error: createError } = await adminClient.auth.admin.createUser({
@@ -31,6 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     id: data.user.id,
     name: name.trim(),
     university: university.trim(),
+    role: safeRole,
   });
 
   if (profileError) {

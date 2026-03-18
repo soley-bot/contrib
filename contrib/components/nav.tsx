@@ -1,24 +1,31 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase';
+import EditProfileModal from '@/components/edit-profile-modal';
 import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers } from '@/components/icons';
-import type { Profile, Group } from '@/types';
+import { useProfile } from '@/hooks/use-profile';
+import type { Profile, Group, UserRole } from '@/types';
 
 interface NavProps {
   profile: Profile | null;
+  role?: UserRole;
   group?: Group | null;
-  /** Desktop sidebar nav items — shown only on group pages */
   onTabChange?: (tab: string) => void;
   activeTab?: string;
+  onProfileUpdate?: () => void;
 }
 
-export default function Nav({ profile, group, onTabChange, activeTab }: NavProps) {
+export default function Nav({ profile, role, group, onTabChange, activeTab, onProfileUpdate }: NavProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const { signOut } = useProfile();
+  const isTeacher = role === 'teacher';
+  const homeRoute = isTeacher ? '/teacher' : '/dashboard';
+  const initials = profile?.name?.slice(0, 2).toUpperCase() ?? '??';
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    await signOut();
     router.push('/');
   }
 
@@ -33,22 +40,25 @@ export default function Nav({ profile, group, onTabChange, activeTab }: NavProps
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
-  const initials = profile?.name?.slice(0, 2).toUpperCase() ?? '??';
-
   return (
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-white border-b border-[#E7E5E4] flex items-center justify-between px-4 gap-2">
         {group ? (
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push(homeRoute)}
             className="flex items-center gap-1 text-[#57534E] hover:text-[#1C1917] transition-colors flex-shrink-0"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="text-[13px] font-medium">Groups</span>
+            <span className="text-[13px] font-medium">{isTeacher ? 'Courses' : 'Groups'}</span>
           </button>
         ) : (
-          <span className="text-base font-extrabold text-[#FF5841]">Contrib</span>
+          <span
+            className="text-base font-extrabold text-[#FF5841] cursor-pointer"
+            onClick={() => router.push(homeRoute)}
+          >
+            Contrib
+          </span>
         )}
         {group && (
           <span className="text-[15px] font-semibold text-[#1C1917] flex-1 text-center truncate px-2">
@@ -71,6 +81,12 @@ export default function Nav({ profile, group, onTabChange, activeTab }: NavProps
                 </div>
               )}
               <button
+                onClick={() => { setMenuOpen(false); setShowEdit(true); }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
+              >
+                Edit profile
+              </button>
+              <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
               >
@@ -87,10 +103,10 @@ export default function Nav({ profile, group, onTabChange, activeTab }: NavProps
 
         <div className="mb-5">
           <div className="text-[10px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
-            My Groups
+            {isTeacher ? 'My Courses' : 'My Groups'}
           </div>
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push(homeRoute)}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
               !group ? 'bg-[#FFF0EE] text-[#FF5841]' : 'text-[#57534E] hover:bg-[#F5F5F4]'
             }`}
@@ -141,11 +157,22 @@ export default function Nav({ profile, group, onTabChange, activeTab }: NavProps
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-[#1C1917] truncate">{profile.name}</p>
+                <button onClick={() => setShowEdit(true)} className="text-[11px] text-[#A8A29E] hover:text-[#FF5841] transition-colors">
+                  Edit profile
+                </button>
               </div>
             </div>
           )}
         </div>
       </aside>
+
+      {showEdit && profile && (
+        <EditProfileModal
+          profile={profile}
+          onSaved={() => onProfileUpdate?.()}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
     </>
   );
 }
