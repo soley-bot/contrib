@@ -164,3 +164,70 @@ create policy "Group members can insert activity"
       where group_id = activity_log.group_id and profile_id = auth.uid()
     )
   );
+
+-- ── v2 MIGRATION: TEACHER ROLE + COURSES ─────────────────────────────────────
+
+alter table public.profiles
+  add column role text not null default 'student'
+  check (role in ('student', 'teacher'));
+
+create table public.courses (
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null,
+  subject      text not null,
+  teacher_id   uuid not null references public.profiles(id),
+  invite_token text not null unique,
+  created_at   timestamptz not null default now()
+);
+
+alter table public.groups
+  add column course_id uuid references public.courses(id) on delete set null;
+
+alter table public.courses enable row level security;
+
+create policy "Authenticated users can read courses"
+  on public.courses for select using (auth.uid() is not null);
+
+create policy "Teachers can insert their courses"
+  on public.courses for insert
+  with check (
+    auth.uid() = teacher_id and
+    exists (select 1 from public.profiles where id = auth.uid() and role = 'teacher')
+  );
+
+create policy "Teacher can update own course"
+  on public.courses for update using (auth.uid() = teacher_id);
+
+create policy "Teachers can read tasks in their courses"
+  on public.tasks for select
+  using (
+    exists (
+      select 1 from public.groups g
+      join public.courses c on c.id = g.course_id
+      where g.id = tasks.group_id and c.teacher_id = auth.uid()
+    )
+  );
+
+create policy "Teachers can read activity in their courses"
+  on public.activity_log for select
+  using (
+    exists (
+      select 1 from public.groups g
+      join public.courses c on c.id = g.course_id
+      where g.id = activity_log.group_id and c.teacher_id = auth.uid()
+    )
+  );
+
+create policy "Teachers can read group_members in their courses"
+  on public.group_members for select
+  using (
+    exists (
+      select 1 from public.groups g
+      join public.courses c on c.id = g.course_id
+      where g.id = group_members.group_id and c.teacher_id = auth.uid()
+    )
+  );
+
+create policy "Lead can link group to course"
+  on public.groups for update
+  using (auth.uid() = lead_id);

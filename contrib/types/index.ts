@@ -1,3 +1,5 @@
+export type UserRole = 'student' | 'teacher';
+
 export interface Profile {
   id: string;
   name: string;
@@ -5,6 +7,7 @@ export interface Profile {
   faculty: string | null;
   year_of_study: string | null;
   avatar_url: string | null;
+  role: UserRole;
   created_at: string;
 }
 
@@ -15,6 +18,7 @@ export interface Group {
   due_date: string | null;
   lead_id: string;
   invite_token: string;
+  course_id: string | null;
   created_at: string;
 }
 
@@ -82,4 +86,20 @@ export interface ActivityLog {
   meta: Record<string, unknown> | null;
   created_at: string;
   actor?: Profile;
+}
+
+export interface Course {
+  id: string;
+  name: string;
+  subject: string;
+  teacher_id: string;
+  invite_token: string;
+  created_at: string;
+}
+
+export interface GroupWithStats {
+  group: Group;
+  memberCount: number;
+  taskTotal: number;
+  taskDone: number;
 }
