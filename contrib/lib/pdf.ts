@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import type { Group, Task, ActivityLog, GroupMember, Evidence } from '@/types';
+import type { Group, Task, ActivityLog, GroupMember, Evidence, EvaluationSummary } from '@/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -83,7 +83,8 @@ export function generateReport(
   members: GroupMember[],
   tasks: Task[],
   activity: ActivityLog[],
-  evidenceByTask: Record<string, Evidence[]> = {}
+  evidenceByTask: Record<string, Evidence[]> = {},
+  evaluationSummaries: EvaluationSummary[] = []
 ): void {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   let y = 18;
@@ -352,6 +353,95 @@ export function generateReport(
 
     y += 5.5;
   });
+
+  // ── Peer evaluation summary ─────────────────────────────────────────────────
+
+  if (evaluationSummaries.length > 0) {
+    ({ y } = checkPage(doc, y, 20));
+    y = sectionHeader(doc, 'Peer Evaluation Summary', y);
+    y += 4;
+
+    // Column widths: name 70, contribution 40, collaboration 40, responses 28 → 178 ✓
+    const eColName  = 70;
+    const eColC     = 40;
+    const eColCol   = 40;
+    const xEName    = ML + 2;
+    const xEC       = ML + eColName + eColC - 3;
+    const xECol     = ML + eColName + eColC + eColCol - 3;
+    const xEResp    = ML + CW - 3;
+    const E_ROW_H   = 7;
+    const E_TY      = 4.5;
+
+    // Header row
+    doc.setFillColor(235, 235, 235);
+    doc.rect(ML, y, CW, E_ROW_H + 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    setColor(doc, GRAY_DARK);
+    doc.text('Member',        xEName, y + E_TY);
+    doc.text('Contribution',  xEC,    y + E_TY, { align: 'right' });
+    doc.text('Collaboration', xECol,  y + E_TY, { align: 'right' });
+    doc.text('Responses',     xEResp, y + E_TY, { align: 'right' });
+    y += E_ROW_H + 1;
+
+    members.forEach((m, idx) => {
+      ({ y } = checkPage(doc, y, E_ROW_H + 2));
+      const s = evaluationSummaries.find((s) => s.evaluatee_id === m.profile_id);
+      const name = m.profile?.name ?? m.profile_id;
+      const isLead = m.profile_id === group.lead_id;
+
+      if (idx % 2 === 0) {
+        doc.setFillColor(GRAY_ROW[0], GRAY_ROW[1], GRAY_ROW[2]);
+        doc.rect(ML, y, CW, E_ROW_H, 'F');
+      }
+
+      const ty = y + E_TY;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      setColor(doc, GRAY_DARK);
+      doc.text(isLead ? `${name} (Lead)` : name, xEName, ty, { maxWidth: eColName - 4 });
+
+      if (s) {
+        setColor(doc, GRAY_DARK);
+        doc.text(`${s.avg_contribution} / 5`, xEC, ty, { align: 'right' });
+        doc.text(`${s.avg_collaboration} / 5`, xECol, ty, { align: 'right' });
+        setColor(doc, GRAY_MID);
+        doc.text(String(s.eval_count), xEResp, ty, { align: 'right' });
+      } else {
+        setColor(doc, GRAY_LIGHT);
+        doc.text('—', xEC, ty, { align: 'right' });
+        doc.text('—', xECol, ty, { align: 'right' });
+        doc.text('0', xEResp, ty, { align: 'right' });
+      }
+
+      y += E_ROW_H;
+      doc.setDrawColor(GRAY_RULE[0], GRAY_RULE[1], GRAY_RULE[2]);
+      doc.line(ML, y, PW - MR, y);
+    });
+
+    // Anonymous comments (if any)
+    const allComments = evaluationSummaries.flatMap((s) => s.comments ?? []);
+    if (allComments.length > 0) {
+      y += 6;
+      ({ y } = checkPage(doc, y, 12));
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      setColor(doc, GRAY_MID);
+      doc.text('Anonymous Comments', ML + 2, y);
+      y += 5;
+
+      allComments.forEach((comment) => {
+        ({ y } = checkPage(doc, y, 8));
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8.5);
+        setColor(doc, GRAY_MID);
+        doc.text(`"${comment}"`, ML + 4, y, { maxWidth: CW - 6 });
+        y += 5;
+      });
+    }
+
+    y += 6;
+  }
 
   // ── Footer (every page) ─────────────────────────────────────────────────────
 

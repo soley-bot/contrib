@@ -75,7 +75,9 @@ export type ActivityAction =
   | 'group_updated'
   | 'member_left'
   | 'member_removed'
-  | 'lead_transferred';
+  | 'lead_transferred'
+  | 'evaluation_opened'
+  | 'evaluation_submitted';
 
 export interface ActivityLog {
   id: string;
@@ -102,4 +104,31 @@ export interface GroupWithStats {
   memberCount: number;
   taskTotal: number;
   taskDone: number;
+}
+
+export interface EvaluationSession {
+  id: string;
+  group_id: string;
+  opened_by: string;
+  opened_at: string;
+}
+
+export interface Evaluation {
+  id: string;
+  group_id: string;
+  evaluator_id: string;
+  evaluatee_id: string;
+  contribution_score: number;
+  collaboration_score: number;
+  comment: string | null;
+  submitted_at: string;
+}
+
+export interface EvaluationSummary {
+  group_id: string;
+  evaluatee_id: string;
+  avg_contribution: number;
+  avg_collaboration: number;
+  eval_count: number;
+  comments: string[] | null;
 }
