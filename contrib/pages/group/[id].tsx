@@ -24,10 +24,10 @@ import type { Task, TaskStatus, GroupMember } from '@/types';
 type Tab = 'tasks' | 'activity' | 'members';
 type StatusFilter = 'all' | TaskStatus;
 
-const STATUS_COLS: { status: TaskStatus; label: string; countClass: string }[] = [
-  { status: 'todo',       label: 'To Do',      countClass: 'bg-[#F5F5F4] text-[#57534E]' },
-  { status: 'inprogress', label: 'In Progress', countClass: 'bg-[#FEF3C7] text-[#D97706]' },
-  { status: 'done',       label: 'Done',        countClass: 'bg-[#DCFCE7] text-[#16A34A]' },
+const STATUS_COLS: { status: TaskStatus; label: string; countClass: string; headerClass: string }[] = [
+  { status: 'todo',       label: 'To Do',      countClass: 'bg-[#E8E5E3] text-[#57534E]',  headerClass: 'bg-[#F5F5F4] text-[#57534E]' },
+  { status: 'inprogress', label: 'In Progress', countClass: 'bg-[#FDE68A] text-[#92400E]', headerClass: 'bg-[#FEF3C7] text-[#B45309]' },
+  { status: 'done',       label: 'Done',        countClass: 'bg-[#BBF7D0] text-[#15803D]', headerClass: 'bg-[#DCFCE7] text-[#15803D]' },
 ];
 
 export default function GroupPage() {
@@ -123,7 +123,7 @@ export default function GroupPage() {
   const nonLeadMembers = members.filter((m) => m.profile_id !== group?.lead_id);
 
   if (userLoading || groupLoading) {
-    return <div className="flex items-center justify-center min-h-dvh text-[#57534E]">Loading…</div>;
+    return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
 
   if (!group || !isMember) {
@@ -189,7 +189,7 @@ export default function GroupPage() {
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <InviteBanner token={group.invite_token} />
+            {members.length < 6 && <InviteBanner token={group.invite_token} />}
 
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
@@ -202,7 +202,7 @@ export default function GroupPage() {
                 <div key={s.label} className="flex-shrink-0 bg-white border border-[#E7E5E4] rounded-[10px] px-3.5 py-2.5 min-w-[80px]"
                   style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
                   <p className="text-lg font-bold" style={{ color: s.color || '#1C1917' }}>{s.value}</p>
-                  <p className="text-[11px] text-[#A8A29E] mt-0.5">{s.label}</p>
+                  <p className="text-[12px] text-[#A8A29E] mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -243,14 +243,18 @@ export default function GroupPage() {
                     const colTasks = tasks.filter(t => t.status === col.status);
                     return (
                       <div key={col.status}>
-                        <div className="flex items-center gap-1.5 mb-3">
-                          {col.status === 'todo'       && <IconList size={14} />}
-                          {col.status === 'inprogress' && <IconActivity size={14} />}
-                          {col.status === 'done'       && <IconCheck size={14} />}
-                          <span className="text-[12px] font-semibold uppercase tracking-wider text-[#A8A29E]">{col.label}</span>
-                          <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
+                        <div className={`flex items-center gap-1.5 mb-3 px-2.5 py-1.5 rounded-full w-fit ${col.headerClass}`}>
+                          {col.status === 'todo'       && <IconList size={13} />}
+                          {col.status === 'inprogress' && <IconActivity size={13} />}
+                          {col.status === 'done'       && <IconCheck size={13} />}
+                          <span className="text-[11px] font-bold uppercase tracking-wider">{col.label}</span>
+                          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
                         </div>
-                        {colTasks.map((task) => (
+                        {colTasks.length === 0 ? (
+                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-[#E7E5E4] rounded-[10px]">
+                            <p className="text-[12px] text-[#C4C0BB]">No tasks here</p>
+                          </div>
+                        ) : colTasks.map((task) => (
                           <TaskCard key={task.id} task={task} isLead={isLead} currentUserId={user!.id}
                             evidenceCount={evidenceByTask[task.id]?.length ?? 0}
                             onClick={setSelectedTask} onEdit={setEditingTask} onDelete={handleDeleteTaskClick}
@@ -268,9 +272,27 @@ export default function GroupPage() {
         {tab === 'activity' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">Recent activity</p>
-            {activity.length === 0
-              ? <p className="text-sm text-[#A8A29E] text-center py-8">No activity yet.</p>
-              : activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)
+            {activity.length === 0 ? (
+              <div className="flex flex-col items-center py-14 text-center">
+                <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
+                  <ellipse cx="60" cy="82" rx="44" ry="6" fill="#F5F5F4"/>
+                  {/* clock body */}
+                  <circle cx="60" cy="42" r="28" fill="#F5F5F4" stroke="#E7E5E4" strokeWidth="2"/>
+                  <circle cx="60" cy="42" r="22" fill="white"/>
+                  {/* clock hands */}
+                  <line x1="60" y1="42" x2="60" y2="26" stroke="#D6D3D1" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="60" y1="42" x2="70" y2="48" stroke="#D6D3D1" strokeWidth="2.5" strokeLinecap="round"/>
+                  <circle cx="60" cy="42" r="2.5" fill="#A8A29E"/>
+                  {/* tick marks */}
+                  <line x1="60" y1="22" x2="60" y2="25" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="60" y1="59" x2="60" y2="62" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="40" y1="42" x2="43" y2="42" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="77" y1="42" x2="80" y2="42" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <p className="text-[14px] font-semibold text-[#57534E] mb-1">No activity yet</p>
+                <p className="text-sm text-[#A8A29E]">Actions will appear here as your team works.</p>
+              </div>
+            ) : activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)
             }
           </div>
         )}
@@ -288,9 +310,6 @@ export default function GroupPage() {
                 onRemove={() => setMemberToRemove(m)}
               />
             ))}
-            {nonLeadMembers.length === 0 && isLead && (
-              <p className="text-sm text-[#A8A29E] text-center py-4">Invite members using the link above.</p>
-            )}
 
             {/* Group actions */}
             <div className="mt-6 flex flex-col gap-2">
@@ -336,8 +355,7 @@ export default function GroupPage() {
         ].map((item) => (
           <button key={item.id} onClick={item.action}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
-              (item.id === tab || (item.id === 'dashboard')) && item.id !== 'dashboard'
-                ? 'text-[#FF5841]' : 'text-[#A8A29E]'
+              item.id === tab ? 'text-[#FF5841]' : 'text-[#A8A29E]'
             }`}
           >
             {item.icon}
