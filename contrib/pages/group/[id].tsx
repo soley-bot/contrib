@@ -12,16 +12,22 @@ import ConfirmModal from '@/components/confirm-modal';
 import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
 import InviteBanner from '@/components/invite-banner';
+import EvaluationForm from '@/components/evaluation-form';
+import EvaluationResults from '@/components/evaluation-results';
 import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
 import { useActivity } from '@/hooks/use-activity';
 import { useGroupEvidence } from '@/hooks/use-group-evidence';
+import { useEvaluationSession } from '@/hooks/use-evaluation-session';
+import { useEvaluation } from '@/hooks/use-evaluation';
+import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
 import { generateReport } from '@/lib/pdf';
-import type { Task, TaskStatus, GroupMember } from '@/types';
+import type { Task, TaskStatus, GroupMember, Evaluation } from '@/types';
 
-type Tab = 'tasks' | 'activity' | 'members';
+type Tab = 'tasks' | 'activity' | 'members' | 'evaluation';
+type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
 type StatusFilter = 'all' | TaskStatus;
 
 const STATUS_COLS: { status: TaskStatus; label: string; countClass: string; headerClass: string }[] = [
@@ -41,6 +47,9 @@ export default function GroupPage() {
   const { activity, refresh: refreshActivity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
   const { evidenceByTask, refresh: refreshEvidence } = useGroupEvidence(taskIds);
+  const { session: evalSession, loading: evalSessionLoading, openEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
+  const { hasSubmitted, submit: submitEvaluation, refresh: refreshEvalSubmit } = useEvaluation(groupId, user?.id);
+  const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -115,7 +124,34 @@ export default function GroupPage() {
 
   function handleExport() {
     if (!group) return;
-    generateReport(group, members, tasks, activity, evidenceByTask);
+    generateReport(group, members, tasks, activity, evidenceByTask, evalSummaries);
+  }
+
+  async function handleOpenEvaluation() {
+    if (!groupId || !user) return;
+    await openEvaluation(groupId, user.id);
+    await supabase.from('activity_log').insert({
+      group_id: groupId,
+      actor_id: user.id,
+      action: 'evaluation_opened',
+      task_id: null,
+      meta: null,
+    });
+    refreshActivity();
+  }
+
+  async function handleSubmitEvaluation(entries: EvaluationInsert[]) {
+    if (!groupId || !user) return;
+    await submitEvaluation(entries);
+    await supabase.from('activity_log').insert({
+      group_id: groupId,
+      actor_id: user.id,
+      action: 'evaluation_submitted',
+      task_id: null,
+      meta: null,
+    });
+    refreshSummaries();
+    refreshActivity();
   }
 
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
@@ -175,13 +211,13 @@ export default function GroupPage() {
 
         {/* Tab bar */}
         <div className="flex border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {(['tasks', 'activity', 'members'] as Tab[]).map((t) => (
+          {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
                 tab === t ? 'text-[#FF5841] border-[#FF5841]' : 'text-[#A8A29E] border-transparent'
               }`}
             >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+              {t === 'evaluation' ? 'Evaluation' : t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
           ))}
         </div>
@@ -190,6 +226,17 @@ export default function GroupPage() {
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
             {members.length < 6 && <InviteBanner token={group.invite_token} />}
+
+            {/* All-tasks-done evaluation nudge (lead only, evaluation not yet open) */}
+            {isLead && !evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
+              <div className="bg-[#FFF0EE] border border-[#FFCFC9] rounded-[10px] px-4 py-3 mb-4 flex items-center justify-between gap-3">
+                <p className="text-sm text-[#1C1917]">All tasks complete — ready for peer evaluation?</p>
+                <button onClick={handleOpenEvaluation}
+                  className="flex-shrink-0 h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md transition-colors">
+                  Open Evaluation
+                </button>
+              </div>
+            )}
 
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
@@ -340,6 +387,50 @@ export default function GroupPage() {
                 </button>
               )}
             </div>
+          </div>
+        )}
+        {/* ── EVALUATION TAB ── */}
+        {tab === 'evaluation' && (
+          <div>
+            {/* Not open */}
+            {!evalSession && (
+              <div className="max-w-2xl mx-auto px-4 py-10 flex flex-col items-center text-center gap-3">
+                <p className="text-[15px] font-semibold text-[#1C1917]">Peer Evaluation</p>
+                <p className="text-sm text-[#57534E] max-w-xs">
+                  When all work is done, the lead opens evaluation so teammates can rate each other&apos;s contributions.
+                </p>
+                {isLead ? (
+                  <button onClick={handleOpenEvaluation}
+                    className="mt-2 h-10 px-5 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-semibold rounded-md transition-colors">
+                    Open Peer Evaluation
+                  </button>
+                ) : (
+                  <p className="text-sm text-[#A8A29E]">
+                    Waiting for the lead to open evaluation.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Open + not yet submitted */}
+            {evalSession && !hasSubmitted && (
+              <EvaluationForm
+                groupId={group.id}
+                currentUserId={user!.id}
+                members={members}
+                onSubmit={handleSubmitEvaluation}
+              />
+            )}
+
+            {/* Open + submitted */}
+            {evalSession && hasSubmitted && (
+              <EvaluationResults
+                summaries={evalSummaries}
+                members={members}
+                currentUserId={user!.id}
+                memberCount={members.length}
+              />
+            )}
           </div>
         )}
       </div>
