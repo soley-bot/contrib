@@ -23,8 +23,17 @@ import { useGroupEvidence } from '@/hooks/use-group-evidence';
 import { useEvaluationSession } from '@/hooks/use-evaluation-session';
 import { useEvaluation } from '@/hooks/use-evaluation';
 import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
-import { generateReport } from '@/lib/pdf';
+import { generateReport, DEFAULT_PDF_THEME } from '@/lib/pdf';
 import type { Task, TaskStatus, GroupMember, Evaluation } from '@/types';
+
+const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
+  { label: 'Coral',  color: [255, 88,  65]  },
+  { label: 'Navy',   color: [30,  64,  175] },
+  { label: 'Forest', color: [22,  101, 52]  },
+  { label: 'Slate',  color: [71,  85,  105] },
+  { label: 'Amber',  color: [180, 83,  9]   },
+  { label: 'Plum',   color: [126, 34,  206] },
+];
 
 type Tab = 'tasks' | 'activity' | 'members' | 'evaluation';
 type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
@@ -51,6 +60,7 @@ export default function GroupPage() {
   const { hasSubmitted, submit: submitEvaluation, refresh: refreshEvalSubmit } = useEvaluation(groupId, user?.id);
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
+  const [pdfTheme, setPdfTheme] = useState<[number, number, number]>(DEFAULT_PDF_THEME);
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -124,7 +134,7 @@ export default function GroupPage() {
 
   function handleExport() {
     if (!group) return;
-    generateReport(group, members, tasks, activity, evidenceByTask, evalSummaries);
+    generateReport(group, members, tasks, activity, evidenceByTask, evalSummaries, pdfTheme);
   }
 
   async function handleOpenEvaluation() {
@@ -197,11 +207,24 @@ export default function GroupPage() {
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {isLead && (
-              <button onClick={handleExport} className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
-                <IconExport size={14} /> Export PDF
-              </button>
+              <>
+                <div className="flex items-center gap-1">
+                  {PDF_THEMES.map((t) => {
+                    const isActive = pdfTheme.join() === t.color.join();
+                    return (
+                      <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
+                        className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#1C1917]' : 'opacity-60 hover:opacity-100'}`}
+                        style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
+                      />
+                    );
+                  })}
+                </div>
+                <button onClick={handleExport} className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
+                  <IconExport size={14} /> Export PDF
+                </button>
+              </>
             )}
             <button onClick={() => setShowNewTask(true)} className="h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
               <IconPlus size={14} /> Add task
@@ -366,10 +389,24 @@ export default function GroupPage() {
                     className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
                     Transfer Lead
                   </button>
-                  <button onClick={handleExport}
-                    className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                    <IconExport size={15} /> Export Report (PDF)
-                  </button>
+                  <div className="w-full bg-white border border-[#E7E5E4] rounded-md px-4 py-2.5">
+                    <p className="text-[11px] text-[#A8A29E] mb-2">PDF theme color</p>
+                    <div className="flex gap-2 mb-3">
+                      {PDF_THEMES.map((t) => {
+                        const isActive = pdfTheme.join() === t.color.join();
+                        return (
+                          <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
+                            className={`w-6 h-6 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#1C1917]' : 'opacity-50 hover:opacity-100'}`}
+                            style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
+                          />
+                        );
+                      })}
+                    </div>
+                    <button onClick={handleExport}
+                      className="w-full h-9 border border-[#E7E5E4] bg-[#FAFAF9] hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                      <IconExport size={15} /> Export Report (PDF)
+                    </button>
+                  </div>
                   <button onClick={() => setShowEditGroup(true)}
                     className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
                     <IconPencil size={15} /> Edit Group
