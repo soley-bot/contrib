@@ -9,12 +9,15 @@ interface NavProps {
   profile: Profile | null;
   role?: UserRole;
   group?: Group | null;
+  title?: string;
+  backLabel?: string;
+  onBack?: () => void;
   onTabChange?: (tab: string) => void;
   activeTab?: string;
   onProfileUpdate?: () => void;
 }
 
-export default function Nav({ profile, role, group, onTabChange, activeTab, onProfileUpdate }: NavProps) {
+export default function Nav({ profile, role, group, title, backLabel, onBack, onTabChange, activeTab, onProfileUpdate }: NavProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -44,13 +47,15 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-white border-b border-[#E7E5E4] flex items-center justify-between px-4 gap-2">
-        {group ? (
+        {(group || onBack) ? (
           <button
-            onClick={() => router.push(homeRoute)}
+            onClick={group ? () => router.push(homeRoute) : onBack}
             className="flex items-center gap-1 text-[#57534E] hover:text-[#1C1917] transition-colors flex-shrink-0"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="text-[13px] font-medium">{isTeacher ? 'Courses' : 'Groups'}</span>
+            <span className="text-[13px] font-medium">
+              {group ? (isTeacher ? 'Courses' : 'Groups') : (backLabel ?? 'Back')}
+            </span>
           </button>
         ) : (
           <span
@@ -60,9 +65,9 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
             Contrib
           </span>
         )}
-        {group && (
+        {(group || title) && (
           <span className="text-[15px] font-semibold text-[#1C1917] flex-1 text-center truncate px-2">
-            {group.name}
+            {group?.name ?? title}
           </span>
         )}
         <div className="relative flex items-center gap-2" ref={menuRef}>

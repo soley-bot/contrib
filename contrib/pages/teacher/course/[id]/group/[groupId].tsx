@@ -87,7 +87,14 @@ export default function TeacherGroupDetail() {
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
-      <Nav profile={profile} role="teacher" group={group} onProfileUpdate={refreshProfile} />
+      <Nav
+        profile={profile}
+        role="teacher"
+        group={group}
+        backLabel={courseName || 'Course'}
+        onBack={() => router.push(`/teacher/course/${courseId}`)}
+        onProfileUpdate={refreshProfile}
+      />
 
       <div className="md:pl-[220px]">
         {/* Desktop topbar */}
