@@ -87,7 +87,14 @@ export default function TeacherGroupDetail() {
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
-      <Nav profile={profile} role="teacher" onProfileUpdate={refreshProfile} />
+      <Nav
+        profile={profile}
+        role="teacher"
+        group={group}
+        backLabel={courseName || 'Course'}
+        onBack={() => router.push(`/teacher/course/${courseId}`)}
+        onProfileUpdate={refreshProfile}
+      />
 
       <div className="md:pl-[220px]">
         {/* Desktop topbar */}
@@ -110,25 +117,6 @@ export default function TeacherGroupDetail() {
             className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export PDF'}
-          </button>
-        </div>
-
-        {/* Mobile topbar */}
-        <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-white border-b border-[#E7E5E4] flex items-center justify-between px-4">
-          <button
-            onClick={() => router.push(`/teacher/course/${courseId}`)}
-            className="flex items-center gap-1.5 text-[#0E7490] text-sm font-medium"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            {courseName || 'Course'}
-          </button>
-          <span className="text-[14px] font-semibold text-[#1C1917] absolute left-1/2 -translate-x-1/2">{group.name}</span>
-          <button
-            onClick={handleDownloadPdf}
-            disabled={downloadingPdf}
-            className="text-[#0E7490] text-sm font-medium disabled:opacity-50"
-          >
-            {downloadingPdf ? '…' : 'PDF'}
           </button>
         </div>
 

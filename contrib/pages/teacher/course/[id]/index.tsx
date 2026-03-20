@@ -24,6 +24,8 @@ export default function CourseDetail() {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const [inviteBase, setInviteBase] = useState('');
+  const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
+  const [confirmDeleteGroupId, setConfirmDeleteGroupId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
@@ -55,6 +57,15 @@ export default function CourseDetail() {
   }, [groups]);
 
   const courseInviteLink = course ? `${inviteBase}course/${course.invite_token}` : '';
+
+  async function handleDeleteGroup() {
+    if (!confirmDeleteGroupId) return;
+    setDeletingGroupId(confirmDeleteGroupId);
+    await supabase.from('groups').delete().eq('id', confirmDeleteGroupId);
+    setConfirmDeleteGroupId(null);
+    setDeletingGroupId(null);
+    refresh();
+  }
 
   async function handleDownloadPdf(group: Group) {
     setDownloadingId(group.id);
@@ -96,7 +107,14 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
-      <Nav profile={profile} role="teacher" onProfileUpdate={refreshProfile} />
+      <Nav
+        profile={profile}
+        role="teacher"
+        title={course.name}
+        backLabel="My Courses"
+        onBack={() => router.push('/teacher')}
+        onProfileUpdate={refreshProfile}
+      />
 
       <div className="md:pl-[220px]">
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
@@ -177,6 +195,7 @@ export default function CourseDetail() {
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
                   onClick={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
+                  onDelete={() => setConfirmDeleteGroupId(group.id)}
                 />
               ))}
             </div>
@@ -191,6 +210,30 @@ export default function CourseDetail() {
       >
         <IconPlus size={22} />
       </button>
+
+      {confirmDeleteGroupId && (
+        <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4">
+          <div className="w-full max-w-[360px] bg-white rounded-[12px] p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
+            <h2 className="text-[15px] font-semibold text-[#1C1917] mb-1">Delete group?</h2>
+            <p className="text-sm text-[#57534E] mb-5">This will permanently delete the group and all its tasks, members, and activity. This cannot be undone.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmDeleteGroupId(null)}
+                className="flex-1 h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium text-[#57534E] rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteGroup}
+                disabled={!!deletingGroupId}
+                className="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60"
+              >
+                {deletingGroupId ? 'Deleting…' : 'Delete group'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div

@@ -12,6 +12,7 @@ interface CourseGroupRowProps {
   onDownloadPdf: () => void;
   downloading: boolean;
   onClick?: () => void;
+  onDelete?: () => void;
 }
 
 function formatDueDate(dateStr: string): string {
@@ -21,7 +22,7 @@ function formatDueDate(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + yearSuffix;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick }: CourseGroupRowProps) {
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onDelete }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
 
   const today = new Date();
@@ -75,6 +76,15 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           >
             {downloading ? 'Exporting…' : 'PDF'}
           </button>
+          {onDelete && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="h-8 w-8 border border-[#E7E5E4] bg-white hover:bg-red-50 hover:border-red-200 text-[#A8A29E] hover:text-red-500 rounded-md flex items-center justify-center transition-colors"
+              title="Delete group"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M11.5 3.5l-.7 7.7a1 1 0 01-1 .8H4.2a1 1 0 01-1-.8L2.5 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          )}
         </div>
       </div>
       <div className="mt-3">
