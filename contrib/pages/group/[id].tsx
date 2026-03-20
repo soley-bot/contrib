@@ -97,7 +97,7 @@ export default function GroupPage() {
   }
 
   async function executeDeleteGroup() {
-    if (!group) return;
+    if (!group || !isLead) return;
     await supabase.from('groups').delete().eq('id', group.id);
     router.push('/dashboard');
   }
@@ -118,7 +118,7 @@ export default function GroupPage() {
   }
 
   async function executeRemoveMember() {
-    if (!memberToRemove || !user || !group) return;
+    if (!memberToRemove || !user || !group || !isLead) return;
     await supabase.from('activity_log').insert({
       group_id: group.id,
       actor_id: user.id,

@@ -22,13 +22,10 @@ export default function JoinPage() {
   }, [router.isReady, user, userLoading, token]);
 
   async function fetchGroup() {
-    const { data } = await supabase
-      .from('groups')
-      .select('*')
-      .eq('invite_token', token)
-      .single();
+    const res = await fetch(`/api/join/lookup?token=${encodeURIComponent(token as string)}`);
+    if (!res.ok) { setStatus('not-found'); return; }
+    const data = await res.json();
 
-    if (!data) { setStatus('not-found'); return; }
     setGroup(data);
 
     const { data: existing } = await supabase
