@@ -150,6 +150,7 @@ export default function CourseDetail() {
                   inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
+                  onClick={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
                 />
               ))}
             </div>
