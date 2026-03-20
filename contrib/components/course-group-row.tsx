@@ -12,6 +12,7 @@ interface CourseGroupRowProps {
   onDownloadPdf: () => void;
   downloading: boolean;
   onClick?: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
 }
 
@@ -22,7 +23,7 @@ function formatDueDate(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + yearSuffix;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onDelete }: CourseGroupRowProps) {
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onEdit, onDelete }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
 
   const today = new Date();
@@ -76,6 +77,15 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           >
             {downloading ? 'Exporting…' : 'PDF'}
           </button>
+          {onEdit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              className="h-8 w-8 border border-[#E7E5E4] bg-white hover:bg-[#F0FDFA] hover:border-[#A5F3FC] text-[#A8A29E] hover:text-[#0E7490] rounded-md flex items-center justify-center transition-colors"
+              title="Edit group"
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2l2 2-7 7H2V9l7-7z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          )}
           {onDelete && (
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
