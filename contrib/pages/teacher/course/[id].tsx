@@ -92,7 +92,7 @@ export default function CourseDetail() {
       <div className="md:pl-[220px]">
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.push('/teacher')} className="text-[#A8A29E] hover:text-[#FF5841] text-sm transition-colors">My Courses</button>
+            <button onClick={() => router.push('/teacher')} className="text-[#A8A29E] hover:text-brand text-sm transition-colors">My Courses</button>
             <span className="text-[#A8A29E] text-sm">/</span>
             <span className="text-base font-semibold text-[#1C1917]">{course.name}</span>
           </div>
@@ -180,17 +180,17 @@ export default function CourseDetail() {
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Group A"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">

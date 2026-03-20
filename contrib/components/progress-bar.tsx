@@ -9,7 +9,7 @@ export default function ProgressBar({ value, max }: ProgressBarProps) {
     <div className="flex items-center gap-2">
       <div className="flex-1 h-2.5 bg-[#F5F5F4] rounded-full overflow-hidden">
         <div
-          className="h-full bg-[#FF5841] rounded-full transition-all"
+          className="h-full bg-brand rounded-full transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>

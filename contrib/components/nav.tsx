@@ -54,7 +54,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
           </button>
         ) : (
           <span
-            className="text-base font-extrabold text-[#FF5841] cursor-pointer"
+            className="text-base font-extrabold text-brand cursor-pointer"
             onClick={() => router.push(homeRoute)}
           >
             Contrib
@@ -68,7 +68,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
         <div className="relative flex items-center gap-2" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="w-7 h-7 rounded-full bg-[#FF5841] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 active:opacity-80"
+            className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 active:opacity-80"
           >
             {initials}
           </button>
@@ -99,7 +99,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
 
       {/* ── DESKTOP SIDEBAR ────────────────────────────── */}
       <aside className="hidden md:flex flex-col fixed top-0 left-0 h-full w-[220px] bg-white border-r border-[#E7E5E4] z-50 py-5 px-3">
-        <div className="text-base font-extrabold text-[#FF5841] px-2 mb-6">Contrib</div>
+        <div className="text-base font-extrabold text-brand px-2 mb-6">Contrib</div>
 
         <div className="mb-5">
           <div className="text-[11px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
@@ -108,7 +108,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
           <button
             onClick={() => router.push(homeRoute)}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
-              !group ? 'bg-[#FFF0EE] text-[#FF5841]' : 'text-[#57534E] hover:bg-[#F5F5F4]'
+              !group ? 'bg-brand-light text-brand' : 'text-[#57534E] hover:bg-[#F5F5F4]'
             }`}
           >
             <IconHome size={16} />
@@ -131,7 +131,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
                 onClick={() => onTabChange(item.id)}
                 className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
                   activeTab === item.id
-                    ? 'bg-[#FFF0EE] text-[#FF5841]'
+                    ? 'bg-brand-light text-brand'
                     : 'text-[#57534E] hover:bg-[#F5F5F4]'
                 }`}
               >
@@ -152,12 +152,12 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
           </button>
           {profile && (
             <div className="flex items-center gap-2 px-2 py-2 mt-1">
-              <div className="w-7 h-7 rounded-full bg-[#FF5841] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-[#1C1917] truncate">{profile.name}</p>
-                <button onClick={() => setShowEdit(true)} className="text-[11px] text-[#A8A29E] hover:text-[#FF5841] transition-colors">
+                <button onClick={() => setShowEdit(true)} className="text-[11px] text-[#A8A29E] hover:text-brand transition-colors">
                   Edit profile
                 </button>
               </div>

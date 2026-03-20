@@ -56,7 +56,7 @@ export default function JoinCoursePage() {
         <p className="text-3xl">🔗</p>
         <p className="text-lg font-semibold">Course link not found</p>
         <p className="text-sm text-[#6B7280]">This invite link is invalid or has been removed.</p>
-        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#FF5841] text-sm font-medium">Back to dashboard</button>
+        <button onClick={() => router.push('/dashboard')} className="mt-2 text-brand text-sm font-medium">Back to dashboard</button>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function JoinCoursePage() {
         <p className="text-3xl">⚠️</p>
         <p className="text-lg font-semibold">Failed to link group</p>
         <p className="text-sm text-[#6B7280]">{errorMsg}</p>
-        <button onClick={() => router.push('/dashboard')} className="mt-2 text-[#FF5841] text-sm font-medium">Back to dashboard</button>
+        <button onClick={() => router.push('/dashboard')} className="mt-2 text-brand text-sm font-medium">Back to dashboard</button>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function JoinCoursePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh px-5 bg-[#F9FAFB]">
       <div className="bg-white border border-[#E7E5E4] rounded-[10px] p-6 max-w-sm w-full shadow-sm">
-        <div className="w-12 h-12 rounded-xl bg-[#FFF0EE] text-[#FF5841] font-bold text-xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 rounded-xl bg-brand-light text-brand font-bold text-xl flex items-center justify-center mx-auto mb-4">
           {course?.name.slice(0, 2).toUpperCase()}
         </div>
         <h1 className="text-lg font-bold text-[#1C1917] mb-0.5 text-center">{course?.name}</h1>
@@ -95,7 +95,7 @@ export default function JoinCoursePage() {
             <p className="text-sm text-[#57534E] mb-4">
               You need to be the lead of an unlinked group to connect it to this course.
             </p>
-            <button onClick={() => router.push('/dashboard')} className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors">
+            <button onClick={() => router.push('/dashboard')} className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors">
               Go to dashboard
             </button>
           </div>
@@ -106,7 +106,7 @@ export default function JoinCoursePage() {
               <select
                 value={selectedGroupId}
                 onChange={(e) => setSelectedGroupId(e.target.value)}
-                className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[14px] focus:border-[#FF5841] outline-none bg-white"
+                className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[14px] focus:border-brand outline-none bg-white"
               >
                 <option value="">Choose a group…</option>
                 {leadGroups.map((g: Group) => (
@@ -117,7 +117,7 @@ export default function JoinCoursePage() {
             <button
               onClick={handleLink}
               disabled={!selectedGroupId || status === 'linking'}
-              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60"
+              className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60"
             >
               {status === 'linking' ? 'Linking…' : 'Link group to course'}
             </button>

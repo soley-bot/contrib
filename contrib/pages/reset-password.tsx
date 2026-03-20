@@ -41,7 +41,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-dvh bg-[#F9FAFB]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
-        <div className="text-xl font-extrabold text-[#FF5841] mb-8">Contrib</div>
+        <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 
         {!ready ? (
           <>
@@ -51,7 +51,7 @@ export default function ResetPassword() {
             </p>
             <Link
               href="/forgot-password"
-              className="block h-12 bg-[#FF5841] hover:bg-[#E04030] text-white text-[15px] font-medium rounded-md transition-colors text-center leading-[48px]"
+              className="block h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors text-center leading-[48px]"
             >
               Request new link
             </Link>
@@ -69,7 +69,7 @@ export default function ResetPassword() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                 />
               </div>
 
@@ -78,7 +78,7 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-12 bg-[#FF5841] hover:bg-[#E04030] text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
+                className="h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
               >
                 {loading ? 'Saving…' : 'Set password'}
               </button>

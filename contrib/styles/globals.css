@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-light: var(--brand-light);
+  --color-brand-border: var(--brand-border);
+}
+
+:root {
+  --bg: #F9FAFB;
+  --surface: #FFFFFF;
+  --border: #E5E7EB;
+  --text: #111827;
+  --muted: #6B7280;
+  --brand: #2563EB;
+  --brand-hover: #1D4ED8;
+  --brand-light: #EFF6FF;
+  --brand-border: #BFDBFE;
+  --green: #22C55E;
+  --yellow: #F59E0B;
+  --red: #EF4444;
+}
 
 * {
   box-sizing: border-box;

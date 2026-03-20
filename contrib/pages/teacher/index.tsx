@@ -139,12 +139,12 @@ export default function TeacherDashboard() {
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
