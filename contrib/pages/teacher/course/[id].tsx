@@ -15,6 +15,7 @@ export default function CourseDetail() {
   const courseId = typeof router.query.id === 'string' ? router.query.id : undefined;
   const { user, profile, loading, refreshProfile } = useUser();
   const { course, groups, isOwner, loading: courseLoading, refresh } = useCourse(courseId, user?.id);
+  const [groupMembers, setGroupMembers] = useState<Record<string, GroupMember[]>>({});
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -34,8 +35,26 @@ export default function CourseDetail() {
   }, [course, isOwner, courseLoading, router]);
 
   useEffect(() => {
-    setInviteBase(`${window.location.origin}/join/course/`);
+    setInviteBase(`${window.location.origin}/join/`);
   }, []);
+
+  useEffect(() => {
+    if (groups.length === 0) return;
+    const ids = groups.map(({ group }) => group.id);
+    supabase
+      .from('group_members')
+      .select('*, profile:profiles(*)')
+      .in('group_id', ids)
+      .order('joined_at', { ascending: true })
+      .then(({ data }) => {
+        const map: Record<string, GroupMember[]> = {};
+        ids.forEach((id) => { map[id] = []; });
+        (data as GroupMember[] ?? []).forEach((m) => { map[m.group_id]?.push(m); });
+        setGroupMembers(map);
+      });
+  }, [groups]);
+
+  const courseInviteLink = course ? `${inviteBase}course/${course.invite_token}` : '';
 
   async function handleDownloadPdf(group: Group) {
     setDownloadingId(group.id);
@@ -59,16 +78,12 @@ export default function CourseDetail() {
       .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token, course_id: courseId })
       .select().single();
     if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
-    await supabase.from('group_members').insert({ group_id: group.id, profile_id: user!.id });
-    await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
     refresh();
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
   if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
   if (!course) return null;
-
-  const courseInviteLink = `${inviteBase}${course.invite_token}`;
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
@@ -131,6 +146,8 @@ export default function CourseDetail() {
                   taskTotal={taskTotal}
                   taskDone={taskDone}
                   memberCount={memberCount}
+                  members={groupMembers[group.id]}
+                  inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
                 />

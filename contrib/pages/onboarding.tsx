@@ -30,35 +30,39 @@ export default function Onboarding() {
     });
   }, [router]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    if (!name.trim() || !university.trim() || !faculty.trim() || !yearOfStudy) {
-      setError('All fields are required.');
-      return;
-    }
+  async function saveProfile(nameVal: string, universityVal: string, facultyVal: string, yearVal: string) {
     if (!user) return;
     setLoading(true);
-
     const avatarUrl = user.user_metadata?.avatar_url ?? null;
-
     const { error: insertError } = await supabase.from('profiles').insert({
       id: user.id,
-      name: name.trim(),
-      university: university.trim(),
-      faculty: faculty.trim(),
-      year_of_study: yearOfStudy,
+      name: nameVal.trim() || 'User',
+      university: universityVal.trim() || null,
+      faculty: facultyVal.trim() || null,
+      year_of_study: yearVal || null,
       avatar_url: avatarUrl,
       role,
     });
-
     if (insertError) {
       setError(insertError.message);
       setLoading(false);
-      return;
+      return false;
     }
+    return true;
+  }
 
-    router.push(role === 'teacher' ? '/teacher' : '/dashboard');
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    if (!name.trim()) { setError('Name is required.'); return; }
+    const ok = await saveProfile(name, university, faculty, yearOfStudy);
+    if (ok) router.push(role === 'teacher' ? '/teacher' : '/dashboard');
+  }
+
+  async function handleSkip() {
+    setError('');
+    const ok = await saveProfile(name, '', '', '');
+    if (ok) router.push(role === 'teacher' ? '/teacher' : '/dashboard');
   }
 
   return (
@@ -96,7 +100,9 @@ export default function Onboarding() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">University</label>
+            <label className="text-[13px] font-medium text-[#57534E]">
+              University <span className="font-normal text-[#A8A29E]">(optional)</span>
+            </label>
             <input
               type="text"
               value={university}
@@ -106,7 +112,9 @@ export default function Onboarding() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Faculty / Major</label>
+            <label className="text-[13px] font-medium text-[#57534E]">
+              Faculty / Major <span className="font-normal text-[#A8A29E]">(optional)</span>
+            </label>
             <input
               type="text"
               value={faculty}
@@ -118,7 +126,9 @@ export default function Onboarding() {
           <RoleToggle value={role} onChange={setRole} />
 
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Year of study</label>
+            <label className="text-[13px] font-medium text-[#57534E]">
+              Year of study <span className="font-normal text-[#A8A29E]">(optional)</span>
+            </label>
             <select
               value={yearOfStudy}
               onChange={(e) => setYearOfStudy(e.target.value)}
@@ -139,6 +149,14 @@ export default function Onboarding() {
             className="h-12 bg-[#FF5841] hover:bg-[#E04030] text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
           >
             {loading ? 'Saving…' : 'Get started'}
+          </button>
+          <button
+            type="button"
+            onClick={handleSkip}
+            disabled={loading}
+            className="text-sm text-[#A8A29E] hover:text-[#57534E] transition-colors text-center disabled:opacity-60"
+          >
+            Skip for now →
           </button>
         </form>
       </div>
