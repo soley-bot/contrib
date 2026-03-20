@@ -20,7 +20,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading && !user) router.replace('/signup');
-  }, [user, loading, router]);
+    if (!loading && user && !profile) router.replace('/onboarding');
+  }, [user, profile, loading, router]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();

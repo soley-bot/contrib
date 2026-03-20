@@ -6,24 +6,31 @@ export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        subscription.unsubscribe();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single();
+        router.replace(profile ? '/dashboard' : '/onboarding');
+      } else if (event === 'INITIAL_SESSION' && session) {
+        // Already signed in (e.g. user bookmarked /auth/callback)
+        subscription.unsubscribe();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single();
+        router.replace(profile ? '/dashboard' : '/onboarding');
+      } else if (event === 'INITIAL_SESSION' && !session) {
+        // No session yet — PKCE code exchange in progress, wait for SIGNED_IN
+      } else if (!session) {
         router.replace('/login');
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profile) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/onboarding');
       }
     });
+    return () => subscription.unsubscribe();
   }, [router]);
 
   return (

@@ -30,8 +30,12 @@ export default function Login() {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace('/dashboard');
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) return;
+      const { data: profile } = await supabase
+        .from('profiles').select('role').eq('id', session.user.id).single();
+      if (!profile) router.replace('/onboarding');
+      else router.replace(profile.role === 'teacher' ? '/teacher' : '/dashboard');
     });
   }, [router]);
 
