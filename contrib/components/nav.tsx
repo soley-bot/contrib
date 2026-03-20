@@ -102,7 +102,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
         <div className="text-base font-extrabold text-brand px-2 mb-6">Contrib</div>
 
         <div className="mb-5">
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
+          <div className="text-[11px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
             {isTeacher ? 'My Courses' : 'My Groups'}
           </div>
           <button
@@ -118,7 +118,7 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
 
         {group && onTabChange && (
           <div className="mb-5">
-            <div className="text-[10px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
+            <div className="text-[11px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
               Current Group
             </div>
             {[

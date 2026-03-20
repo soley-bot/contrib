@@ -36,6 +36,25 @@ body {
   min-height: 100dvh;
   background: var(--bg);
   font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #E7E5E4;
+  border-top-color: #FF5841;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes done-flash {
+  0%   { background-color: #DCFCE7; }
+  100% { background-color: #F0FDF4; }
 }
 
 input,

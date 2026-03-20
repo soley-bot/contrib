@@ -10,6 +10,7 @@ create table public.profiles (
   faculty text,
   year_of_study text,
   avatar_url text,
+  role text not null default 'student',
   created_at timestamptz not null default now()
 );
 

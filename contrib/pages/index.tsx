@@ -215,6 +215,79 @@ export default function Landing() {
         </div>
       </div>
 
+      {/* How it Works */}
+      <div className="bg-white border-t border-[#F3F4F6]">
+        <div className="max-w-6xl mx-auto px-5 py-12">
+          <h2 className="text-[18px] md:text-[22px] font-extrabold tracking-tight text-[#111827] text-center mb-2">
+            How it works
+          </h2>
+          <p className="text-center text-sm text-[#6B7280] mb-10">From first day to final submission, in three steps.</p>
+          <div className="flex flex-col md:flex-row gap-8 relative">
+            {/* connector line desktop */}
+            <div className="hidden md:block absolute top-8 left-[calc(16.67%+16px)] right-[calc(16.67%+16px)] h-px bg-[#E5E7EB]" />
+            {[
+              {
+                step: '01',
+                color: '#FFF0EE',
+                accent: '#FF5841',
+                title: 'Teacher creates a course',
+                desc: 'Set up a course and share the invite link. Students click it and join automatically — no manual enrolment.',
+                icon: (
+                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
+                    <circle cx="20" cy="20" r="20" fill="#FFF0EE"/>
+                    <rect x="10" y="12" width="20" height="16" rx="3" fill="#FF5841"/>
+                    <rect x="13" y="15" width="10" height="2" rx="1" fill="white" fillOpacity="0.8"/>
+                    <rect x="13" y="19" width="14" height="2" rx="1" fill="white" fillOpacity="0.6"/>
+                    <rect x="13" y="23" width="8" height="2" rx="1" fill="white" fillOpacity="0.6"/>
+                  </svg>
+                ),
+              },
+              {
+                step: '02',
+                color: '#F0FDFA',
+                accent: '#0E7490',
+                title: 'Students track tasks',
+                desc: 'Split work into tasks, assign to members, and move cards across To Do → In Progress → Done. Every change is logged.',
+                icon: (
+                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
+                    <circle cx="20" cy="20" r="20" fill="#F0FDFA"/>
+                    <rect x="10" y="12" width="7" height="16" rx="2" fill="#A5F3FC"/>
+                    <rect x="19" y="18" width="7" height="10" rx="2" fill="#0E7490"/>
+                    <rect x="28" y="15" width="2" height="13" rx="1" fill="#BAE6FD"/>
+                    <path d="M12 20l2 2 3-3" stroke="#0E7490" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+              },
+              {
+                step: '03',
+                color: '#DCFCE7',
+                accent: '#16A34A',
+                title: 'Export the PDF report',
+                desc: 'One click generates a contribution breakdown with timestamps and evidence. Hand it straight to your teacher.',
+                icon: (
+                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
+                    <circle cx="20" cy="20" r="20" fill="#DCFCE7"/>
+                    <rect x="13" y="10" width="14" height="20" rx="3" fill="#16A34A"/>
+                    <rect x="16" y="14" width="8" height="1.5" rx="0.75" fill="white" fillOpacity="0.8"/>
+                    <rect x="16" y="17" width="6" height="1.5" rx="0.75" fill="white" fillOpacity="0.6"/>
+                    <rect x="16" y="20" width="7" height="1.5" rx="0.75" fill="white" fillOpacity="0.6"/>
+                    <circle cx="27" cy="28" r="6" fill="#15803D"/>
+                    <path d="M24.5 28l2 2 3-3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+              },
+            ].map((step) => (
+              <div key={step.step} className="flex-1 flex flex-col items-center text-center">
+                <div className="relative mb-4 z-10">{step.icon}</div>
+                <span className="text-[11px] font-bold tracking-widest uppercase mb-1" style={{ color: step.accent }}>Step {step.step}</span>
+                <h3 className="text-[15px] font-bold mb-1.5">{step.title}</h3>
+                <p className="text-[13px] text-[#6B7280] leading-relaxed max-w-[220px]">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <footer className="py-6 text-center text-xs text-[#9CA3AF] border-t border-[#E5E7EB] bg-white">
         © 2026 Contrib · Made for Cambodian universities
       </footer>

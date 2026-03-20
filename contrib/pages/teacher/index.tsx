@@ -53,7 +53,7 @@ export default function TeacherDashboard() {
     router.push(`/teacher/course/${course.id}`);
   }
 
-  if (loading) return <div className="flex items-center justify-center min-h-dvh text-[#57534E]">Loading…</div>;
+  if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
@@ -64,7 +64,7 @@ export default function TeacherDashboard() {
           <span className="text-base font-semibold text-[#1C1917]">My Courses</span>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-8 px-3 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New course
           </button>
@@ -72,9 +72,34 @@ export default function TeacherDashboard() {
 
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {courses.length === 0 ? (
-            <div className="text-center py-20 text-[#A8A29E]">
-              <p className="text-4xl mb-3">🎓</p>
-              <p className="text-sm">No courses yet. Create one to get started.</p>
+            <div className="text-center py-14">
+              <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
+                <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F0FDFA"/>
+                {/* chalkboard */}
+                <rect x="30" y="20" width="140" height="80" rx="6" fill="#0E7490"/>
+                <rect x="36" y="26" width="128" height="68" rx="4" fill="#0C6478"/>
+                {/* chalk lines on board */}
+                <rect x="46" y="36" width="48" height="4" rx="2" fill="white" fillOpacity="0.7"/>
+                <rect x="46" y="44" width="32" height="4" rx="2" fill="white" fillOpacity="0.5"/>
+                <rect x="46" y="52" width="40" height="4" rx="2" fill="white" fillOpacity="0.5"/>
+                <rect x="108" y="36" width="16" height="16" rx="3" fill="white" fillOpacity="0.15"/>
+                <path d="M112 44l2.5 2.5 5.5-5.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="108" y="56" width="16" height="16" rx="3" fill="white" fillOpacity="0.15"/>
+                <rect x="108" y="76" width="16" height="6" rx="2" fill="white" fillOpacity="0.3"/>
+                {/* tray */}
+                <rect x="30" y="100" width="140" height="8" rx="2" fill="#0A5468"/>
+                {/* person */}
+                <circle cx="100" cy="56" r="10" fill="#BAE6FD"/>
+                <rect x="88" y="72" width="24" height="16" rx="6" fill="#0E7490"/>
+                {/* graduation cap */}
+                <rect x="92" y="46" width="16" height="3" rx="1.5" fill="#1C1917"/>
+                <polygon points="100,42 110,47 100,52 90,47" fill="#1C1917"/>
+              </svg>
+              <p className="text-[16px] font-bold text-[#1C1917] mb-1.5">No courses yet</p>
+              <p className="text-sm text-[#A8A29E] mb-6 max-w-xs mx-auto">Create your first course and share the invite link with your students.</p>
+              <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[14px] font-medium rounded-md transition-colors">
+                <IconPlus size={16} /> Create your first course
+              </button>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
@@ -93,8 +118,8 @@ export default function TeacherDashboard() {
 
       <button
         onClick={() => setShowModal(true)}
-        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 16px rgba(37,99,235,.3)' }}
+        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#0E7490] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+        style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
       >
         <IconPlus size={22} />
       </button>
@@ -124,7 +149,7 @@ export default function TeacherDashboard() {
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
                 <button type="submit" disabled={creating}
-                  className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create course'}
                 </button>
               </div>
