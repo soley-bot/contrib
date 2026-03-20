@@ -14,6 +14,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!email || !password || !name || !university) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
+  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address.' });
+  }
+  if (typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+  }
+  if (typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 100) {
+    return res.status(400).json({ error: 'Name must be between 1 and 100 characters.' });
+  }
+  if (typeof university !== 'string' || university.trim().length === 0 || university.trim().length > 200) {
+    return res.status(400).json({ error: 'University name must be between 1 and 200 characters.' });
+  }
   const safeRole = role === 'teacher' ? 'teacher' : 'student';
 
   // Create auth user without sending a confirmation email
