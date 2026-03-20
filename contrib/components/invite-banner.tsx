@@ -16,15 +16,15 @@ export default function InviteBanner({ token }: InviteBannerProps) {
   }
 
   return (
-    <div className="border-[1.5px] border-dashed border-[#FFCFC9] rounded-[10px] bg-[#FFF0EE] p-3.5 flex items-center gap-2.5 mb-4">
+    <div className="border-[1.5px] border-dashed border-brand-border rounded-[10px] bg-brand-light p-3.5 flex items-center gap-2.5 mb-4">
       <IconUsers size={20} />
-      <div className="flex-1 min-w-0" style={{ color: '#FF5841' }}>
-        <p className="text-[11px] font-semibold text-[#FF5841] mb-0.5">Invite link</p>
+      <div className="flex-1 min-w-0" style={{ color: 'var(--brand)' }}>
+        <p className="text-[11px] font-semibold text-brand mb-0.5">Invite link</p>
         <p className="text-xs text-[#57534E] truncate">{link}</p>
       </div>
       <button
         onClick={handleCopy}
-        className="flex-shrink-0 h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
+        className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
       >
         {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
         {copied ? 'Copied' : 'Copy'}

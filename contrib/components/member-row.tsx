@@ -19,14 +19,14 @@ export default function MemberRow({ member, tasks, isThisMemberLead, canRemove, 
 
   return (
     <div className="flex items-center gap-3 py-3 border-b border-[#E7E5E4] last:border-none">
-      <div className="w-9 h-9 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[13px] font-bold flex items-center justify-center flex-shrink-0">
+      <div className="w-9 h-9 rounded-full bg-brand-light text-brand text-[13px] font-bold flex items-center justify-center flex-shrink-0">
         {initials}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[14px] font-medium text-[#1C1917]">{name}</span>
           {isThisMemberLead && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFF0EE] text-[#FF5841]">
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-brand-light text-brand">
               Lead
             </span>
           )}
@@ -39,7 +39,7 @@ export default function MemberRow({ member, tasks, isThisMemberLead, canRemove, 
           <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#16A34A]">
             {doneTasks.length} done
           </span>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FFF0EE] text-[#FF5841]">
+          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-brand-light text-brand">
             {pct}%
           </span>
         </div>

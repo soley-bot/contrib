@@ -5,33 +5,33 @@ import { supabase } from '@/lib/supabase';
 
 const IconCheck = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2.5 7l3 3 6-6" stroke="#FF5841" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2.5 7l3 3 6-6" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 const IconArrowUp = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M7 11V3M3.5 6.5L7 3l3.5 3.5" stroke="#FF5841" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 11V3M3.5 6.5L7 3l3.5 3.5" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 const IconUsers = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <circle cx="5" cy="4.5" r="2" stroke="#FF5841" strokeWidth="1.5"/>
-    <path d="M1 11.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M10 6.5c1.1 0 2 .9 2 2v1" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8.5 3c.8 0 1.5.7 1.5 1.5S9.3 6 8.5 6" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="5" cy="4.5" r="2" stroke="var(--brand)" strokeWidth="1.5"/>
+    <path d="M1 11.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M10 6.5c1.1 0 2 .9 2 2v1" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8.5 3c.8 0 1.5.7 1.5 1.5S9.3 6 8.5 6" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 const IconLink = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M6 8l-1 1a2.83 2.83 0 01-4-4l2-2a2.83 2.83 0 014 0" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8 6l1-1a2.83 2.83 0 014 4l-2 2a2.83 2.83 0 01-4 0" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 9l4-4" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M6 8l-1 1a2.83 2.83 0 01-4-4l2-2a2.83 2.83 0 014 0" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8 6l1-1a2.83 2.83 0 014 4l-2 2a2.83 2.83 0 01-4 0" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M5 9l4-4" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 const IconTask = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <rect x="3" y="3" width="14" height="14" rx="3" stroke="#FF5841" strokeWidth="1.5"/>
-    <path d="M6.5 10l2.5 2.5 4.5-5" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="3" y="3" width="14" height="14" rx="3" stroke="var(--brand)" strokeWidth="1.5"/>
+    <path d="M6.5 10l2.5 2.5 4.5-5" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 const IconActivity = () => (
@@ -41,17 +41,17 @@ const IconActivity = () => (
 );
 const IconPDF = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M5 3h7l4 4v11a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#FF5841" strokeWidth="1.5"/>
-    <path d="M12 3v4h4" stroke="#FF5841" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M10 9v5M7.5 12l2.5 2.5L12.5 12" stroke="#FF5841" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 3h7l4 4v11a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="var(--brand)" strokeWidth="1.5"/>
+    <path d="M12 3v4h4" stroke="var(--brand)" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M10 9v5M7.5 12l2.5 2.5L12.5 12" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
 const HeroIllustration = () => (
   <svg viewBox="0 0 360 196" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
     <rect width="360" height="196" rx="14" fill="#FFF8F7"/>
-    <rect width="360" height="44" rx="14" fill="#FF5841"/>
-    <rect y="28" width="360" height="16" fill="#FF5841"/>
+    <rect width="360" height="44" rx="14" fill="var(--brand)"/>
+    <rect y="28" width="360" height="16" fill="var(--brand)"/>
     <circle cx="22" cy="22" r="5.5" fill="white" fillOpacity="0.35"/>
     <circle cx="38" cy="22" r="5.5" fill="white" fillOpacity="0.35"/>
     <circle cx="54" cy="22" r="5.5" fill="white" fillOpacity="0.35"/>
@@ -59,38 +59,38 @@ const HeroIllustration = () => (
     <rect x="84" y="19" width="80" height="6" rx="3" fill="white" fillOpacity="0.4"/>
     <circle cx="314" cy="22" r="11" fill="#C53678"/>
     <text x="314" y="26" textAnchor="middle" fontSize="8" fontWeight="700" fill="white">SO</text>
-    <circle cx="330" cy="22" r="11" fill="#FF5841" fillOpacity="0.6"/>
+    <circle cx="330" cy="22" r="11" fill="var(--brand)" fillOpacity="0.6"/>
     <text x="330" y="26" textAnchor="middle" fontSize="8" fontWeight="700" fill="white">VR</text>
     <circle cx="346" cy="22" r="11" fill="white" fillOpacity="0.4"/>
     <text x="346" y="26" textAnchor="middle" fontSize="8" fontWeight="700" fill="white">KD</text>
     <rect x="14" y="56" width="100" height="13" rx="4" fill="#F3F4F6"/>
     <text x="22" y="66" fontSize="8" fontWeight="700" fill="#6B7280" letterSpacing="0.5">TO DO  2</text>
     <rect x="128" y="56" width="104" height="13" rx="4" fill="#FEE2E2"/>
-    <text x="136" y="66" fontSize="8" fontWeight="700" fill="#FF5841" letterSpacing="0.5">IN PROGRESS  2</text>
+    <text x="136" y="66" fontSize="8" fontWeight="700" fill="var(--brand)" letterSpacing="0.5">IN PROGRESS  2</text>
     <rect x="246" y="56" width="100" height="13" rx="4" fill="#D1FAE5"/>
     <text x="254" y="66" fontSize="8" fontWeight="700" fill="#16A34A" letterSpacing="0.5">DONE  2</text>
     <rect x="14" y="76" width="100" height="48" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="1"/>
     <rect x="22" y="86" width="56" height="7" rx="3" fill="#1F2937"/>
     <rect x="22" y="97" width="40" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="101" cy="108" r="7" fill="#FFF0EE"/>
-    <text x="101" y="111" textAnchor="middle" fontSize="6" fontWeight="800" fill="#FF5841">SO</text>
+    <circle cx="101" cy="108" r="7" fill="var(--brand-light)"/>
+    <text x="101" y="111" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">SO</text>
     <rect x="14" y="132" width="100" height="48" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="1"/>
     <rect x="22" y="142" width="48" height="7" rx="3" fill="#1F2937"/>
     <rect x="22" y="153" width="60" height="5" rx="2.5" fill="#D1D5DB"/>
     <circle cx="101" cy="164" r="7" fill="#FDF2F7"/>
     <text x="101" y="167" textAnchor="middle" fontSize="6" fontWeight="800" fill="#C53678">KD</text>
     <rect x="128" y="76" width="104" height="48" rx="8" fill="white" stroke="#FCA5A5" strokeWidth="1"/>
-    <rect x="128" y="76" width="4" height="48" rx="2" fill="#FF5841"/>
+    <rect x="128" y="76" width="4" height="48" rx="2" fill="var(--brand)"/>
     <rect x="140" y="86" width="65" height="7" rx="3" fill="#1F2937"/>
     <rect x="140" y="97" width="42" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="219" cy="108" r="7" fill="#FFF0EE"/>
-    <text x="219" y="111" textAnchor="middle" fontSize="6" fontWeight="800" fill="#FF5841">VR</text>
+    <circle cx="219" cy="108" r="7" fill="var(--brand-light)"/>
+    <text x="219" y="111" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">VR</text>
     <rect x="128" y="132" width="104" height="48" rx="8" fill="white" stroke="#FCA5A5" strokeWidth="1"/>
-    <rect x="128" y="132" width="4" height="48" rx="2" fill="#FF5841"/>
+    <rect x="128" y="132" width="4" height="48" rx="2" fill="var(--brand)"/>
     <rect x="140" y="142" width="55" height="7" rx="3" fill="#1F2937"/>
     <rect x="140" y="153" width="48" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="219" cy="164" r="7" fill="#FFF0EE"/>
-    <text x="219" y="167" textAnchor="middle" fontSize="6" fontWeight="800" fill="#FF5841">LM</text>
+    <circle cx="219" cy="164" r="7" fill="var(--brand-light)"/>
+    <text x="219" y="167" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">LM</text>
     <rect x="246" y="76" width="100" height="48" rx="8" fill="white" stroke="#BBF7D0" strokeWidth="1" fillOpacity="0.7"/>
     <rect x="254" y="86" width="52" height="7" rx="3" fill="#9CA3AF"/>
     <rect x="254" y="97" width="40" height="5" rx="2.5" fill="#E5E7EB"/>
@@ -119,12 +119,12 @@ export default function Landing() {
       {/* Nav */}
       <nav className="h-14 border-b border-[#F3F4F6] sticky top-0 z-50 bg-white">
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
-          <span className="text-lg font-extrabold tracking-tight text-[#FF5841]">Contrib</span>
+          <span className="text-lg font-extrabold tracking-tight text-brand">Contrib</span>
           <div className="flex gap-2">
             <Link href="/login" className="h-8 px-3 flex items-center text-sm text-[#6B7280] hover:text-[#111827] font-medium rounded-md transition-colors">
               Log in
             </Link>
-            <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-[#FF5841] hover:bg-[#E04030]">
+            <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-brand hover:bg-brand-hover">
               Sign up free
             </Link>
           </div>
@@ -137,18 +137,18 @@ export default function Landing() {
 
           {/* Text */}
           <div className="md:flex-1 text-center md:text-left mb-6 md:mb-0">
-            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full mb-4 bg-[#FFF0EE] text-[#FF5841]">
+            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full mb-4 bg-brand-light text-brand">
               For Cambodian university students
             </span>
             <h1 className="text-[32px] md:text-[44px] lg:text-[52px] font-extrabold leading-tight tracking-tight text-[#111827] mb-4">
               Track. Prove.<br />
-              <span className="text-[#FF5841]">Export.</span>
+              <span className="text-brand">Export.</span>
             </h1>
             <p className="text-[15px] md:text-[17px] text-[#6B7280] leading-relaxed mb-7 max-w-xs mx-auto md:mx-0 md:max-w-sm">
               Stop arguing about who did what. Contrib records every contribution and exports a PDF your teacher already expects.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-              <Link href="/signup" className="inline-flex items-center justify-center h-12 px-8 text-white text-[15px] font-semibold rounded-md transition-colors bg-[#FF5841] hover:bg-[#E04030]">
+              <Link href="/signup" className="inline-flex items-center justify-center h-12 px-8 text-white text-[15px] font-semibold rounded-md transition-colors bg-brand hover:bg-brand-hover">
                 Get started — it&apos;s free
               </Link>
               <Link href="/login" className="inline-flex items-center justify-center h-12 px-4 text-[15px] font-medium text-[#6B7280] hover:text-[#111827] transition-colors">
@@ -199,9 +199,9 @@ export default function Landing() {
           </h2>
           <div className="flex flex-col md:grid md:grid-cols-3 gap-4">
             {[
-              { icon: <IconTask />, bg: '#FFF0EE', title: 'Task Tracking', desc: 'Assign tasks to members, track To Do → In Progress → Done. Every move is timestamped.' },
+              { icon: <IconTask />, bg: 'var(--brand-light)', title: 'Task Tracking', desc: 'Assign tasks to members, track To Do → In Progress → Done. Every move is timestamped.' },
               { icon: <IconActivity />, bg: '#FDF2F7', title: 'Activity Feed', desc: 'A live record of who did what and when. No editing, no deleting — honest data only.' },
-              { icon: <IconPDF />, bg: '#FFF0EE', title: 'PDF Export', desc: 'One click generates a contribution report formatted exactly like the peer evaluation form your teacher uses.' },
+              { icon: <IconPDF />, bg: 'var(--brand-light)', title: 'PDF Export', desc: 'One click generates a contribution report formatted exactly like the peer evaluation form your teacher uses.' },
             ].map((f) => (
               <div key={f.title} className="bg-white border border-[#E5E7EB] rounded-[10px] p-5">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: f.bg }}>
@@ -209,6 +209,79 @@ export default function Landing() {
                 </div>
                 <h3 className="text-[15px] font-bold tracking-tight mb-1">{f.title}</h3>
                 <p className="text-[13px] text-[#6B7280] leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* How it Works */}
+      <div className="bg-white border-t border-[#F3F4F6]">
+        <div className="max-w-6xl mx-auto px-5 py-12">
+          <h2 className="text-[18px] md:text-[22px] font-extrabold tracking-tight text-[#111827] text-center mb-2">
+            How it works
+          </h2>
+          <p className="text-center text-sm text-[#6B7280] mb-10">From first day to final submission, in three steps.</p>
+          <div className="flex flex-col md:flex-row gap-8 relative">
+            {/* connector line desktop */}
+            <div className="hidden md:block absolute top-8 left-[calc(16.67%+16px)] right-[calc(16.67%+16px)] h-px bg-[#E5E7EB]" />
+            {[
+              {
+                step: '01',
+                color: '#FFF0EE',
+                accent: '#FF5841',
+                title: 'Teacher creates a course',
+                desc: 'Set up a course and share the invite link. Students click it and join automatically — no manual enrolment.',
+                icon: (
+                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
+                    <circle cx="20" cy="20" r="20" fill="#FFF0EE"/>
+                    <rect x="10" y="12" width="20" height="16" rx="3" fill="#FF5841"/>
+                    <rect x="13" y="15" width="10" height="2" rx="1" fill="white" fillOpacity="0.8"/>
+                    <rect x="13" y="19" width="14" height="2" rx="1" fill="white" fillOpacity="0.6"/>
+                    <rect x="13" y="23" width="8" height="2" rx="1" fill="white" fillOpacity="0.6"/>
+                  </svg>
+                ),
+              },
+              {
+                step: '02',
+                color: '#F0FDFA',
+                accent: '#0E7490',
+                title: 'Students track tasks',
+                desc: 'Split work into tasks, assign to members, and move cards across To Do → In Progress → Done. Every change is logged.',
+                icon: (
+                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
+                    <circle cx="20" cy="20" r="20" fill="#F0FDFA"/>
+                    <rect x="10" y="12" width="7" height="16" rx="2" fill="#A5F3FC"/>
+                    <rect x="19" y="18" width="7" height="10" rx="2" fill="#0E7490"/>
+                    <rect x="28" y="15" width="2" height="13" rx="1" fill="#BAE6FD"/>
+                    <path d="M12 20l2 2 3-3" stroke="#0E7490" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+              },
+              {
+                step: '03',
+                color: '#DCFCE7',
+                accent: '#16A34A',
+                title: 'Export the PDF report',
+                desc: 'One click generates a contribution breakdown with timestamps and evidence. Hand it straight to your teacher.',
+                icon: (
+                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
+                    <circle cx="20" cy="20" r="20" fill="#DCFCE7"/>
+                    <rect x="13" y="10" width="14" height="20" rx="3" fill="#16A34A"/>
+                    <rect x="16" y="14" width="8" height="1.5" rx="0.75" fill="white" fillOpacity="0.8"/>
+                    <rect x="16" y="17" width="6" height="1.5" rx="0.75" fill="white" fillOpacity="0.6"/>
+                    <rect x="16" y="20" width="7" height="1.5" rx="0.75" fill="white" fillOpacity="0.6"/>
+                    <circle cx="27" cy="28" r="6" fill="#15803D"/>
+                    <path d="M24.5 28l2 2 3-3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+              },
+            ].map((step) => (
+              <div key={step.step} className="flex-1 flex flex-col items-center text-center">
+                <div className="relative mb-4 z-10">{step.icon}</div>
+                <span className="text-[11px] font-bold tracking-widest uppercase mb-1" style={{ color: step.accent }}>Step {step.step}</span>
+                <h3 className="text-[15px] font-bold mb-1.5">{step.title}</h3>
+                <p className="text-[13px] text-[#6B7280] leading-relaxed max-w-[220px]">{step.desc}</p>
               </div>
             ))}
           </div>

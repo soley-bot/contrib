@@ -30,7 +30,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-dvh bg-[#F9FAFB]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
-        <div className="text-xl font-extrabold text-[#FF5841] mb-8">Contrib</div>
+        <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 
         {sent ? (
           <>
@@ -57,7 +57,7 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@university.edu.kh"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                 />
               </div>
 
@@ -66,7 +66,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-12 bg-[#FF5841] hover:bg-[#E04030] text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
+                className="h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
               >
                 {loading ? 'Sending…' : 'Send reset link'}
               </button>

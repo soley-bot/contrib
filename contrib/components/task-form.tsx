@@ -59,12 +59,12 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Task title</label>
             <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Write executive summary"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Description <span className="font-normal text-[#A8A29E]">(optional)</span></label>
             <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} placeholder="Add details…"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none resize-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none resize-none" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Assign to</label>
@@ -76,11 +76,11 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
                   onClick={() => setAssignee(m.profile_id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
                     assignee === m.profile_id
-                      ? 'bg-[#FF5841] text-white border-[#FF5841]'
+                      ? 'bg-brand text-white border-brand'
                       : 'bg-white text-[#57534E] border-[#E7E5E4]'
                   }`}
                 >
-                  <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center flex-shrink-0 ${assignee === m.profile_id ? 'bg-white/20 text-white' : 'bg-[#FFF0EE] text-[#FF5841]'}`}>
+                  <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center flex-shrink-0 ${assignee === m.profile_id ? 'bg-white/20 text-white' : 'bg-brand-light text-brand'}`}>
                     {m.profile?.name?.slice(0, 2).toUpperCase() ?? '??'}
                   </span>
                   {m.profile?.name ?? m.profile_id}{m.profile_id === userId ? ' (me)' : ''}
@@ -91,12 +91,12 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
             <input type="date" value={due} onChange={(e) => setDue(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="pt-1 border-t border-[#E7E5E4]">
             <button type="submit" disabled={creating}
-              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+              className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
               {creating ? 'Adding…' : 'Add task'}
             </button>
           </div>

@@ -15,6 +15,7 @@ export default function CourseDetail() {
   const courseId = typeof router.query.id === 'string' ? router.query.id : undefined;
   const { user, profile, loading, refreshProfile } = useUser();
   const { course, groups, isOwner, loading: courseLoading, refresh } = useCourse(courseId, user?.id);
+  const [groupMembers, setGroupMembers] = useState<Record<string, GroupMember[]>>({});
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -34,8 +35,26 @@ export default function CourseDetail() {
   }, [course, isOwner, courseLoading, router]);
 
   useEffect(() => {
-    setInviteBase(`${window.location.origin}/join/course/`);
+    setInviteBase(`${window.location.origin}/join/`);
   }, []);
+
+  useEffect(() => {
+    if (groups.length === 0) return;
+    const ids = groups.map(({ group }) => group.id);
+    supabase
+      .from('group_members')
+      .select('*, profile:profiles(*)')
+      .in('group_id', ids)
+      .order('joined_at', { ascending: true })
+      .then(({ data }) => {
+        const map: Record<string, GroupMember[]> = {};
+        ids.forEach((id) => { map[id] = []; });
+        (data as GroupMember[] ?? []).forEach((m) => { map[m.group_id]?.push(m); });
+        setGroupMembers(map);
+      });
+  }, [groups]);
+
+  const courseInviteLink = course ? `${inviteBase}course/${course.invite_token}` : '';
 
   async function handleDownloadPdf(group: Group) {
     setDownloadingId(group.id);
@@ -59,16 +78,12 @@ export default function CourseDetail() {
       .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token, course_id: courseId })
       .select().single();
     if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
-    await supabase.from('group_members').insert({ group_id: group.id, profile_id: user!.id });
-    await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
     refresh();
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
-  if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh text-[#57534E]">Loading…</div>;
+  if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
   if (!course) return null;
-
-  const courseInviteLink = `${inviteBase}${course.invite_token}`;
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
@@ -77,13 +92,13 @@ export default function CourseDetail() {
       <div className="md:pl-[220px]">
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.push('/teacher')} className="text-[#A8A29E] hover:text-[#FF5841] text-sm transition-colors">My Courses</button>
+            <button onClick={() => router.push('/teacher')} className="text-[#A8A29E] hover:text-brand text-sm transition-colors">My Courses</button>
             <span className="text-[#A8A29E] text-sm">/</span>
             <span className="text-base font-semibold text-[#1C1917]">{course.name}</span>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-8 px-3 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New group
           </button>
@@ -91,13 +106,13 @@ export default function CourseDetail() {
 
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {/* Course invite link for students */}
-          <div className="mb-4 p-3 bg-[#FFF0EE] rounded-[8px] border border-[#FFD5CF]">
-            <p className="text-[11px] font-semibold text-[#FF5841] uppercase tracking-wide mb-1">Student invite link</p>
-            <p className="text-[12px] text-[#57534E] break-all font-mono">{inviteBase ? courseInviteLink : 'Loading…'}</p>
+          <div className="mb-4 p-3 bg-[#F0FDFA] rounded-[8px] border border-[#A5F3FC]">
+            <p className="text-[11px] font-semibold text-[#0E7490] uppercase tracking-wide mb-1">Student invite link</p>
+            <p className="text-[12px] text-[#0A5468] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#CFFAFE] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
             {inviteBase && (
               <button
                 onClick={() => navigator.clipboard.writeText(courseInviteLink)}
-                className="mt-1.5 text-[11px] text-[#FF5841] font-medium hover:underline"
+                className="mt-1.5 text-[11px] text-[#0E7490] font-medium hover:underline"
               >
                 Copy link
               </button>
@@ -105,9 +120,22 @@ export default function CourseDetail() {
           </div>
 
           {groups.length === 0 ? (
-            <div className="text-center py-16 text-[#A8A29E]">
-              <p className="text-4xl mb-3">👥</p>
-              <p className="text-sm">No groups yet. Create one or share the invite link with students.</p>
+            <div className="text-center py-12">
+              <svg viewBox="0 0 160 100" fill="none" className="w-36 mx-auto mb-4">
+                <ellipse cx="80" cy="92" rx="56" ry="6" fill="#F0FDFA"/>
+                {/* 3 person icons */}
+                <circle cx="40" cy="36" r="10" fill="#BAE6FD"/>
+                <rect x="28" y="52" width="24" height="16" rx="6" fill="#0E7490"/>
+                <circle cx="80" cy="30" r="12" fill="#A5F3FC"/>
+                <rect x="66" y="48" width="28" height="18" rx="7" fill="#0C6478"/>
+                <circle cx="120" cy="36" r="10" fill="#BAE6FD"/>
+                <rect x="108" y="52" width="24" height="16" rx="6" fill="#0E7490"/>
+                {/* plus bubble */}
+                <circle cx="80" cy="18" r="10" fill="#0E7490"/>
+                <path d="M80 13v10M75 18h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <p className="text-[15px] font-bold text-[#1C1917] mb-1">No groups yet</p>
+              <p className="text-sm text-[#A8A29E] mb-4 max-w-xs mx-auto">Share the invite link above or create groups manually.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
@@ -118,6 +146,8 @@ export default function CourseDetail() {
                   taskTotal={taskTotal}
                   taskDone={taskDone}
                   memberCount={memberCount}
+                  members={groupMembers[group.id]}
+                  inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
                 />
@@ -129,8 +159,8 @@ export default function CourseDetail() {
 
       <button
         onClick={() => setShowModal(true)}
-        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#FF5841] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 16px rgba(255,88,65,.4)' }}
+        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#0E7490] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+        style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
       >
         <IconPlus size={22} />
       </button>
@@ -150,22 +180,22 @@ export default function CourseDetail() {
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Group A"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
                 <button type="submit" disabled={creating}
-                  className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}
                 </button>
               </div>

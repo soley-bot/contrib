@@ -1,6 +1,14 @@
 import { IconCalendar, IconPencil, IconTrash } from '@/components/icons';
 import type { Task } from '@/types';
 
+function dueDateClass(dueDate: string | null | undefined): string {
+  if (!dueDate) return 'text-[#A8A29E]';
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  if (dueDate < today) return 'text-red-500 font-semibold';
+  if (dueDate <= tomorrow) return 'text-amber-500 font-medium';
+  return 'text-[#A8A29E]';
+}
 
 const STATUS_LABEL: Record<string, string> = {
   todo: 'To Do',
@@ -13,7 +21,7 @@ const STATUS_BADGE: Record<string, string> = {
   done: 'bg-[#DCFCE7] text-[#16A34A]',
 };
 const LEFT_BORDER: Record<string, string> = {
-  todo: 'border-l-[#FFCFC9]',
+  todo: 'border-l-brand-border',
   inprogress: 'border-l-[#D97706]',
   done: 'border-l-[#16A34A]',
 };
@@ -31,11 +39,14 @@ interface TaskCardProps {
 export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 0, onClick, onEdit, onDelete }: TaskCardProps) {
   const initials = task.assignee?.name?.slice(0, 2).toUpperCase() ?? '??';
   const canEdit = isLead || task.assignee_id === currentUserId;
+  const isDone = task.status === 'done';
+  const cardBg = isDone ? 'bg-[#F0FDF4]' : 'bg-white';
 
   return (
     <div
       onClick={() => onClick(task)}
-      className={`group bg-white border border-[#E7E5E4] border-l-4 ${LEFT_BORDER[task.status]} rounded-[10px] px-3.5 pt-3.5 pb-3.5 pl-[18px] mb-2.5 cursor-pointer active:shadow-md transition-shadow`}
+      className={`group ${cardBg} border border-[#E7E5E4] border-l-4 ${LEFT_BORDER[task.status]} rounded-[10px] px-3.5 pt-3.5 pb-3.5 pl-[18px] mb-2.5 cursor-pointer active:shadow-md transition-all`}
+      style={isDone ? { animation: 'done-flash 0.6s ease-out forwards' } : undefined}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-[14px] font-medium text-[#1C1917] mb-2 flex-1">{task.title}</p>
@@ -61,12 +72,12 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
         </div>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="w-5 h-5 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[9px] font-bold flex items-center justify-center flex-shrink-0">
+        <div className="w-5 h-5 rounded-full bg-brand-light text-brand text-[9px] font-bold flex items-center justify-center flex-shrink-0">
           {initials}
         </div>
         <span className="text-xs text-[#57534E]">{task.assignee?.name ?? '—'}</span>
         {task.due_date && (
-          <span className="flex items-center gap-1 text-xs text-[#A8A29E]">
+          <span className={`flex items-center gap-1 text-xs ${dueDateClass(task.due_date)}`}>
             <IconCalendar size={12} />
             {task.due_date}
           </span>

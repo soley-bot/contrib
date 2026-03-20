@@ -53,7 +53,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
           <button key={t.value} type="button"
             onClick={() => { setType(t.value); setContent(''); }}
             className={`flex-1 h-8 rounded-md text-[12px] font-medium border transition-colors ${
-              type === t.value ? 'bg-[#FF5841] text-white border-[#FF5841]' : 'bg-white text-[#57534E] border-[#E7E5E4]'
+              type === t.value ? 'bg-brand text-white border-brand' : 'bg-white text-[#57534E] border-[#E7E5E4]'
             }`}>
             {t.label}
           </button>
@@ -63,11 +63,11 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
       {activeType.isText ? (
         <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3}
           placeholder={activeType.placeholder}
-          className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-[14px] focus:border-[#FF5841] outline-none resize-none bg-white" />
+          className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none resize-none bg-white" />
       ) : (
         <input type="url" value={content} onChange={(e) => setContent(e.target.value)}
           placeholder={activeType.placeholder}
-          className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-[14px] focus:border-[#FF5841] outline-none bg-white" />
+          className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none bg-white" />
       )}
 
       {error && <p className="text-xs text-[#EF4444]">{error}</p>}
@@ -78,7 +78,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
           Cancel
         </button>
         <button type="submit" disabled={saving}
-          className="flex-1 h-9 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60">
+          className="flex-1 h-9 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60">
           {saving ? 'Saving…' : nextVersion === 1 ? 'Add evidence' : 'Upload version'}
         </button>
       </div>

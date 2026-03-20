@@ -56,7 +56,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
@@ -64,7 +64,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
@@ -75,7 +75,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
           <button
             onClick={handleSave}
             disabled={saving || !name.trim() || !subject.trim()}
-            className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full h-11 bg-brand hover:bg-brand-hover text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {saving ? 'Saving…' : <><IconCheck size={14} /> Save changes</>}
           </button>
