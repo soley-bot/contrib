@@ -27,6 +27,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading && !user) router.replace('/signup');
+    if (!loading && user && !profile) router.replace('/onboarding');
     if (!loading && profile && profile.role === 'teacher') router.replace('/teacher');
   }, [user, profile, loading, router]);
 
