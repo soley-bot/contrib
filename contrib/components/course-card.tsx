@@ -3,10 +3,11 @@ import type { Course } from '@/types';
 interface CourseCardProps {
   course: Course;
   groupCount: number;
+  memberCount?: number;
   onClick: () => void;
 }
 
-export default function CourseCard({ course, groupCount, onClick }: CourseCardProps) {
+export default function CourseCard({ course, groupCount, memberCount, onClick }: CourseCardProps) {
   return (
     <div
       onClick={onClick}
@@ -20,6 +21,7 @@ export default function CourseCard({ course, groupCount, onClick }: CourseCardPr
         <p className="text-[15px] font-semibold text-[#1C1917] truncate">{course.name}</p>
         <p className="text-xs text-[#A8A29E] mt-0.5">
           {course.subject} · {groupCount} {groupCount === 1 ? 'group' : 'groups'}
+          {memberCount !== undefined && <> · {memberCount} {memberCount === 1 ? 'student' : 'students'}</>}
         </p>
       </div>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#A8A29E] flex-shrink-0">

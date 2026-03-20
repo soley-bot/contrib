@@ -14,8 +14,19 @@ interface CourseGroupRowProps {
   onClick?: () => void;
 }
 
+function formatDueDate(dateStr: string): string {
+  const date = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  const yearSuffix = date.getFullYear() !== now.getFullYear() ? `, ${date.getFullYear()}` : '';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + yearSuffix;
+}
+
 export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isOverdue = !!(group.due_date && new Date(group.due_date + 'T00:00:00') < today && taskDone < taskTotal);
 
   function handleCopy() {
     if (!inviteLink) return;
@@ -36,9 +47,15 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
             {group.name.slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold text-[#1C1917] truncate">{group.name}</p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="text-[14px] font-semibold text-[#1C1917] truncate">{group.name}</p>
+              {isOverdue && (
+                <span className="flex-shrink-0 text-[10px] font-semibold bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full border border-red-100">Overdue</span>
+              )}
+            </div>
             <p className="text-[11px] text-[#A8A29E] mt-0.5">
               {memberCount} {memberCount === 1 ? 'member' : 'members'} · {taskDone}/{taskTotal} tasks done
+              {group.due_date && <> · Due {formatDueDate(group.due_date)}</>}
             </p>
           </div>
         </div>
