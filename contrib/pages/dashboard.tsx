@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Nav from '@/components/nav';
 import { IconPlus, IconChevronRight } from '@/components/icons';
@@ -6,6 +6,7 @@ import { useUser } from '@/hooks/use-user';
 import { useGroups } from '@/hooks/use-groups';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
+import { formatDueDate } from '@/lib/date';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -24,14 +25,23 @@ export default function Dashboard() {
   const [dueDate, setDueDate] = useState('');
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
+  const courseTokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (router.query.newGroup === '1') {
+      setShowModal(true);
+      courseTokenRef.current = typeof router.query.courseToken === 'string' ? router.query.courseToken : null;
+    }
+  }, [router.isReady, router.query.newGroup, router.query.courseToken]);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/signup');
+    if (!loading && user && !profile) router.replace('/onboarding');
     if (!loading && profile && profile.role === 'teacher') router.replace('/teacher');
   }, [user, profile, loading, router]);
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleCreate() {
     setFormError('');
     if (!groupName.trim() || !subject.trim()) {
       setFormError('Group name and subject are required.');
@@ -50,6 +60,18 @@ export default function Dashboard() {
     if (joinError) { setFormError(joinError.message); setCreating(false); return; }
 
     await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
+
+    if (courseTokenRef.current) {
+      const { data: course } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('invite_token', courseTokenRef.current)
+        .single();
+      if (course) {
+        await supabase.from('groups').update({ course_id: course.id }).eq('id', group.id);
+      }
+      courseTokenRef.current = null;
+    }
 
     refreshGroups();
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
@@ -132,7 +154,7 @@ export default function Dashboard() {
                 <div
                   key={group.id}
                   onClick={() => router.push(`/group/${group.id}`)}
-                  className="bg-white border border-[#E7E5E4] rounded-[10px] p-4 flex items-center gap-3.5 cursor-pointer hover:shadow-md transition-shadow"
+                  className="bg-white border border-[#E7E5E4] rounded-[10px] p-4 flex items-center gap-3.5 cursor-pointer hover:border-brand transition-colors"
                   style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}
                 >
                   <div className="w-11 h-11 rounded-[10px] bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">
@@ -141,7 +163,7 @@ export default function Dashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-semibold text-[#1C1917] truncate">{group.name}</p>
                     <p className="text-xs text-[#A8A29E] mt-0.5">
-                      {group.subject}{group.due_date ? ` · Due ${group.due_date}` : ''}
+                      {group.subject}{group.due_date ? ` · Due ${formatDueDate(group.due_date)}` : ''}
                     </p>
                   </div>
                   <IconChevronRight size={16} />
@@ -171,9 +193,11 @@ export default function Dashboard() {
             <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
               <h2 className="text-base font-semibold text-[#1C1917]">New Group</h2>
-              <button onClick={() => setShowModal(false)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
+              <button onClick={() => setShowModal(false)} className="p-1 text-[#57534E] hover:text-[#1C1917] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </button>
             </div>
-            <form onSubmit={handleCreate} className="p-5 flex flex-col gap-3.5">
+            <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
@@ -191,12 +215,12 @@ export default function Dashboard() {
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
-                <button type="submit" disabled={creating}
+                <button onClick={handleCreate} disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

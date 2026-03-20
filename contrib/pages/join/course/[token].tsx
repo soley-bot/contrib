@@ -95,7 +95,13 @@ export default function JoinCoursePage() {
             <p className="text-sm text-[#57534E] mb-4">
               You need to be the lead of an unlinked group to connect it to this course.
             </p>
-            <button onClick={() => router.push('/dashboard')} className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors">
+            <button
+              onClick={() => router.push(`/dashboard?newGroup=1&courseToken=${token}`)}
+              className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors mb-2"
+            >
+              Create a new group
+            </button>
+            <button onClick={() => router.push('/dashboard')} className="w-full h-11 border border-[#E7E5E4] text-[#57534E] text-sm font-medium rounded-md hover:bg-[#F5F5F4] transition-colors">
               Go to dashboard
             </button>
           </div>

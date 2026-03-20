@@ -6,6 +6,7 @@ interface UseEvaluationSessionResult {
   session: EvaluationSession | null;
   loading: boolean;
   openEvaluation: (groupId: string, userId: string) => Promise<void>;
+  closeEvaluation: (groupId: string) => Promise<void>;
   refresh: () => void;
 }
 
@@ -37,5 +38,11 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
     setTick((t) => t + 1);
   }
 
-  return { session, loading, openEvaluation, refresh: () => setTick((t) => t + 1) };
+  async function closeEvaluation(groupId: string) {
+    await supabase.from('evaluations').delete().eq('group_id', groupId);
+    await supabase.from('evaluation_sessions').delete().eq('group_id', groupId);
+    setTick((t) => t + 1);
+  }
+
+  return { session, loading, openEvaluation, closeEvaluation, refresh: () => setTick((t) => t + 1) };
 }

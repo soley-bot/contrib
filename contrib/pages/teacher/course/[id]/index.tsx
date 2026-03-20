@@ -8,7 +8,7 @@ import { useCourse } from '@/hooks/use-course';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { generateReport } from '@/lib/pdf';
-import type { Group, GroupMember, Task, ActivityLog } from '@/types';
+import type { Group, GroupMember, Task, ActivityLog, Evidence, EvaluationSummary } from '@/types';
 
 export default function CourseDetail() {
   const router = useRouter();
@@ -63,12 +63,23 @@ export default function CourseDetail() {
       supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
     ]);
-    generateReport(group, (membersData as GroupMember[]) ?? [], (tasksData as Task[]) ?? [], (activityData as ActivityLog[]) ?? []);
+    const taskIds = ((tasksData as Task[]) ?? []).map((t) => t.id);
+    const [{ data: evidenceData }, { data: evalData }] = await Promise.all([
+      taskIds.length > 0
+        ? supabase.from('evidence').select('*, uploader:profiles(name)').in('task_id', taskIds)
+        : Promise.resolve({ data: [] }),
+      supabase.from('evaluation_summaries').select('*').eq('group_id', group.id),
+    ]);
+    const evidenceByTask: Record<string, Evidence[]> = {};
+    ((evidenceData as Evidence[]) ?? []).forEach((e) => {
+      if (!evidenceByTask[e.task_id]) evidenceByTask[e.task_id] = [];
+      evidenceByTask[e.task_id].push(e);
+    });
+    generateReport(group, (membersData as GroupMember[]) ?? [], (tasksData as Task[]) ?? [], (activityData as ActivityLog[]) ?? [], evidenceByTask, (evalData as EvaluationSummary[]) ?? []);
     setDownloadingId(null);
   }
 
-  async function handleCreateGroup(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleCreateGroup() {
     setFormError('');
     if (!groupName.trim() || !subject.trim()) { setFormError('Group name and subject are required.'); return; }
     setCreating(true);
@@ -82,7 +93,16 @@ export default function CourseDetail() {
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
-  if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
+  const totalMembers = groups.reduce((s, g) => s + g.memberCount, 0);
+  const totalTasks = groups.reduce((s, g) => s + g.taskTotal, 0);
+  const totalDone = groups.reduce((s, g) => s + g.taskDone, 0);
+  const completionPct = totalTasks > 0 ? Math.round((totalDone / totalTasks) * 100) : 0;
+  const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
+  const overdueCount = groups.filter(({ group, taskDone: done, taskTotal: total }) =>
+    group.due_date && new Date(group.due_date + 'T00:00:00') < todayDate && done < total
+  ).length;
+
+  if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   if (!course) return null;
 
   return (
@@ -98,7 +118,7 @@ export default function CourseDetail() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New group
           </button>
@@ -118,6 +138,23 @@ export default function CourseDetail() {
               </button>
             )}
           </div>
+
+          {groups.length > 0 && (
+            <div className="flex gap-2.5 mb-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+              {[
+                { label: 'Groups',     value: groups.length,  color: '' },
+                { label: 'Students',   value: totalMembers,   color: '' },
+                { label: 'Completion', value: `${completionPct}%`, color: completionPct === 100 ? '#16A34A' : '' },
+                ...(overdueCount > 0 ? [{ label: 'Overdue', value: overdueCount, color: '#DC2626' }] : []),
+              ].map((s) => (
+                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E7E5E4] rounded-[10px] px-3.5 py-2.5 min-w-[76px]"
+                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
+                  <p className="text-lg font-bold" style={{ color: s.color || '#1C1917' }}>{s.value}</p>
+                  <p className="text-[11px] text-[#A8A29E] mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           {groups.length === 0 ? (
             <div className="text-center py-12">
@@ -150,6 +187,7 @@ export default function CourseDetail() {
                   inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
+                  onClick={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
                 />
               ))}
             </div>
@@ -159,7 +197,7 @@ export default function CourseDetail() {
 
       <button
         onClick={() => setShowModal(true)}
-        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#0E7490] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
         style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
       >
         <IconPlus size={22} />
@@ -174,9 +212,11 @@ export default function CourseDetail() {
             <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
               <h2 className="text-base font-semibold text-[#1C1917]">New Group</h2>
-              <button onClick={() => setShowModal(false)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
+              <button onClick={() => setShowModal(false)} className="p-1 text-[#57534E] hover:text-[#1C1917] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </button>
             </div>
-            <form onSubmit={handleCreateGroup} className="p-5 flex flex-col gap-3.5">
+            <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Group A"
@@ -194,12 +234,12 @@ export default function CourseDetail() {
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
-                <button type="submit" disabled={creating}
-                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                <button onClick={handleCreateGroup} disabled={creating}
+                  className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
