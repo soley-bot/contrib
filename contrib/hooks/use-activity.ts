@@ -17,6 +17,21 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
     if (!groupId) { setLoading(false); return; }
     setLoading(true);
     fetchActivity(groupId).finally(() => setLoading(false));
+
+    // NOTE: Supabase realtime requires the 'activity_log' table to have realtime enabled in the Supabase dashboard.
+    const channel = supabase
+      .channel(`activity:${groupId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'activity_log',
+        filter: `group_id=eq.${groupId}`,
+      }, () => {
+        fetchActivity(groupId);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [groupId, tick]);
 
   async function fetchActivity(id: string) {

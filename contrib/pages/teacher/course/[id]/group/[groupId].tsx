@@ -46,7 +46,7 @@ export default function TeacherGroupDetail() {
 
   useEffect(() => {
     if (!userLoading && !user) { router.replace('/login'); return; }
-    if (!userLoading && profile && profile.role !== 'teacher') router.replace('/dashboard');
+    if (!userLoading && user && (!profile || profile.role !== 'teacher')) router.replace('/dashboard');
   }, [user, profile, userLoading, router]);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function TeacherGroupDetail() {
   }
 
   if (userLoading || groupLoading) {
-    return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
+    return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
 
   if (!group || !isOwner) return null;
@@ -125,7 +125,7 @@ export default function TeacherGroupDetail() {
           {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
-                tab === t ? 'text-[#0E7490] border-[#0E7490]' : 'text-[#A8A29E] border-transparent'
+                tab === t ? 'text-brand border-brand' : 'text-[#A8A29E] border-transparent'
               }`}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -279,7 +279,7 @@ export default function TeacherGroupDetail() {
         ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((item) => (
           <button key={item.id} onClick={() => setTab(item.id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
-              tab === item.id ? 'text-[#0E7490]' : 'text-[#A8A29E]'
+              tab === item.id ? 'text-brand' : 'text-[#A8A29E]'
             }`}
           >
             {item.icon}

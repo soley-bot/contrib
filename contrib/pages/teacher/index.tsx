@@ -69,8 +69,7 @@ export default function TeacherDashboard() {
     setMemberCounts(mCounts);
   }
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleCreate() {
     setFormError('');
     if (!courseName.trim() || !subject.trim()) { setFormError('Course name and subject are required.'); return; }
     const course = await createCourse({ name: courseName, subject, teacherId: user!.id });
@@ -123,7 +122,7 @@ export default function TeacherDashboard() {
           <span className="text-base font-semibold text-[#1C1917]">My Courses</span>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New course
           </button>
@@ -151,7 +150,7 @@ export default function TeacherDashboard() {
               </svg>
               <p className="text-[16px] font-bold text-[#1C1917] mb-1.5">No courses yet</p>
               <p className="text-sm text-[#A8A29E] mb-6 max-w-xs mx-auto">Create your first course and share the invite link with your students.</p>
-              <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[14px] font-medium rounded-md transition-colors">
+              <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
                 <IconPlus size={16} /> Create your first course
               </button>
             </div>
@@ -175,7 +174,7 @@ export default function TeacherDashboard() {
 
       <button
         onClick={() => setShowModal(true)}
-        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#0E7490] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
         style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
       >
         <IconPlus size={22} />
@@ -251,9 +250,11 @@ export default function TeacherDashboard() {
             <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
               <h2 className="text-base font-semibold text-[#1C1917]">New Course</h2>
-              <button onClick={() => setShowModal(false)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
+              <button onClick={() => setShowModal(false)} className="p-1 text-[#57534E] hover:text-[#1C1917] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </button>
             </div>
-            <form onSubmit={handleCreate} className="p-5 flex flex-col gap-3.5">
+            <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
@@ -266,12 +267,12 @@ export default function TeacherDashboard() {
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
-                <button type="submit" disabled={creating}
-                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                <button onClick={handleCreate} disabled={creating}
+                  className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create course'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

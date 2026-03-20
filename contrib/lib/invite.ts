@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-
 export function generateInviteToken(): string {
-  return crypto.randomBytes(32).toString('hex');
+  const bytes = new Uint8Array(9);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 12);
 }

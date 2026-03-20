@@ -9,7 +9,7 @@ export default function JoinPage() {
   const { token } = router.query;
   const { user, loading: userLoading } = useUser();
   const [group, setGroup] = useState<Group | null>(null);
-  const [status, setStatus] = useState<'loading' | 'found' | 'not-found' | 'joining' | 'joined' | 'already' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'found' | 'not-found' | 'joining' | 'joined' | 'already' | 'full' | 'error'>('loading');
   const [joinError, setJoinError] = useState('');
 
   useEffect(() => {
@@ -42,6 +42,15 @@ export default function JoinPage() {
   async function handleJoin() {
     if (!group || !user) return;
     setStatus('joining');
+
+    const { count } = await supabase
+      .from('group_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', group.id);
+    if ((count ?? 0) >= 6) {
+      setStatus('full');
+      return;
+    }
 
     const { error: insertError } = await supabase.from('group_members').insert({
       group_id: group.id,
@@ -99,6 +108,22 @@ export default function JoinPage() {
         <p className="text-sm text-[#6B7280]">{group.name}</p>
         <button onClick={() => router.push(`/group/${group.id}`)} className="mt-2 h-10 px-5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover">
           Open group
+        </button>
+      </div>
+    );
+  }
+
+  if (status === 'full') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-dvh gap-3 px-5 text-center">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="text-[#A8A29E]">
+          <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
+          <path d="M16 24h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+        </svg>
+        <p className="text-lg font-semibold text-[#1C1917]">This group is full</p>
+        <p className="text-sm text-[#6B7280]">This group already has 6 members and cannot accept new members.</p>
+        <button onClick={() => router.push('/dashboard')} className="mt-2 h-10 px-5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover">
+          Back to dashboard
         </button>
       </div>
     );

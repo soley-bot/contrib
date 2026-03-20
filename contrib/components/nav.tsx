@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import EditProfileModal from '@/components/edit-profile-modal';
-import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers } from '@/components/icons';
+import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers, IconCheck } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
 import type { Profile, Group, UserRole } from '@/types';
 
@@ -127,9 +127,10 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
               Current Group
             </div>
             {[
-              { id: 'tasks',    label: 'Tasks',    icon: <IconBoard size={16} />    },
-              { id: 'activity', label: 'Activity', icon: <IconActivity size={16} /> },
-              { id: 'members',  label: 'Members',  icon: <IconUsers size={16} />    },
+              { id: 'tasks',      label: 'Tasks',      icon: <IconBoard size={16} />    },
+              { id: 'activity',   label: 'Activity',   icon: <IconActivity size={16} /> },
+              { id: 'members',    label: 'Members',    icon: <IconUsers size={16} />    },
+              { id: 'evaluation', label: 'Evaluation', icon: <IconCheck size={16} />    },
             ].map((item) => (
               <button
                 key={item.id}
@@ -148,6 +149,15 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
         )}
 
         <div className="mt-auto">
+          <button
+            onClick={() => router.push('/profile')}
+            className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
+              router.pathname === '/profile' ? 'bg-brand-light text-brand' : 'text-[#57534E] hover:bg-[#F5F5F4]'
+            }`}
+          >
+            <IconUsers size={16} />
+            Profile
+          </button>
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
