@@ -37,7 +37,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
 
   return (
     <div
-      className={`bg-white border border-[#E7E5E4] rounded-[10px] p-4 ${onClick ? 'cursor-pointer hover:border-brand hover:shadow-sm transition-all' : ''}`}
+      className={`bg-white border border-[#E7E5E4] rounded-[10px] p-4 ${onClick ? 'cursor-pointer hover:border-[#0E7490] hover:shadow-sm transition-all' : ''}`}
       style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}
       onClick={onClick}
     >

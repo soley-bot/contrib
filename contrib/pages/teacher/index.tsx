@@ -22,7 +22,7 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
-    if (!loading && profile && profile.role !== 'teacher') router.replace('/dashboard');
+    if (!loading && user && (!profile || profile.role !== 'teacher')) router.replace('/dashboard');
   }, [user, profile, loading, router]);
 
   useEffect(() => {
