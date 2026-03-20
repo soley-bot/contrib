@@ -82,6 +82,15 @@ export default function CourseDetail() {
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
+  const totalMembers = groups.reduce((s, g) => s + g.memberCount, 0);
+  const totalTasks = groups.reduce((s, g) => s + g.taskTotal, 0);
+  const totalDone = groups.reduce((s, g) => s + g.taskDone, 0);
+  const completionPct = totalTasks > 0 ? Math.round((totalDone / totalTasks) * 100) : 0;
+  const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
+  const overdueCount = groups.filter(({ group, taskDone: done, taskTotal: total }) =>
+    group.due_date && new Date(group.due_date + 'T00:00:00') < todayDate && done < total
+  ).length;
+
   if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
   if (!course) return null;
 
@@ -119,6 +128,23 @@ export default function CourseDetail() {
             )}
           </div>
 
+          {groups.length > 0 && (
+            <div className="flex gap-2.5 mb-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+              {[
+                { label: 'Groups',     value: groups.length,  color: '' },
+                { label: 'Students',   value: totalMembers,   color: '' },
+                { label: 'Completion', value: `${completionPct}%`, color: completionPct === 100 ? '#16A34A' : '' },
+                ...(overdueCount > 0 ? [{ label: 'Overdue', value: overdueCount, color: '#DC2626' }] : []),
+              ].map((s) => (
+                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E7E5E4] rounded-[10px] px-3.5 py-2.5 min-w-[76px]"
+                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
+                  <p className="text-lg font-bold" style={{ color: s.color || '#1C1917' }}>{s.value}</p>
+                  <p className="text-[11px] text-[#A8A29E] mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           {groups.length === 0 ? (
             <div className="text-center py-12">
               <svg viewBox="0 0 160 100" fill="none" className="w-36 mx-auto mb-4">
@@ -150,6 +176,7 @@ export default function CourseDetail() {
                   inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
+                  onClick={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
                 />
               ))}
             </div>

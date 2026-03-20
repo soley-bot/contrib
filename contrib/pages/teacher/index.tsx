@@ -14,6 +14,7 @@ export default function TeacherDashboard() {
   const { courses, refresh: refreshCourses } = useCourses(user?.id);
   const { createCourse, creating } = useCreateCourse();
   const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
+  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false);
   const [courseName, setCourseName] = useState('');
   const [subject, setSubject] = useState('');
@@ -30,16 +31,28 @@ export default function TeacherDashboard() {
   }, [courses]);
 
   async function fetchGroupCounts(courseIds: string[]) {
-    const { data } = await supabase
+    const { data: groupData } = await supabase
       .from('groups')
-      .select('course_id')
+      .select('id, course_id')
       .in('course_id', courseIds);
+    const groups = (groupData ?? []) as { id: string; course_id: string }[];
     const counts: Record<string, number> = {};
     courseIds.forEach((id) => { counts[id] = 0; });
-    (data ?? []).forEach((row: { course_id: string }) => {
-      counts[row.course_id] = (counts[row.course_id] ?? 0) + 1;
-    });
+    groups.forEach((row) => { counts[row.course_id] = (counts[row.course_id] ?? 0) + 1; });
     setGroupCounts(counts);
+
+    const groupIds = groups.map((g) => g.id);
+    if (groupIds.length === 0) return;
+    const { data: memberData } = await supabase.from('group_members').select('group_id').in('group_id', groupIds);
+    const groupCourseMap: Record<string, string> = {};
+    groups.forEach((g) => { groupCourseMap[g.id] = g.course_id; });
+    const mCounts: Record<string, number> = {};
+    courseIds.forEach((id) => { mCounts[id] = 0; });
+    (memberData ?? []).forEach((row: { group_id: string }) => {
+      const cid = groupCourseMap[row.group_id];
+      if (cid) mCounts[cid] = (mCounts[cid] ?? 0) + 1;
+    });
+    setMemberCounts(mCounts);
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -108,6 +121,7 @@ export default function TeacherDashboard() {
                   key={course.id}
                   course={course}
                   groupCount={groupCounts[course.id] ?? 0}
+                  memberCount={memberCounts[course.id]}
                   onClick={() => router.push(`/teacher/course/${course.id}`)}
                 />
               ))}
