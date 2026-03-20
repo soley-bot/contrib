@@ -17,7 +17,7 @@ export default function RoleToggle({ value, onChange }: RoleToggleProps) {
             onClick={() => onChange(role)}
             className={`flex-1 py-2.5 text-[14px] font-medium transition-colors capitalize ${
               value === role
-                ? 'bg-[#FF5841] text-white'
+                ? 'bg-brand text-white'
                 : 'text-[#57534E] hover:bg-[#F5F5F4]'
             }`}
           >

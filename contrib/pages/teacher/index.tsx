@@ -64,7 +64,7 @@ export default function TeacherDashboard() {
           <span className="text-base font-semibold text-[#1C1917]">My Courses</span>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New course
           </button>
@@ -93,8 +93,8 @@ export default function TeacherDashboard() {
 
       <button
         onClick={() => setShowModal(true)}
-        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#FF5841] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 16px rgba(255,88,65,.4)' }}
+        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+        style={{ boxShadow: '0 4px 16px rgba(37,99,235,.3)' }}
       >
         <IconPlus size={22} />
       </button>
@@ -114,17 +114,17 @@ export default function TeacherDashboard() {
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white" />
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
                 <button type="submit" disabled={creating}
-                  className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create course'}
                 </button>
               </div>

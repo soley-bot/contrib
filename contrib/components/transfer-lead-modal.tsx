@@ -68,7 +68,7 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
           <select
             value={newLeadId}
             onChange={(e) => setNewLeadId(e.target.value)}
-            className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-[#FF5841] outline-none bg-white"
+            className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-brand outline-none bg-white"
           >
             {others.map((m) => (
               <option key={m.profile_id} value={m.profile_id}>{m.profile?.name ?? m.profile_id}</option>
@@ -80,7 +80,7 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
           <button
             onClick={handleTransfer}
             disabled={saving || !newLeadId}
-            className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full h-11 bg-brand hover:bg-brand-hover text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {saving ? 'Transferring…' : <><IconCheck size={14} /> Transfer lead</>}
           </button>

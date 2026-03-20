@@ -68,7 +68,7 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
           <div>
             <p className="text-[13px] font-medium text-[#57534E] mb-2">Assignee</p>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[11px] font-bold flex items-center justify-center">
+              <div className="w-7 h-7 rounded-full bg-brand-light text-brand text-[11px] font-bold flex items-center justify-center">
                 {task.assignee?.name?.slice(0, 2).toUpperCase() ?? '??'}
               </div>
               <span className="text-sm text-[#1C1917]">{task.assignee?.name ?? '—'}</span>
@@ -86,7 +86,7 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
             <p className="text-[13px] font-medium text-[#57534E] mb-1.5">Status</p>
             <select value={status} onChange={(e) => setStatus(e.target.value as TaskStatus)}
               disabled={!canChangeStatus}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-[#FF5841] outline-none disabled:opacity-50 disabled:cursor-not-allowed bg-white">
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-brand outline-none disabled:opacity-50 disabled:cursor-not-allowed bg-white">
               {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
@@ -97,7 +97,7 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
                 Evidence {hasEvidence && <span className="font-normal text-[#16A34A]">({evidence.length} version{evidence.length !== 1 ? 's' : ''})</span>}
               </p>
               {!showForm && (
-                <button onClick={() => setShowForm(true)} className="text-[12px] font-medium text-[#FF5841]">
+                <button onClick={() => setShowForm(true)} className="text-[12px] font-medium text-brand">
                   {hasEvidence ? '+ New version' : '+ Add'}
                 </button>
               )}
@@ -121,7 +121,7 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
         <div className="px-5 py-3 border-t border-[#E7E5E4]">
           {canChangeStatus ? (
             <button onClick={handleSave} disabled={saving}
-              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+              className="w-full h-11 bg-brand hover:bg-brand-hover text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
               {saving ? 'Saving…' : <><IconCheck size={14} /> Save changes</>}
             </button>
           ) : (

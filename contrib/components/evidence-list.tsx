@@ -2,8 +2,8 @@ import type { Evidence, EvidenceType } from '@/types';
 
 const TYPE_LABEL: Record<EvidenceType, string> = { file: 'File', link: 'Link', note: 'Note' };
 const TYPE_COLOR: Record<EvidenceType, string> = {
-  file: 'bg-[#EFF6FF] text-[#3B82F6]',
-  link: 'bg-[#FFF0EE] text-[#FF5841]',
+  file: 'bg-brand-light text-brand',
+  link: 'bg-brand-light text-brand',
   note: 'bg-[#F0FDF4] text-[#16A34A]',
 };
 
@@ -31,7 +31,7 @@ export default function EvidenceList({ evidence }: EvidenceListProps) {
             <p className="text-[13px] text-[#1C1917] leading-relaxed">{e.content}</p>
           ) : (
             <a href={e.content} target="_blank" rel="noopener noreferrer"
-              className="text-[13px] text-[#FF5841] underline break-all">
+              className="text-[13px] text-brand underline break-all">
               {e.content}
             </a>
           )}

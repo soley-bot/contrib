@@ -60,7 +60,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-dvh bg-[#F9FAFB]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
-        <div className="text-xl font-extrabold text-[#FF5841] mb-8">Contrib</div>
+        <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
         <h1 className="text-[22px] font-bold mb-1">Almost there!</h1>
         <p className="text-sm text-[#57534E] mb-7">Tell us a bit about yourself to get started.</p>
 
@@ -72,7 +72,7 @@ export default function Onboarding() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Sophea Chea"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -82,7 +82,7 @@ export default function Onboarding() {
               value={university}
               onChange={(e) => setUniversity(e.target.value)}
               placeholder="Royal University of Phnom Penh"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -92,7 +92,7 @@ export default function Onboarding() {
               value={faculty}
               onChange={(e) => setFaculty(e.target.value)}
               placeholder="Computer Science"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -100,7 +100,7 @@ export default function Onboarding() {
             <select
               value={yearOfStudy}
               onChange={(e) => setYearOfStudy(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none bg-white"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             >
               <option value="">Select year…</option>
               {YEAR_OPTIONS.map((y) => (
@@ -114,7 +114,7 @@ export default function Onboarding() {
           <button
             type="submit"
             disabled={loading}
-            className="h-12 bg-[#FF5841] hover:bg-[#E04030] text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
+            className="h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
           >
             {loading ? 'Saving…' : 'Get started'}
           </button>

@@ -38,8 +38,8 @@ const MR  = 16;    // margin right
 const CW  = PW - ML - MR;  // 178mm content width
 
 // Brand colours (used sparingly)
-const ORANGE  = [255, 88, 65]   as const;  // #FF5841
-const ORANGE_LIGHT = [255, 240, 238] as const;  // #FFF0EE
+const BRAND   = [37, 99, 235]   as const;  // #2563EB
+const BRAND_LIGHT = [239, 246, 255] as const;  // #EFF6FF
 const GRAY_DARK   = [30, 30, 30]  as const;
 const GRAY_MID    = [90, 90, 90]  as const;
 const GRAY_LIGHT  = [160, 160, 160] as const;
@@ -54,11 +54,11 @@ function setColor(doc: jsPDF, rgb: readonly [number, number, number]) {
 
 function sectionHeader(doc: jsPDF, label: string, y: number): number {
   // Light orange pill behind label
-  doc.setFillColor(ORANGE_LIGHT[0], ORANGE_LIGHT[1], ORANGE_LIGHT[2]);
+  doc.setFillColor(BRAND_LIGHT[0], BRAND_LIGHT[1], BRAND_LIGHT[2]);
   doc.roundedRect(ML, y - 4.5, CW, 8, 1.5, 1.5, 'F');
 
   // Small orange square accent
-  doc.setFillColor(ORANGE[0], ORANGE[1], ORANGE[2]);
+  doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
   doc.rect(ML, y - 3.5, 2.5, 6, 'F');
 
   doc.setFont('helvetica', 'bold');
@@ -91,7 +91,7 @@ export function generateReport(
   // ── Header ─────────────────────────────────────────────────────────────────
 
   // Orange top bar
-  doc.setFillColor(ORANGE[0], ORANGE[1], ORANGE[2]);
+  doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
   doc.rect(0, 0, PW, 10, 'F');
 
   // Title
@@ -209,7 +209,7 @@ export function generateReport(
     doc.text(String(doneTasks.length), xDone, ty, { align: 'right' });
 
     if (pct === 100) {
-      doc.setTextColor(ORANGE[0], ORANGE[1], ORANGE[2]);
+      doc.setTextColor(BRAND[0], BRAND[1], BRAND[2]);
     } else {
       setColor(doc, GRAY_DARK);
     }
@@ -270,7 +270,7 @@ export function generateReport(
         ({ y } = checkPage(doc, y, 10));
 
         // Orange bullet + title
-        doc.setFillColor(ORANGE[0], ORANGE[1], ORANGE[2]);
+        doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
         doc.circle(ML + 3, y - 1, 0.8, 'F');
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8.5);
@@ -361,7 +361,7 @@ export function generateReport(
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     // Bottom orange line
-    doc.setFillColor(ORANGE[0], ORANGE[1], ORANGE[2]);
+    doc.setFillColor(BRAND[0], BRAND[1], BRAND[2]);
     doc.rect(0, PH - 8, PW, 8, 'F');
     // Footer text
     doc.setFont('helvetica', 'normal');

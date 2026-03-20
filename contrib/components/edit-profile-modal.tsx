@@ -48,12 +48,12 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">Name</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#57534E]">University</label>
             <input type="text" value={university} onChange={(e) => setUniversity(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-[#FF5841] outline-none" />
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           <RoleToggle value={role} onChange={setRole} />
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -63,7 +63,7 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
               Cancel
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 h-11 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+              className="flex-1 h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>

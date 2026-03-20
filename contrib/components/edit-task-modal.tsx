@@ -75,7 +75,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
@@ -86,7 +86,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none resize-none"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none resize-none"
             />
           </div>
           <div>
@@ -94,7 +94,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             <select
               value={assigneeId}
               onChange={(e) => setAssigneeId(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-[#FF5841] outline-none bg-white"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-brand outline-none bg-white"
             >
               {members.map((m) => (
                 <option key={m.profile_id} value={m.profile_id}>{m.profile?.name ?? m.profile_id}</option>
@@ -109,7 +109,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-[#FF5841] outline-none"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
           <button
             onClick={handleSave}
             disabled={saving || !title.trim()}
-            className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full h-11 bg-brand hover:bg-brand-hover text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {saving ? 'Saving…' : <><IconCheck size={14} /> Save changes</>}
           </button>
