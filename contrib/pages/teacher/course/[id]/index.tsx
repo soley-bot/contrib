@@ -123,14 +123,12 @@ export default function CourseDetail() {
             <div className="text-center py-12">
               <svg viewBox="0 0 160 100" fill="none" className="w-36 mx-auto mb-4">
                 <ellipse cx="80" cy="92" rx="56" ry="6" fill="#F0FDFA"/>
-                {/* 3 person icons */}
                 <circle cx="40" cy="36" r="10" fill="#BAE6FD"/>
                 <rect x="28" y="52" width="24" height="16" rx="6" fill="#0E7490"/>
                 <circle cx="80" cy="30" r="12" fill="#A5F3FC"/>
                 <rect x="66" y="48" width="28" height="18" rx="7" fill="#0C6478"/>
                 <circle cx="120" cy="36" r="10" fill="#BAE6FD"/>
                 <rect x="108" y="52" width="24" height="16" rx="6" fill="#0E7490"/>
-                {/* plus bubble */}
                 <circle cx="80" cy="18" r="10" fill="#0E7490"/>
                 <path d="M80 13v10M75 18h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               </svg>
@@ -150,6 +148,7 @@ export default function CourseDetail() {
                   inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
                   onDownloadPdf={() => handleDownloadPdf(group)}
                   downloading={downloadingId === group.id}
+                  onViewGroup={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
                 />
               ))}
             </div>

@@ -11,9 +11,10 @@ interface CourseGroupRowProps {
   inviteLink?: string;
   onDownloadPdf: () => void;
   downloading: boolean;
+  onViewGroup?: () => void;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading }: CourseGroupRowProps) {
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onViewGroup }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -26,28 +27,32 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
   return (
     <div className="bg-white border border-[#E7E5E4] rounded-[10px] p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <button
+          onClick={onViewGroup}
+          disabled={!onViewGroup}
+          className="flex items-center gap-3 flex-1 min-w-0 text-left group/name disabled:cursor-default"
+        >
           <div className="w-10 h-10 rounded-[8px] bg-brand-light text-brand font-bold text-sm flex items-center justify-center flex-shrink-0">
             {group.name.slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold text-[#1C1917] truncate">{group.name}</p>
+            <p className="text-[14px] font-semibold text-[#1C1917] truncate group-hover/name:underline group-disabled/name:no-underline">{group.name}</p>
             <p className="text-[11px] text-[#A8A29E] mt-0.5">
               {memberCount} {memberCount === 1 ? 'member' : 'members'} · {taskDone}/{taskTotal} tasks done
             </p>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-2 flex-shrink-0">
           {inviteLink && (
             <button
-              onClick={handleCopy}
+              onClick={(e) => { e.stopPropagation(); handleCopy(); }}
               className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
             >
               {copied ? <span className="text-green-600">Copied!</span> : 'Copy link'}
             </button>
           )}
           <button
-            onClick={onDownloadPdf}
+            onClick={(e) => { e.stopPropagation(); onDownloadPdf(); }}
             disabled={downloading}
             className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >

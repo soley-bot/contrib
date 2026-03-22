@@ -4,7 +4,7 @@
     {
       "name": "Contrib (Next.js dev)",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
+      "runtimeArgs": ["start-dev.js"],
       "port": 3000
     }
   ]
