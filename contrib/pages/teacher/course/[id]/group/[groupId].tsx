@@ -272,10 +272,10 @@ export default function TeacherGroupDetail() {
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E7E5E4] flex"
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {([
-          { id: 'tasks',    label: 'Tasks',    icon: <IconBoard size={22} /> },
-          { id: 'activity', label: 'Activity', icon: <IconActivity size={22} /> },
-          { id: 'members',  label: 'Members',  icon: <IconUsers size={22} /> },
-          { id: 'evaluation', label: 'Eval',   icon: <IconCheck size={22} /> },
+          { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} /> },
+          { id: 'activity',   label: 'Activity', icon: <IconActivity size={22} /> },
+          { id: 'members',    label: 'Members',  icon: <IconUsers size={22} /> },
+          { id: 'evaluation', label: 'Eval',     icon: <IconCheck size={22} /> },
         ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((item) => (
           <button key={item.id} onClick={() => setTab(item.id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
