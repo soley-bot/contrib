@@ -125,12 +125,24 @@ Run `ls hooks/` for the full list.
 - **Student side:** group creation/join, task management, evidence upload (immutable + versioned), timeline, peer review, Contribution Record PDF export
 - **Teacher side:** course creation, course detail with group list + progress bars + analytics, group drill-down (read-only view of tasks/timeline/members/peer review), edit/delete course & group, copy invite links, download Contribution Record
 
+## Landing Page Redesign (in progress)
+
+Spec at `docs/superpowers/specs/2026-03-22-landing-page-redesign.md`. Key decisions:
+- **Horizontal scroll-snap storyboard** — 5 beats from brand narrative + CTA slide
+- **2-column desktop** (text left, visual right), stacks on mobile
+- **Storyset/Freepik illustrations** as subtle backgrounds (8-15% opacity, bottom-right)
+- **Illustrations saved at** `public/illustrations/beat-01..05-*.svg`
+- Copy follows brand narrative beats 01-05 exactly
+- Still needed: login/signup copy updates, implementation
+
 ## Launch Checklist
 
-1. **UX polish** — smooth out rough edges across student and teacher flows
-2. **Bug fixes** — resolve known issues before real users hit them
-3. **Auth edge cases** — handle all login/signup/OAuth flows reliably
-4. **Production readiness** — error states, loading states, empty states, mobile responsiveness
+1. **Landing page redesign** — implement horizontal scroll storyboard (spec ready)
+2. **Login/signup copy** — align with brand voice (currently generic)
+3. **UX polish** — smooth out rough edges across student and teacher flows
+4. **Bug fixes** — resolve known issues before real users hit them
+5. **Auth edge cases** — handle all login/signup/OAuth flows reliably
+6. **Production readiness** — error states, loading states, empty states, mobile responsiveness
 
 ## Z-Index Hierarchy
 
