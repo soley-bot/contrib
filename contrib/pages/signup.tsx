@@ -84,70 +84,82 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F9FAFB]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
-        <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
+        <div className="flex items-center gap-2 mb-8">
+          <div className="w-7 h-7 bg-brand rounded-[8px] flex items-center justify-center flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 160 160" fill="none">
+              <line x1="58" y1="18" x2="58" y2="142" stroke="#fff" strokeWidth="3" opacity="0.15"/>
+              <circle cx="58" cy="128" r="6" fill="#fff" opacity="0.18"/>
+              <circle cx="58" cy="100" r="7" fill="#fff" opacity="0.2"/>
+              <circle cx="58" cy="46" r="12" fill="#fff"/>
+              <line x1="70" y1="46" x2="118" y2="46" stroke="#fff" strokeWidth="3" strokeLinecap="round"/>
+              <circle cx="122" cy="46" r="4" fill="#fff"/>
+            </svg>
+          </div>
+          <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
+        </div>
         <h1 className="text-[22px] font-bold mb-1">Create your account</h1>
-        <p className="text-sm text-[#57534E] mb-7">Free forever. No credit card.</p>
+        <p className="text-sm text-[#64748B] mb-7">Free forever. No credit card.</p>
 
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="h-12 w-full border border-[#E7E5E4] bg-white hover:bg-[#F9FAFB] text-[15px] font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 mb-1"
+          className="h-12 w-full border border-[#E2E8F0] bg-white hover:bg-[#F8FAFF] text-[15px] font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 mb-1"
         >
           <GoogleIcon /> Continue with Google
         </button>
 
         <div className="flex items-center gap-3 my-1">
-          <hr className="flex-1 border-[#E7E5E4]" />
-          <span className="text-[12px] text-[#A8A29E]">or</span>
-          <hr className="flex-1 border-[#E7E5E4]" />
+          <hr className="flex-1 border-[#E2E8F0]" />
+          <span className="text-[12px] text-[#64748B]">or</span>
+          <hr className="flex-1 border-[#E2E8F0]" />
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Full name</label>
+            <label className="text-[13px] font-medium text-[#64748B]">Full name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">School</label>
+            <label className="text-[13px] font-medium text-[#64748B]">School</label>
             <input
               type="text"
               value={university}
               onChange={(e) => setUniversity(e.target.value)}
               placeholder="Royal University of Phnom Penh"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <RoleToggle value={role} onChange={setRole} />
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Email</label>
+            <label className="text-[13px] font-medium text-[#64748B]">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="sophea@gmail.com"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Password</label>
+            <label className="text-[13px] font-medium text-[#64748B]">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min. 8 characters"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
 
-          {error && <p className="text-sm text-[#EF4444]">{error}</p>}
+          {error && <p className="text-sm text-[#DC2626]">{error}</p>}
 
           <button
             type="submit"
@@ -158,9 +170,9 @@ export default function Signup() {
           </button>
         </form>
 
-        <p className="text-[13px] text-[#57534E] text-center mt-4">
+        <p className="text-[13px] text-[#64748B] text-center mt-4">
           Already have an account?{' '}
-          <Link href="/login" className="text-[#C53678] font-medium">Log in</Link>
+          <Link href="/login" className="text-brand font-medium">Log in</Link>
         </p>
       </div>
     </div>

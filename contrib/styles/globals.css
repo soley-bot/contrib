@@ -8,18 +8,19 @@
 }
 
 :root {
-  --bg: #F9FAFB;
+  --bg: #F8FAFF;
   --surface: #FFFFFF;
-  --border: #E5E7EB;
-  --text: #111827;
-  --muted: #6B7280;
-  --brand: #2563EB;
-  --brand-hover: #1D4ED8;
-  --brand-light: #EFF6FF;
-  --brand-border: #BFDBFE;
-  --green: #22C55E;
-  --yellow: #F59E0B;
-  --red: #EF4444;
+  --border: #E2E8F0;
+  --text: #0F172A;
+  --muted: #64748B;
+  --brand: #1A56E8;
+  --brand-dark: #1240C4;
+  --brand-hover: #1648D0;
+  --brand-light: #EBF0FF;
+  --brand-border: #C3D4FD;
+  --green: #16A34A;
+  --amber: #D97706;
+  --red: #DC2626;
 }
 
 * {
@@ -47,7 +48,7 @@ body {
   width: 20px;
   height: 20px;
   border: 2px solid #E7E5E4;
-  border-top-color: #FF5841;
+  border-top-color: var(--brand);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

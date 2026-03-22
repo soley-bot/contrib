@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "Contrib (Next.js dev)",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["start-dev.js"],
-      "port": 3000
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd contrib && node node_modules/next/dist/bin/next dev --port 3001"],
+      "port": 3001
     },
     {
       "name": "Logo Preview",
