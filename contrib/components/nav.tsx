@@ -62,14 +62,12 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => router.push(homeRoute)}
           >
-            <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="11.5" y1="3" x2="11.5" y2="29" stroke="#1A56E8" strokeWidth="1.5" opacity="0.18" strokeLinecap="round"/>
-              <circle cx="11.5" cy="26" r="2" fill="#1A56E8" opacity="0.2"/>
-              <circle cx="11.5" cy="20" r="2" fill="#1A56E8" opacity="0.2"/>
-              <circle cx="11.5" cy="14.5" r="2.2" fill="#1A56E8" opacity="0.28"/>
-              <circle cx="11.5" cy="7.5" r="4" fill="#1A56E8"/>
-              <line x1="15.5" y1="7.5" x2="26" y2="7.5" stroke="#1A56E8" strokeWidth="2.5" strokeLinecap="round"/>
-              <circle cx="28" cy="7.5" r="2" fill="#1A56E8"/>
+            <svg width="20" height="20" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="58" y1="20" x2="58" y2="145" stroke="#1A56E8" strokeWidth="4" opacity="0.15" strokeLinecap="round"/>
+              <circle cx="58" cy="130" r="7" fill="#1A56E8" opacity="0.18"/>
+              <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.18"/>
+              <circle cx="58" cy="46" r="13" fill="#1A56E8"/>
+              <line x1="71" y1="46" x2="120" y2="46" stroke="#1A56E8" strokeWidth="4" strokeLinecap="round"/>
             </svg>
             <span className="text-base font-extrabold text-brand">Contrib</span>
           </span>
@@ -114,14 +112,12 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
       {/* ── DESKTOP SIDEBAR ────────────────────────────── */}
       <aside className="hidden md:flex flex-col fixed top-0 left-0 h-full w-[220px] bg-white border-r border-[#E7E5E4] z-50 py-5 px-3">
         <div className="flex items-center gap-2 px-2 mb-6">
-          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="11.5" y1="3" x2="11.5" y2="29" stroke="#1A56E8" strokeWidth="1.5" opacity="0.18" strokeLinecap="round"/>
-            <circle cx="11.5" cy="26" r="2" fill="#1A56E8" opacity="0.2"/>
-            <circle cx="11.5" cy="20" r="2" fill="#1A56E8" opacity="0.2"/>
-            <circle cx="11.5" cy="14.5" r="2.2" fill="#1A56E8" opacity="0.28"/>
-            <circle cx="11.5" cy="7.5" r="4" fill="#1A56E8"/>
-            <line x1="15.5" y1="7.5" x2="26" y2="7.5" stroke="#1A56E8" strokeWidth="2.5" strokeLinecap="round"/>
-            <circle cx="28" cy="7.5" r="2" fill="#1A56E8"/>
+          <svg width="22" height="22" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="58" y1="20" x2="58" y2="145" stroke="#1A56E8" strokeWidth="4" opacity="0.15" strokeLinecap="round"/>
+            <circle cx="58" cy="130" r="7" fill="#1A56E8" opacity="0.18"/>
+            <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.18"/>
+            <circle cx="58" cy="46" r="13" fill="#1A56E8"/>
+            <line x1="71" y1="46" x2="120" y2="46" stroke="#1A56E8" strokeWidth="4" strokeLinecap="round"/>
           </svg>
           <span className="text-base font-extrabold text-brand">Contrib</span>
         </div>
