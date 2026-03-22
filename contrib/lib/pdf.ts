@@ -184,7 +184,7 @@ export function generateReport(
     { label: 'Members',    value: String(members.length) },
     { label: 'Tasks',      value: String(totalTasks) },
     { label: 'Complete',   value: `${completionPct}%` },
-    { label: 'Evaluation', value: evaluationSummaries.length > 0 ? `${evalResponses} responses` : 'Not opened' },
+    { label: 'Peer Review', value: evaluationSummaries.length > 0 ? `${evalResponses} responses` : 'Not opened' },
   ];
 
   const statW = CW / stats.length;
@@ -428,7 +428,7 @@ export function generateReport(
   // ── Activity Timeline ───────────────────────────────────────────────────────
 
   ({ y } = checkPage(doc, y, 20));
-  y = sectionHeader(doc, 'Full Activity Timeline', y, TC, TCL);
+  y = sectionHeader(doc, 'Full Timeline', y, TC, TCL);
   y += 4;
 
   const TIME_COL  = 38;
@@ -476,7 +476,7 @@ export function generateReport(
 
   if (evaluationSummaries.length > 0) {
     ({ y } = checkPage(doc, y, 20));
-    y = sectionHeader(doc, 'Peer Evaluation Summary', y, TC, TCL);
+    y = sectionHeader(doc, 'Peer Review Summary', y, TC, TCL);
     y += 4;
 
     const eColName = 70; const eColC = 40; const eColCol = 40;

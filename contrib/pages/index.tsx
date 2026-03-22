@@ -120,16 +120,14 @@ export default function Landing() {
       <nav className="h-14 border-b border-[#E2E8F0] sticky top-0 z-50 bg-white">
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-brand rounded-[8px] flex items-center justify-center flex-shrink-0">
-              <svg width="16" height="16" viewBox="0 0 160 160" fill="none">
-                <line x1="58" y1="18" x2="58" y2="142" stroke="#fff" strokeWidth="3" opacity="0.15"/>
-                <circle cx="58" cy="128" r="6" fill="#fff" opacity="0.18"/>
-                <circle cx="58" cy="100" r="7" fill="#fff" opacity="0.2"/>
-                <circle cx="58" cy="46" r="12" fill="#fff"/>
-                <line x1="70" y1="46" x2="118" y2="46" stroke="#fff" strokeWidth="3" strokeLinecap="round"/>
-                <circle cx="122" cy="46" r="4" fill="#fff"/>
-              </svg>
-            </div>
+            <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
+              <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
+              <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
+              <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
+              <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
+              <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
+              <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
+            </svg>
             <span className="text-lg font-extrabold tracking-tight text-[#0F172A]">Contrib</span>
           </div>
           <div className="flex gap-2">

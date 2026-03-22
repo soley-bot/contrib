@@ -262,10 +262,10 @@ export default function GroupPage() {
             {/* All-tasks-done evaluation nudge (lead only, evaluation not yet open) */}
             {isLead && !evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
               <div className="bg-[#FFF0EE] border border-[#FFCFC9] rounded-[10px] px-4 py-3 mb-4 flex items-center justify-between gap-3">
-                <p className="text-sm text-[#1C1917]">All tasks complete — ready for peer evaluation?</p>
+                <p className="text-sm text-[#1C1917]">All tasks complete — ready for peer review?</p>
                 <button onClick={handleOpenEvaluation}
                   className="flex-shrink-0 h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md transition-colors">
-                  Open Evaluation
+                  Open Peer Review
                 </button>
               </div>
             )}
@@ -413,7 +413,7 @@ export default function GroupPage() {
                     </div>
                     <button onClick={handleExport}
                       className="w-full h-9 border border-[#E7E5E4] bg-[#FAFAF9] hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                      <IconExport size={15} /> Export Report (PDF)
+                      <IconExport size={15} /> Export Contribution Record
                     </button>
                   </div>
                   <button onClick={() => setShowEditGroup(true)}
@@ -441,18 +441,18 @@ export default function GroupPage() {
             {/* Not open */}
             {!evalSession && (
               <div className="max-w-2xl mx-auto px-4 py-10 flex flex-col items-center text-center gap-3">
-                <p className="text-[15px] font-semibold text-[#1C1917]">Peer Evaluation</p>
+                <p className="text-[15px] font-semibold text-[#1C1917]">Peer Review</p>
                 <p className="text-sm text-[#57534E] max-w-xs">
-                  When all work is done, the lead opens evaluation so teammates can rate each other&apos;s contributions.
+                  When all work is done, the lead opens peer review so teammates can rate each other&apos;s contributions.
                 </p>
                 {isLead ? (
                   <button onClick={handleOpenEvaluation}
                     className="mt-2 h-10 px-5 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-semibold rounded-md transition-colors">
-                    Open Peer Evaluation
+                    Open Peer Review
                   </button>
                 ) : (
                   <p className="text-sm text-[#A8A29E]">
-                    Waiting for the lead to open evaluation.
+                    Waiting for the lead to open peer review.
                   </p>
                 )}
               </div>
@@ -507,9 +507,9 @@ export default function GroupPage() {
         {[
           { id: 'dashboard',  label: 'Groups',   icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
           { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} />,    action: () => setTab('tasks') },
-          { id: 'activity',   label: 'Activity', icon: <IconActivity size={22} />, action: () => setTab('activity') },
+          { id: 'activity',   label: 'Timeline', icon: <IconActivity size={22} />, action: () => setTab('activity') },
           { id: 'members',    label: 'Members',  icon: <IconUsers size={22} />,    action: () => setTab('members') },
-          { id: 'evaluation', label: 'Eval',     icon: <IconCheck size={22} />,    action: () => setTab('evaluation') },
+          { id: 'evaluation', label: 'Review',   icon: <IconCheck size={22} />,    action: () => setTab('evaluation') },
         ].map((item) => (
           <button key={item.id} onClick={item.action}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${

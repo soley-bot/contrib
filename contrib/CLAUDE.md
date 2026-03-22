@@ -41,7 +41,24 @@ Polish & launch prep — targeting **April 1, 2026** release. Focus on UX polish
 
 - Student pages: `#1A56E8` (brand blue)
 - Teacher pages: `#1240C4` (dark blue)
+- Blue tint: `#EBF0FF` (hover states, backgrounds)
+- Off-white: `#F8FAFF` (page backgrounds)
+- Slate: `#0F172A` (primary text)
 - **Teal is gone** — do not use it anywhere
+- **No gradients, no deep shadows** — flat design only
+
+## Logo (The Record mark)
+
+- SVG-based timeline spine with dots — bare SVG, no background container
+- Blue strokes (`#1A56E8`) on white/light backgrounds
+- Sizes: 28px (login/signup/landing), 24px (sidebar), 20px (mobile header)
+- All instances are inline SVG — no imported image files
+- Locations: `nav.tsx` (sidebar + mobile), `index.tsx`, `login.tsx`, `signup.tsx`
+
+## Typography
+
+- **Plus Jakarta Sans** — one typeface, all weights (loaded via Google Fonts in `_document.tsx`)
+- Hierarchy through weight and size only, never through color variety
 
 ## Page Structure
 
@@ -115,10 +132,30 @@ Run `ls hooks/` for the full list.
 3. **Auth edge cases** — handle all login/signup/OAuth flows reliably
 4. **Production readiness** — error states, loading states, empty states, mobile responsiveness
 
+## Z-Index Hierarchy
+
+| Layer | Z-index | Elements |
+|---|---|---|
+| Content | default | Cards, lists, forms |
+| Sticky tab bar | `z-40` | Teacher group drill-down tabs |
+| Navigation | `z-50` | Mobile header, desktop sidebar, mobile bottom nav |
+| Modals | `z-[100]` | All modals and overlays |
+
+## Brand Guidelines
+
+Full brand bible at `../contrib-markting/contrib-brand-guidelines.html`. Key rules:
+- No emojis — SVG icons only
+- No teal — permanently removed
+- No gradients or heavy shadows — flat design
+- No surveillance framing — always empowerment
+- Feature names are locked (see Feature Names table above)
+- Voice: confident, direct, specific — not generic EdTech copy
+
 ## Avoid
 
 - Teal anywhere — removed from brand
 - Scope creep — every feature must answer: "does this make individual effort visible in group work?"
+- Old feature names (Activity, Evaluation, Export Report, PDF Report, Upload evidence)
 
 ## Git Workflow
 
@@ -141,6 +178,15 @@ Run `ls hooks/` for the full list.
 3. `npm run dev` → runs on localhost:3000
 
 SQL migrations are in `database/` — apply via Supabase dashboard or CLI.
+
+## Claude Model Usage
+
+| Task | Model |
+|---|---|
+| Planning, brainstorming, architecture | Opus 4.6 |
+| Writing code, implementing features | Sonnet 4.6 |
+| Bug fixes, debugging, testing | Opus 4.6 |
+| Light work (git descriptions, commit messages) | Haiku 4.5 |
 
 ## Business Model
 

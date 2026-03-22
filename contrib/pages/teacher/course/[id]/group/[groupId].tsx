@@ -116,21 +116,24 @@ export default function TeacherGroupDetail() {
             disabled={downloadingPdf}
             className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
-            <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export PDF'}
+            <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export Contribution Record'}
           </button>
         </div>
 
         {/* Tab bar */}
-        <div className="flex border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => (
+        <div className="flex border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-40 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => {
+            const tabLabels: Record<Tab, string> = { tasks: 'Tasks', activity: 'Timeline', members: 'Members', evaluation: 'Peer Review' };
+            return (
             <button key={t} onClick={() => setTab(t)}
-              className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
+              className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
                 tab === t ? 'text-brand border-brand' : 'text-[#A8A29E] border-transparent'
               }`}
             >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+              {tabLabels[t]}
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* ── TASKS TAB ── */}
@@ -273,9 +276,9 @@ export default function TeacherGroupDetail() {
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {([
           { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} /> },
-          { id: 'activity',   label: 'Activity', icon: <IconActivity size={22} /> },
+          { id: 'activity',   label: 'Timeline', icon: <IconActivity size={22} /> },
           { id: 'members',    label: 'Members',  icon: <IconUsers size={22} /> },
-          { id: 'evaluation', label: 'Eval',     icon: <IconCheck size={22} /> },
+          { id: 'evaluation', label: 'Review',   icon: <IconCheck size={22} /> },
         ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((item) => (
           <button key={item.id} onClick={() => setTab(item.id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${

@@ -112,16 +112,14 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
       {/* ── DESKTOP SIDEBAR ────────────────────────────── */}
       <aside className="hidden md:flex flex-col fixed top-0 left-0 h-full w-[220px] bg-white border-r border-[#E2E8F0] z-50 py-5 px-3">
         <div className="flex items-center gap-2 px-2 mb-6">
-          <div className="w-6 h-6 bg-brand rounded-[7px] flex items-center justify-center flex-shrink-0">
-            <svg width="13" height="13" viewBox="0 0 160 160" fill="none">
-              <line x1="58" y1="18" x2="58" y2="142" stroke="#fff" strokeWidth="3" opacity="0.15"/>
-              <circle cx="58" cy="128" r="6" fill="#fff" opacity="0.18"/>
-              <circle cx="58" cy="100" r="7" fill="#fff" opacity="0.2"/>
-              <circle cx="58" cy="46" r="12" fill="#fff"/>
-              <line x1="70" y1="46" x2="118" y2="46" stroke="#fff" strokeWidth="3" strokeLinecap="round"/>
-              <circle cx="122" cy="46" r="4" fill="#fff"/>
-            </svg>
-          </div>
+          <svg width="24" height="24" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
+            <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
+            <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
+            <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
+            <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
+            <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
+          </svg>
           <span className="text-base font-extrabold text-[#0F172A]">Contrib</span>
         </div>
 
@@ -149,7 +147,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
               { id: 'tasks',      label: 'Tasks',      icon: <IconBoard size={16} />    },
               { id: 'activity',   label: 'Timeline',   icon: <IconActivity size={16} /> },
               { id: 'members',    label: 'Members',    icon: <IconUsers size={16} />    },
-              { id: 'evaluation', label: 'Evaluation', icon: <IconCheck size={16} />    },
+              { id: 'evaluation', label: 'Peer Review', icon: <IconCheck size={16} />    },
             ].map((item) => (
               <button
                 key={item.id}
