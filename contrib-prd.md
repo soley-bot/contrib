@@ -1,11 +1,11 @@
 # Contrib — Product Requirements Document
-**Version:** 1.0
+**Version:** 2.0
 **Date:** March 2026
-**Status:** Draft
+**Status:** Active
 
 | Product | Market |
 |---------|--------|
-| **Contrib — Group Project Tracker** | **Cambodia first** |
+| **Contrib — Group Contribution Tracker** | **Cambodia first** |
 | Stack | Notifications |
 | **Next.js (Pages Router) + Supabase + Vercel** | **In-app activity feed** |
 | Language | PDF Export |
@@ -17,35 +17,44 @@
 
 ### 1.1 Vision
 
-Contrib gives university students in Cambodia a timestamped record of who did what in a group assignment — and auto-generates a contribution report PDF formatted like the peer eval form teachers already use. The platform handles activity tracking and evidence upload only. What happens in the session is between the students.
+Individual effort is invisible in group work. The output is shared — but the work never was. Contrib makes individual effort visible while it's happening, so the people who did the work get the credit for it.
 
-**Core tagline: Track. Prove. Export.**
+Contrib gives university students in Cambodia a timestamped record of who did what in a group assignment — and generates a Contribution Record PDF formatted like the peer evaluation forms teachers already use. Teachers get real-time visibility into every group. Free-riding stops being invisible.
 
-### 1.2 What Contrib Is
+**Soul: Individual effort is invisible in group work. Contrib turns it on.**
 
-- A group project tracker for university students
-- Task-based: members are assigned tasks, mark them done, and upload evidence
-- Timestamped: every action is logged automatically
-- PDF-first: the output is a contribution report formatted like the peer eval forms teachers already expect
-- Free to use: no paywall, no premium tier in v1
+### 1.2 Taglines
 
-### 1.3 What Contrib Is NOT
+| Audience | Tagline |
+|----------|---------|
+| Students | Your work. On record. |
+| Teachers | See who did the work — before you grade it. |
+
+### 1.3 What Contrib Is
+
+- A group contribution tracker for university students and teachers
+- Task-based: members log tasks, mark them done, and upload timestamped evidence
+- Timeline-first: every action is recorded automatically — immutable, versioned
+- Contribution Record: the output is a structured PDF formatted like Cambodian university peer evaluation forms
+- Free for students: no paywall, no premium tier for student features
+- Paid for teachers: real-time monitoring dashboard (current build priority)
+
+### 1.4 What Contrib Is NOT
 
 - Not a communication tool — no in-app chat or comments
-- Not a file storage platform — evidence links/uploads are references only
-- Not an LMS — no grades, rubrics, or course integration
-- Not a time tracker — tasks are marked done, not timed
+- Not a file storage platform — evidence is referenced, not stored as a library
+- Not an LMS — no grades, rubrics, or deep course integration
+- Not a time tracker — tasks are logged done, not timed
 - Not a social network — no feed, no follows, no profile discovery
+- Not a surveillance tool — framing is always empowerment, not monitoring
 
-### 1.4 Target User
+### 1.5 Users
 
-| Field | Detail |
-|-------|--------|
-| Who | University students in Cambodia, ages 18–26 |
-| Context | Group assignments, 3–6 members, per subject per semester |
-| Device | Mobile-first (phone), web app not native |
-| Motivation | Prove contribution fairly; hold free-riders accountable |
-| Teacher role | Receives PDF only — no sign-up, no dashboard in v1 |
+| Role | Description | Access |
+|------|-------------|--------|
+| Student | Creates/joins groups, manages tasks, logs work, submits peer review | Free forever |
+| Teacher | Creates courses, monitors groups in real-time, downloads Contribution Records | Paid (current build) |
+| Institution | Policy-level adoption, cross-course analytics | Not yet designed — future |
 
 ---
 
@@ -69,50 +78,37 @@ ALL files use lowercase hyphenated names. No exceptions.
 
 | RULE | Detail |
 |------|--------|
-| Never create | task-card-v2.tsx, task-card-new.tsx, task-card-final.tsx, or any variant. Git is the version history. If a file needs updating, edit it in place. |
-
-**Workflow when updating a file:**
-- Edit the existing file directly
-- Never duplicate it with a new name
-- If replacing a file entirely, delete the old one before creating the new one
-- If unsure whether old code is still needed — delete it. Git has it.
+| Never create | task-card-v2.tsx, task-card-new.tsx, task-card-final.tsx, or any variant. Git is the version history. Edit in place. Delete before replacing. |
 
 ### 2.3 Folder Structure
 
-Strict folder structure. No files outside their designated folder.
-
 ```
 contrib/
-├── pages/                    ← Routes only. No logic.
-│   ├── index.tsx             ← Landing page
-│   ├── dashboard.tsx         ← My Groups list
+├── pages/                        ← Routes only. No logic.
+│   ├── index.tsx                 ← Landing page
+│   ├── dashboard.tsx             ← My Groups (student) / My Courses (teacher)
 │   ├── group/
-│   │   └── [id].tsx          ← Group dashboard (tasks, feed, members)
+│   │   └── [id].tsx              ← Group view (tasks, timeline, members, peer review)
 │   ├── join/
-│   │   └── [token].tsx       ← Join via invite link
+│   │   └── [token].tsx           ← Join via invite link
+│   ├── teacher/
+│   │   ├── dashboard.tsx         ← Teacher course list
+│   │   └── course/
+│   │       └── [id]/
+│   │           ├── index.tsx     ← Course groups overview
+│   │           └── group/
+│   │               └── [groupId].tsx ← Group drill-down (read-only teacher view)
 │   └── api/
 │       └── auth/
 │           └── signup.ts
-├── components/               ← Reusable UI only. Short names.
-│   ├── nav.tsx
-│   ├── task-card.tsx
-│   ├── task-modal.tsx
-│   ├── task-form.tsx
-│   ├── member-row.tsx
-│   ├── feed-item.tsx
-│   └── invite-banner.tsx
-├── lib/                      ← Utilities, clients, helpers
-│   ├── supabase.ts           ← Supabase client (one file, one export)
-│   ├── pdf.ts                ← PDF generation logic
-│   └── invite.ts             ← Invite token generation/validation
-├── hooks/                    ← Custom React hooks
-│   ├── use-user.ts
-│   ├── use-group.ts
-│   ├── use-groups.ts
-│   ├── use-tasks.ts
-│   └── use-activity.ts
-├── types/                    ← TypeScript interfaces
-│   └── index.ts              ← All types in one file
+├── components/                   ← Reusable UI only. Short names.
+├── lib/                          ← Utilities, clients, helpers
+│   ├── supabase.ts
+│   ├── pdf.ts
+│   └── invite.ts
+├── hooks/                        ← Custom React hooks
+├── types/
+│   └── index.ts
 ├── styles/
 │   └── globals.css
 └── public/
@@ -122,258 +118,323 @@ contrib/
 
 - One component per file
 - Components only handle UI — no data fetching inside components
-- Data fetching belongs in hooks (hooks/ folder) or pages
+- Data fetching belongs in hooks or pages
 - No component does more than one thing
 - Keep components under 150 lines — if longer, split it
 
 ### 2.5 No Speculative Code
 
-| RULE | Detail |
-|------|--------|
-| Only build what is in this PRD. | Do not add features, fields, columns, or components that are not explicitly listed here. When in doubt, do less. |
+Build only what is in this PRD. Do not add features, fields, columns, or components not explicitly listed. When in doubt, do less.
 
 ---
 
 ## 3. Database Schema (Supabase)
 
-> **Design principle: lean schema. Only columns needed now. No nullable columns unless truly optional. No speculative fields.**
+> **Lean schema. Only columns needed now. No speculative fields.**
 
 ### 3.1 Table: profiles
 
-Extended from Supabase Auth (auth.users).
-
 | Column | Type | Required | Notes |
 |--------|------|----------|-------|
-| id | uuid | YES | References auth.users(id). Primary key. |
+| id | uuid | YES | FK → auth.users(id) |
 | name | text | YES | Display name |
-| university | text | YES | Free text in v1 |
+| university | text | YES | Free text |
+| role | text | YES | `'student'` or `'teacher'` — default `'student'` |
+| faculty | text | NO | Optional |
+| year_of_study | text | NO | Optional |
+| avatar_url | text | NO | Optional |
 | created_at | timestamptz | YES | Default now() |
 
-### 3.2 Table: groups
+### 3.2 Table: courses
 
-| Column | Type | Required | Notes |
-|--------|------|----------|-------|
-| id | uuid | YES | Primary key, default gen_random_uuid() |
-| name | text | YES | e.g. "Business Strategy Final" |
-| subject | text | YES | e.g. "MGT 402" |
-| due_date | date | NO | Optional assignment due date |
-| lead_id | uuid | YES | References profiles(id). Group creator. |
-| invite_token | text | YES | Unique token for invite link. |
-| created_at | timestamptz | YES | Default now() |
-
-### 3.3 Table: group_members
+Teacher-created courses. Groups link to courses.
 
 | Column | Type | Required | Notes |
 |--------|------|----------|-------|
 | id | uuid | YES | Primary key |
-| group_id | uuid | YES | References groups(id) |
-| profile_id | uuid | YES | References profiles(id) |
+| name | text | YES | Course name |
+| subject | text | YES | Subject code |
+| teacher_id | uuid | YES | FK → profiles(id) |
+| invite_token | text | YES | Unique — for students to link groups |
+| created_at | timestamptz | YES | Default now() |
+
+### 3.3 Table: groups
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| id | uuid | YES | Primary key |
+| name | text | YES | e.g. "Business Strategy Final" |
+| subject | text | YES | e.g. "MGT 402" |
+| due_date | date | NO | Optional |
+| lead_id | uuid | YES | FK → profiles(id) |
+| invite_token | text | YES | Unique — for member join links |
+| course_id | uuid | NO | Nullable FK → courses(id) |
+| created_at | timestamptz | YES | Default now() |
+
+### 3.4 Table: group_members
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| id | uuid | YES | Primary key |
+| group_id | uuid | YES | FK → groups(id) |
+| profile_id | uuid | YES | FK → profiles(id) |
 | joined_at | timestamptz | YES | Default now() |
 
 Unique constraint on (group_id, profile_id).
 
-### 3.4 Table: tasks
-
-| Column | Type | Required | Notes |
-|--------|------|----------|-------|
-| id | uuid | YES | Primary key, default gen_random_uuid() |
-| group_id | uuid | YES | References groups(id) |
-| title | text | YES | Short task title |
-| description | text | NO | Optional detail |
-| assignee_id | uuid | YES | References profiles(id) |
-| status | text | YES | todo, inprogress, done. Default todo. |
-| due_date | date | NO | Optional |
-| evidence_url | text | NO | Link or uploaded file URL |
-| completed_at | timestamptz | NO | Set when status moves to done |
-| created_at | timestamptz | YES | Default now() |
-
-> **RULE:** Do NOT add columns for ratings, effort scores, or comments on tasks. That is a future feature. Keep this table lean.
-
-### 3.5 Table: activity_log
+### 3.5 Table: tasks
 
 | Column | Type | Required | Notes |
 |--------|------|----------|-------|
 | id | uuid | YES | Primary key |
-| group_id | uuid | YES | References groups(id) |
-| actor_id | uuid | YES | References profiles(id). Who did the action. |
-| action | text | YES | task_created, task_assigned, task_done, file_uploaded, member_joined |
-| task_id | uuid | NO | References tasks(id) if action is task-related |
-| meta | jsonb | NO | Extra context, e.g. { "task_title": "..." } |
+| group_id | uuid | YES | FK → groups(id) |
+| title | text | YES | |
+| description | text | NO | Optional |
+| assignee_id | uuid | YES | FK → profiles(id) |
+| status | text | YES | `todo`, `inprogress`, `done` — default `todo` |
+| due_date | date | NO | Optional |
+| completed_at | timestamptz | NO | Set when status → done |
+| deleted_at | timestamptz | NO | Soft delete — never hard delete |
 | created_at | timestamptz | YES | Default now() |
+
+> **RULE:** Always filter `WHERE deleted_at IS NULL` when querying active tasks.
+
+### 3.6 Table: evidence
+
+Immutable and versioned. Never update or delete rows.
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| id | uuid | YES | Primary key |
+| task_id | uuid | YES | FK → tasks(id) |
+| uploaded_by | uuid | YES | FK → profiles(id) |
+| type | text | YES | `'file'`, `'link'`, or `'note'` |
+| content | text | YES | URL, link, or note text |
+| version_number | integer | YES | Starts at 1, increments per task |
+| created_at | timestamptz | YES | Immutable |
+
+> **RULE:** To update evidence, insert a new row with version_number + 1. Never mutate.
+
+### 3.7 Table: activity_log
+
+Append-only audit trail. Never update or delete.
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| id | uuid | YES | Primary key |
+| group_id | uuid | YES | FK → groups(id) |
+| actor_id | uuid | YES | FK → profiles(id) |
+| action | text | YES | See action enum below |
+| task_id | uuid | NO | FK → tasks(id) if task-related |
+| meta | jsonb | NO | Extra context |
+| created_at | timestamptz | YES | Default now() |
+
+**Action enum:** `task_created`, `task_assigned`, `task_updated`, `task_done`, `task_edited`, `task_deleted`, `task_reassigned`, `file_uploaded`, `evidence_added`, `evidence_version_added`, `member_joined`, `member_left`, `member_removed`, `lead_transferred`, `group_updated`, `evaluation_opened`, `evaluation_submitted`
+
+### 3.8 Table: evaluation_sessions
+
+One row per group when the lead opens peer review. One session per group (unique constraint).
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| id | uuid | YES | Primary key |
+| group_id | uuid | YES | Unique FK → groups(id) |
+| opened_by | uuid | YES | FK → profiles(id) |
+| opened_at | timestamptz | YES | Default now() |
+
+### 3.9 Table: evaluations
+
+Peer-to-peer scores. One row per evaluator→evaluatee pair per group.
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| id | uuid | YES | Primary key |
+| group_id | uuid | YES | FK → groups(id) |
+| evaluator_id | uuid | YES | FK → profiles(id) |
+| evaluatee_id | uuid | YES | FK → profiles(id) |
+| contribution_score | integer | YES | 1–5 |
+| collaboration_score | integer | YES | 1–5 |
+| comment | text | NO | Optional |
+| submitted_at | timestamptz | YES | Default now() |
+
+Unique constraint on (group_id, evaluator_id, evaluatee_id).
 
 ---
 
 ## 4. Core Features
 
-> **Build these five features only. Nothing else in v1.**
+### Student Features (Built)
 
-### Feature 1: Sign Up + Profile
+#### Feature 1: Sign Up + Profile
+**Route:** /signup
 
-**Route:** /signup (public) and /dashboard (redirect after auth)
-
-**Flow:**
-- Step 1 — Name and university
-- Step 2 — Email + password (Supabase Auth)
+- Name, university, role (student/teacher), optional faculty + year
+- Email + password via Supabase Auth
 - On submit: create auth user, insert into profiles, redirect to /dashboard
 
-**Rules:**
-- All steps on one page — not separate pages
-- Validate all required fields before submit
-- No email verification required in v1
-
----
-
-### Feature 2: Group Creation + Invite
-
+#### Feature 2: Group Creation + Invite
 **Route:** /dashboard
 
-**Flow:**
-- Lead creates a group: name, subject, optional due date
-- Group is created; a unique invite_token is generated (lib/invite.ts)
-- Invite link is displayed: contrib.app/join/[token]
-- Lead shares the link with teammates
-- Members visit the link, see group details, and join with one click (must be logged in)
+- Student creates a group: name, subject, optional due date
+- Unique invite_token generated on creation
+- Invite link: contrib.app/join/[token]
+- Members join via link (must be logged in)
+- Optional: link group to a course via course invite token
 
-**Rules:**
-- Invite token is a random URL-safe string, stored in groups.invite_token
-- Joining requires auth — if not logged in, redirect to /signup with return URL
-- No expiry on invite tokens in v1
-- A member can only join a group once (enforced by unique constraint)
-
----
-
-### Feature 3: Task Management
-
+#### Feature 3: Task Management
 **Route:** /group/[id] — Tasks tab
 
-**What it shows:**
-- Kanban board: three columns — To Do, In Progress, Done
-- Each task card shows: title, assignee, due date, status
+- Kanban: To Do, In Progress, Done
+- Any member can create a task: title, assignee, description (optional), due date (optional)
+- Assignee moves their own task; lead can move any task
+- Moving to Done sets completed_at and writes to activity_log
+- Evidence (file/link/note) can be logged at any point — immutable, versioned
 
-**Flow:**
-- Any member can create a task: title, description (optional), assignee, due date (optional)
-- Any member can move their own assigned task to In Progress or Done
-- Lead can move any task
-- When a task is moved to Done: completed_at is set, activity_log entry is created
-- Optional: evidence_url can be added when marking Done
+#### Feature 4: Timeline
+**Route:** /group/[id] — Timeline tab
 
-**Rules:**
-- No drag-and-drop in v1 — use a status dropdown or buttons
-- Moving a task always writes to activity_log
-- Status values are exactly: todo, inprogress, done — no others
+*(Previously called "Activity" — renamed to reflect that it's a record, not a feed)*
 
----
+- Chronological, most recent first
+- Each entry: actor name, action, task reference, timestamp
+- Read-only — append only
 
-### Feature 4: Activity Feed
+#### Feature 5: Peer Review
+**Route:** /group/[id] — Peer Review tab
 
-**Route:** /group/[id] — Activity tab
+*(Previously called "Evaluation")*
 
-**What it shows:**
-- Chronological list of all activity_log entries for the group
-- Each entry: actor name, action description, timestamp
-- Most recent first
+- Lead opens peer review when all tasks are done
+- Each member rates every other member: contribution score (1–5), collaboration score (1–5), optional comment
+- Results shown as averages — individual scores are never shown to peers (anonymous by design)
+- Pre-submission message: "Your ratings are combined with your teammates'. No one will see your individual scores."
 
-**Rules:**
-- Read-only — no deleting or editing feed entries
-- Feed is rebuilt from activity_log on page load — no separate feed table
+#### Feature 6: Contribution Record (PDF Export)
+**Route:** /group/[id] — Export button
 
----
+*(Previously called "Export Report" — renamed to "Export Contribution Record")*
 
-### Feature 5: Contribution Report (PDF Export)
-
-**Route:** /group/[id] — Export button (Lead only)
-
-**What it generates:**
-- Group name, subject, export date
-- Member summary table: tasks assigned, tasks done, completion rate per member
-- Per-member section: list of their completed tasks with completion timestamps and evidence links
-- Full activity timeline: every entry from activity_log in chronological order
+- Available to group lead
+- Generated client-side via lib/pdf.ts
+- Contains: group summary, per-member contribution breakdown, task list with timestamps, full timeline, peer review summary
+- Formatted to mirror Cambodian university peer evaluation forms
 - Footer: "Generated by Contrib · Activity data is automatically recorded"
 
-**Rules:**
-- Export is available to the Lead only
-- Generated client-side using lib/pdf.ts — no server needed
-- PDF is formatted to resemble standard Cambodian university peer evaluation forms
-- Do not add a digital signature or tamper-detection in v1 — plain PDF is sufficient
+---
+
+### Teacher Features (Current Build Priority)
+
+#### Feature 7: Course Management
+**Route:** /teacher/dashboard
+
+- Teacher creates a course: name, subject
+- Course invite token generated — students link their group to the course
+- Course dashboard shows all linked groups with progress bars
+
+#### Feature 8: Group Drill-Down ← BUILD NEXT
+**Route:** /teacher/course/[id]/group/[groupId]
+
+- Read-only view of a specific group's task board, timeline, members, and peer review results
+- This is the minimum credible teacher experience
+- Must be ready before the Leap Sok meeting
+
+#### Feature 9: Course Analytics ← NEXT AFTER DRILL-DOWN
+**Route:** /teacher/course/[id]
+
+- Completion rates across all groups
+- Active vs stalled groups at a glance
+- Member participation summary per group
+
+#### Feature 10: Real-Time Monitoring ← PAID TIER
+- Live activity updates without page refresh
+- This becomes the paid feature gate
 
 ---
 
 ## 5. Authentication
 
 ### 5.1 Method
-
 - Supabase Auth — email + password only
-- No OAuth (Google, Facebook) in v1
-- No email verification required in v1
+- No OAuth in current version
+- No email verification required
 
 ### 5.2 Protected Routes
 
-- /dashboard — requires auth, redirect to /signup if not logged in
-- /group/[id] — requires auth AND group membership
-- /join/[token] — requires auth, redirect to /signup with return URL if not logged in
-- / (landing) — public
-- /signup — public, redirect to /dashboard if already logged in
+| Route | Rule |
+|-------|------|
+| /dashboard | Requires auth |
+| /group/[id] | Requires auth + group membership |
+| /join/[token] | Requires auth — redirect to /signup with return URL if not logged in |
+| /teacher/* | Requires auth + role = 'teacher' |
+| / | Public |
+| /signup | Public — redirect to /dashboard if already logged in |
 
 ### 5.3 Session Handling
-
-- Use Supabase client-side session (supabaseClient.auth.getSession())
-- useUser hook in hooks/use-user.ts provides current user across the app
+- Supabase client-side session via `supabaseClient.auth.getSession()`
+- `useUser` hook in hooks/use-user.ts provides current user across the app
 - On sign out: clear session, redirect to /
 
 ---
 
 ## 6. UI Direction
 
-> **Light theme. Clean. Mobile-first. Student-friendly, not corporate.**
+> **Light theme. Flat. Modern. Mobile-first. Not corporate, not playful.**
 
 ### 6.1 Design Tokens
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| --bg | #F9FAFB | Page background |
-| --surface | #FFFFFF | Card backgrounds |
-| --border | #E5E7EB | Card borders |
-| --text | #111827 | Primary text |
-| --muted | #6B7280 | Secondary text |
-| --brand | #5B4FFF | Primary action, links |
-| --green | #22C55E | Done state, success |
-| --yellow | #F59E0B | In Progress state |
-| --red | #EF4444 | Overdue, error states |
+| Brand Blue | #1A56E8 | Primary actions, links, brand |
+| Slate | #0F172A | Primary text, dark surfaces |
+| Blue Tint | #EBF0FF | Backgrounds, hover states |
+| Off White | #F8FAFF | Page background |
+| Teacher Blue | #1240C4 | Teacher-facing pages only |
 
-**Fonts:**
-- Headings: Inter — weight 700, 800
-- Body: Inter — weight 400, 500
-- Use Google Fonts CDN
+> **Note:** Teal (#0E7490) has been removed from the brand entirely. Do not use it.
 
-**Spacing:**
-- Use 8px grid throughout
-- Card padding: 20px 24px
-- Section spacing: 32px between sections
+**Font:** Plus Jakarta Sans — already loaded via CSS
+- Hero headings: weight 800
+- Section headings: weight 700
+- Card titles: weight 600
+- UI labels: weight 500
+- Body: weight 400
 
-### 6.2 Key Components
+### 6.2 Design Rules
 
-**Nav (nav.tsx):**
-- Fixed top, white background, bottom border
-- Logo left: "Contrib" wordmark
-- Right: group name (if inside a group) + avatar + sign out
+- No gradients, no heavy shadows — flat design only
+- SVG icons only — no emojis anywhere in the UI
+- Soft delete for tasks — never hard delete
+- Evidence is immutable — upload new version, never mutate
+- Teacher pages use #1240C4 (dark blue) to visually separate teacher experience from student experience
+- Student pages use #1A56E8 (brand blue)
 
-**Task Card (task-card.tsx):**
-- White surface card with border
-- Title, assignee chip (avatar initial + name), due date, status badge
-- Clickable to open task-modal.tsx
+### 6.3 Key Components
 
-**Feed Item (feed-item.tsx):**
-- Icon dot (emoji per action type) + actor name + action text + timestamp
-- No interaction — read-only
+**Nav:** Fixed top, white background, bottom border. Logo left. Role-aware routing.
 
-**Invite Banner (invite-banner.tsx):**
-- Dashed brand-color border
-- Invite link text + Copy button
-- Shown at top of group dashboard
+**Task Card:** Title, assignee chip, due date, status badge. Clickable to open task modal.
+
+**Timeline Item:** Actor name + action + task reference + timestamp. Read-only.
+
+**Invite Banner:** Shown at top of group view when group has fewer than 6 members. Dashed border, copy-link button.
+
+**Empty States:** Flat vector illustration, short headline, one-line subtext. No emoji.
 
 ---
 
-## 7. Environment Variables
+## 7. Feature Naming — Locked
+
+| Old Name | New Name | Where |
+|----------|----------|-------|
+| Activity | Timeline | Tab label, nav |
+| Evaluation | Peer Review | Tab label, nav |
+| Export Report (PDF) | Export Contribution Record | Button label |
+| PDF Report | Contribution Record | Document name |
+| Upload evidence | Log your work | Action label |
+
+---
+
+## 8. Environment Variables
 
 Store in .env.local — never commit to Git.
 
@@ -385,66 +446,79 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 ---
 
-## 8. Do NOT Build in v1
+## 9. Do NOT Build Yet
 
-> **If it is not in this PRD, do not build it.**
+> These are real ideas — they're just not now.
 
-- In-app chat or comments on tasks
-- Real-time sync (polling or websockets) — page refresh is acceptable
-- Teacher dashboard or class codes
-- Email or push notifications
+- In-app chat or task comments
+- Real-time sync for students (polling/websockets) — page refresh is acceptable
 - Native mobile app (iOS or Android)
-- Profile photos or image upload (evidence is a URL or file link only)
-- Ratings, effort scores, or peer scoring
+- Email or push notifications
 - Gamification, points, badges
 - Admin dashboard
-- Reporting or flagging users
-- Monetization or premium features
+- Monetization UI or premium gating
 - Google / Facebook OAuth
-- Email verification
-- Multiple groups per assignment
-- Time tracking or Pomodoro
+- Multiple assignees per task
+- Time tracking
+- Institution-level dashboard (university admin role)
+- AI-powered contribution analysis
+- Khmer language toggle
 
 ---
 
-## 9. Recommended Build Order
+## 10. Build Priority Order
 
-Build in this exact order. Do not jump ahead.
-
-| Step | Task | Done when... |
-|------|------|--------------|
-| 1 | Project setup | Next.js (Pages Router) initialized, Tailwind configured, folder structure created |
-| 2 | Supabase setup | Project created, all 5 tables created with correct schema |
-| 3 | Auth | Email/password sign up and sign in working, useUser hook working |
-| 4 | Group creation | Group created, invite token generated, invite link displayed |
-| 5 | Join via link | Member visits /join/[token], joins group, appears in group_members |
-| 6 | Task management | Create task, assign, move through statuses, activity_log written on each change |
-| 7 | Activity feed | Feed tab shows all log entries for the group |
-| 8 | PDF export | Lead clicks Export, PDF generated client-side with correct layout |
-| 9 | Profile page | View name and university, edit working |
-| 10 | Deploy | Live on Vercel, environment variables set, tested end-to-end |
+| Priority | Feature | Done when... |
+|----------|---------|--------------|
+| 1 | Group drill-down `/teacher/course/[id]/group/[groupId]` | Teacher can see task board, timeline, members, peer review results for any group — read-only |
+| 2 | Feature naming update | All renamed labels applied across student and teacher views |
+| 3 | Course analytics `/teacher/course/[id]` | Completion rates, active vs stalled, member participation |
+| 4 | Real-time monitoring | Live updates without page refresh — paid tier gate |
+| 5 | Landing page | Built, live, matches brand and narrative |
+| 6 | Teacher outreach + first case study | One teacher runs a real assignment through Contrib |
 
 ---
 
-## 10. Success Metrics
+## 11. Success Metrics
 
 | Metric | Minimum Signal | Strong Signal |
 |--------|---------------|---------------|
+| Teachers running real assignments | 1 | 5+ |
 | Groups created | 50 in first month | 150+ in first month |
-| PDFs exported | At least 1 per group | >80% of groups export |
+| Contribution Records exported | At least 1 per group | >80% of groups export |
 | Tasks completed per group | Average 3+ | Average 6+ |
 | Repeat usage (2+ groups) | 20% of users | 40%+ of users |
 | Teacher friction reports | 0 | 0 |
 
 ---
 
-## 11. Open Questions
+## 12. Product Narrative (for pitching and marketing)
 
-1. Should join-by-link require any identity verification, or is a self-declared name enough for v1?
-2. What peer eval format do Cambodian universities most commonly use — is there a standard layout to mirror exactly?
-3. Should PDF export be locked to the Lead, or can any member export?
-4. Do we need an archive state for completed groups, or is deletion sufficient for v1?
+**Beat 1 — The world before**
+Every semester, the same thing happens. A group of students gets assigned a project. Four people work. One doesn't. The deadline comes, the presentation goes well, and the teacher gives everyone the same grade.
+
+**Beat 2 — Why it persists**
+Teachers know. They just can't see. Peer evaluation forms exist — but they're filled out at the end, from memory, under social pressure. The form becomes a formality. The effort was always invisible.
+
+**Beat 3 — What Contrib does**
+Students log tasks, upload timestamped evidence, and evaluate each other inside Contrib. Teachers get a live window into every group — a Contribution Record they can use to grade fairly. It's not a new behavior. It's the peer evaluation form universities already use — with a timestamp on every action.
+
+**Beat 4 — The world after**
+The student who pulled the group gets recognized. The teacher grades with evidence, not instinct. Free-riding stops being invisible — and over time, stops being worth it.
+
+**Beat 5 — Why now, why Cambodia**
+237,000 students. 189 institutions. No tool built for this context. The peer evaluation habit already exists. Contrib doesn't ask universities to change — it gives them the tool to do what they always intended.
 
 ---
 
-*End of document.*
+## 13. Open Questions
+
+1. Should peer review scores be visible to the group lead, or only to the teacher?
+2. What is the exact Cambodian university peer evaluation form format to mirror in the Contribution Record?
+3. Should the Contribution Record be exportable by any member, or lead only?
+4. How should group archiving work — archive state or deletion?
+5. What triggers the paid tier gate for teachers — course size, number of groups, or feature access?
+
+---
+
+*End of document. Version 2.0 — March 2026.*
