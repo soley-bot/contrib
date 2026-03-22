@@ -56,7 +56,7 @@ export default function GroupPage() {
   const { activity, refresh: refreshActivity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
   const { evidenceByTask, refresh: refreshEvidence } = useGroupEvidence(taskIds);
-  const { session: evalSession, loading: evalSessionLoading, openEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
+  const { session: evalSession, loading: evalSessionLoading, openEvaluation, closeEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
   const { hasSubmitted, submit: submitEvaluation, refresh: refreshEvalSubmit } = useEvaluation(groupId, user?.id);
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
@@ -72,6 +72,7 @@ export default function GroupPage() {
   const [showTransferLead, setShowTransferLead] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null);
+  const [showResetEval, setShowResetEval] = useState(false);
 
   useEffect(() => {
     if (!userLoading && !user) router.replace('/signup');
@@ -97,7 +98,7 @@ export default function GroupPage() {
   }
 
   async function executeDeleteGroup() {
-    if (!group) return;
+    if (!group || !isLead) return;
     await supabase.from('groups').delete().eq('id', group.id);
     router.push('/dashboard');
   }
@@ -118,7 +119,7 @@ export default function GroupPage() {
   }
 
   async function executeRemoveMember() {
-    if (!memberToRemove || !user || !group) return;
+    if (!memberToRemove || !user || !group || !isLead) return;
     await supabase.from('activity_log').insert({
       group_id: group.id,
       actor_id: user.id,
@@ -148,6 +149,14 @@ export default function GroupPage() {
       meta: null,
     });
     refreshActivity();
+  }
+
+  async function executeResetEvaluation() {
+    if (!groupId) return;
+    await closeEvaluation(groupId);
+    refreshEvalSession();
+    refreshEvalSubmit();
+    setShowResetEval(false);
   }
 
   async function handleSubmitEvaluation(entries: EvaluationInsert[]) {
@@ -459,14 +468,34 @@ export default function GroupPage() {
               />
             )}
 
+            {/* Open + not yet submitted */}
+            {evalSession && !hasSubmitted && isLead && (
+              <div className="flex justify-center mt-2 pb-4">
+                <button onClick={() => setShowResetEval(true)}
+                  className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
+                  Reset evaluation
+                </button>
+              </div>
+            )}
+
             {/* Open + submitted */}
             {evalSession && hasSubmitted && (
-              <EvaluationResults
-                summaries={evalSummaries}
-                members={members}
-                currentUserId={user!.id}
-                memberCount={members.length}
-              />
+              <>
+                <EvaluationResults
+                  summaries={evalSummaries}
+                  members={members}
+                  currentUserId={user!.id}
+                  memberCount={members.length}
+                />
+                {isLead && (
+                  <div className="flex justify-center mt-2 pb-4">
+                    <button onClick={() => setShowResetEval(true)}
+                      className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
+                      Reset evaluation
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -476,10 +505,11 @@ export default function GroupPage() {
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E7E5E4] flex"
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { id: 'dashboard', label: 'Groups',   icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
-          { id: 'tasks',     label: 'Tasks',    icon: <IconBoard size={22} />,    action: () => setTab('tasks') },
-          { id: 'activity',  label: 'Activity', icon: <IconActivity size={22} />, action: () => setTab('activity') },
-          { id: 'members',   label: 'Members',  icon: <IconUsers size={22} />,    action: () => setTab('members') },
+          { id: 'dashboard',  label: 'Groups',   icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
+          { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} />,    action: () => setTab('tasks') },
+          { id: 'activity',   label: 'Activity', icon: <IconActivity size={22} />, action: () => setTab('activity') },
+          { id: 'members',    label: 'Members',  icon: <IconUsers size={22} />,    action: () => setTab('members') },
+          { id: 'evaluation', label: 'Eval',     icon: <IconCheck size={22} />,    action: () => setTab('evaluation') },
         ].map((item) => (
           <button key={item.id} onClick={item.action}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
@@ -567,6 +597,15 @@ export default function GroupPage() {
           confirmLabel="Remove" destructive
           onConfirm={executeRemoveMember}
           onCancel={() => setMemberToRemove(null)}
+        />
+      )}
+      {showResetEval && (
+        <ConfirmModal
+          title="Reset evaluation"
+          message="This will delete all submitted scores and close the evaluation session. This cannot be undone."
+          confirmLabel="Reset" destructive
+          onConfirm={executeResetEvaluation}
+          onCancel={() => setShowResetEval(false)}
         />
       )}
     </div>

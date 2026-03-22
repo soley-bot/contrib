@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import EditProfileModal from '@/components/edit-profile-modal';
-import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers } from '@/components/icons';
+import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers, IconCheck } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
 import type { Profile, Group, UserRole } from '@/types';
 
@@ -9,12 +9,15 @@ interface NavProps {
   profile: Profile | null;
   role?: UserRole;
   group?: Group | null;
+  title?: string;
+  backLabel?: string;
+  onBack?: () => void;
   onTabChange?: (tab: string) => void;
   activeTab?: string;
   onProfileUpdate?: () => void;
 }
 
-export default function Nav({ profile, role, group, onTabChange, activeTab, onProfileUpdate }: NavProps) {
+export default function Nav({ profile, role, group, title, backLabel, onBack, onTabChange, activeTab, onProfileUpdate }: NavProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -44,25 +47,34 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-4 gap-2">
-        {group ? (
+        {(group || onBack) ? (
           <button
-            onClick={() => router.push(homeRoute)}
+            onClick={group ? () => router.push(homeRoute) : onBack}
             className="flex items-center gap-1 text-[#64748B] hover:text-[#0F172A] transition-colors flex-shrink-0"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="text-[13px] font-medium">{isTeacher ? 'Courses' : 'Groups'}</span>
+            <span className="text-[13px] font-medium">
+              {group ? (isTeacher ? 'Courses' : 'Groups') : (backLabel ?? 'Back')}
+            </span>
           </button>
         ) : (
           <span
-            className="text-base font-extrabold text-brand cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => router.push(homeRoute)}
           >
-            Contrib
+            <svg width="20" height="20" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="58" y1="20" x2="58" y2="145" stroke="#1A56E8" strokeWidth="4" opacity="0.15" strokeLinecap="round"/>
+              <circle cx="58" cy="130" r="7" fill="#1A56E8" opacity="0.18"/>
+              <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.18"/>
+              <circle cx="58" cy="46" r="13" fill="#1A56E8"/>
+              <line x1="71" y1="46" x2="120" y2="46" stroke="#1A56E8" strokeWidth="4" strokeLinecap="round"/>
+            </svg>
+            <span className="text-base font-extrabold text-brand">Contrib</span>
           </span>
         )}
-        {group && (
+        {(group || title) && (
           <span className="text-[15px] font-semibold text-[#0F172A] flex-1 text-center truncate px-2">
-            {group.name}
+            {group?.name ?? title}
           </span>
         )}
         <div className="relative flex items-center gap-2" ref={menuRef}>
@@ -134,9 +146,10 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
               Current Group
             </div>
             {[
-              { id: 'tasks',    label: 'Tasks',    icon: <IconBoard size={16} />    },
-              { id: 'activity', label: 'Timeline', icon: <IconActivity size={16} /> },
-              { id: 'members',  label: 'Members',  icon: <IconUsers size={16} />    },
+              { id: 'tasks',      label: 'Tasks',      icon: <IconBoard size={16} />    },
+              { id: 'activity',   label: 'Timeline',   icon: <IconActivity size={16} /> },
+              { id: 'members',    label: 'Members',    icon: <IconUsers size={16} />    },
+              { id: 'evaluation', label: 'Evaluation', icon: <IconCheck size={16} />    },
             ].map((item) => (
               <button
                 key={item.id}
@@ -155,6 +168,15 @@ export default function Nav({ profile, role, group, onTabChange, activeTab, onPr
         )}
 
         <div className="mt-auto">
+          <button
+            onClick={() => router.push('/profile')}
+            className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
+              router.pathname === '/profile' ? 'bg-brand-light text-brand' : 'text-[#64748B] hover:bg-[#EBF0FF]'
+            }`}
+          >
+            <IconUsers size={16} />
+            Profile
+          </button>
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium text-[#64748B] hover:bg-[#EBF0FF] transition-colors"

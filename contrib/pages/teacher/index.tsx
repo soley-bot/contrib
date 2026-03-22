@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/use-user';
 import { useCourses } from '@/hooks/use-courses';
 import { useCreateCourse } from '@/hooks/use-create-course';
 import { supabase } from '@/lib/supabase';
+import type { Course } from '@/types';
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -14,14 +15,28 @@ export default function TeacherDashboard() {
   const { courses, refresh: refreshCourses } = useCourses(user?.id);
   const { createCourse, creating } = useCreateCourse();
   const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
+  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
+
+  // Create course modal
   const [showModal, setShowModal] = useState(false);
   const [courseName, setCourseName] = useState('');
   const [subject, setSubject] = useState('');
   const [formError, setFormError] = useState('');
 
+  // Edit course modal
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editSubject, setEditSubject] = useState('');
+  const [editError, setEditError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Delete course confirm
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
-    if (!loading && profile && profile.role !== 'teacher') router.replace('/dashboard');
+    if (!loading && user && (!profile || profile.role !== 'teacher')) router.replace('/dashboard');
   }, [user, profile, loading, router]);
 
   useEffect(() => {
@@ -30,20 +45,31 @@ export default function TeacherDashboard() {
   }, [courses]);
 
   async function fetchGroupCounts(courseIds: string[]) {
-    const { data } = await supabase
+    const { data: groupData } = await supabase
       .from('groups')
-      .select('course_id')
+      .select('id, course_id')
       .in('course_id', courseIds);
+    const groups = (groupData ?? []) as { id: string; course_id: string }[];
     const counts: Record<string, number> = {};
     courseIds.forEach((id) => { counts[id] = 0; });
-    (data ?? []).forEach((row: { course_id: string }) => {
-      counts[row.course_id] = (counts[row.course_id] ?? 0) + 1;
-    });
+    groups.forEach((row) => { counts[row.course_id] = (counts[row.course_id] ?? 0) + 1; });
     setGroupCounts(counts);
+
+    const groupIds = groups.map((g) => g.id);
+    if (groupIds.length === 0) return;
+    const { data: memberData } = await supabase.from('group_members').select('group_id').in('group_id', groupIds);
+    const groupCourseMap: Record<string, string> = {};
+    groups.forEach((g) => { groupCourseMap[g.id] = g.course_id; });
+    const mCounts: Record<string, number> = {};
+    courseIds.forEach((id) => { mCounts[id] = 0; });
+    (memberData ?? []).forEach((row: { group_id: string }) => {
+      const cid = groupCourseMap[row.group_id];
+      if (cid) mCounts[cid] = (mCounts[cid] ?? 0) + 1;
+    });
+    setMemberCounts(mCounts);
   }
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleCreate() {
     setFormError('');
     if (!courseName.trim() || !subject.trim()) { setFormError('Course name and subject are required.'); return; }
     const course = await createCourse({ name: courseName, subject, teacherId: user!.id });
@@ -51,6 +77,38 @@ export default function TeacherDashboard() {
     refreshCourses();
     setShowModal(false); setCourseName(''); setSubject('');
     router.push(`/teacher/course/${course.id}`);
+  }
+
+  function openEdit(course: Course) {
+    setEditingCourse(course);
+    setEditName(course.name);
+    setEditSubject(course.subject);
+    setEditError('');
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingCourse) return;
+    setEditError('');
+    if (!editName.trim() || !editSubject.trim()) { setEditError('Course name and subject are required.'); return; }
+    setSaving(true);
+    const { error } = await supabase
+      .from('courses')
+      .update({ name: editName.trim(), subject: editSubject.trim() })
+      .eq('id', editingCourse.id);
+    setSaving(false);
+    if (error) { setEditError(error.message); return; }
+    refreshCourses();
+    setEditingCourse(null);
+  }
+
+  async function handleDelete() {
+    if (!confirmDeleteId) return;
+    setDeleting(true);
+    await supabase.from('courses').delete().eq('id', confirmDeleteId);
+    setDeleting(false);
+    setConfirmDeleteId(null);
+    refreshCourses();
   }
 
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
@@ -64,7 +122,7 @@ export default function TeacherDashboard() {
           <span className="text-base font-semibold text-[#1C1917]">My Courses</span>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New course
           </button>
@@ -75,10 +133,8 @@ export default function TeacherDashboard() {
             <div className="text-center py-14">
               <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
                 <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F0FDFA"/>
-                {/* chalkboard */}
                 <rect x="30" y="20" width="140" height="80" rx="6" fill="#0E7490"/>
                 <rect x="36" y="26" width="128" height="68" rx="4" fill="#0C6478"/>
-                {/* chalk lines on board */}
                 <rect x="46" y="36" width="48" height="4" rx="2" fill="white" fillOpacity="0.7"/>
                 <rect x="46" y="44" width="32" height="4" rx="2" fill="white" fillOpacity="0.5"/>
                 <rect x="46" y="52" width="40" height="4" rx="2" fill="white" fillOpacity="0.5"/>
@@ -86,18 +142,15 @@ export default function TeacherDashboard() {
                 <path d="M112 44l2.5 2.5 5.5-5.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <rect x="108" y="56" width="16" height="16" rx="3" fill="white" fillOpacity="0.15"/>
                 <rect x="108" y="76" width="16" height="6" rx="2" fill="white" fillOpacity="0.3"/>
-                {/* tray */}
                 <rect x="30" y="100" width="140" height="8" rx="2" fill="#0A5468"/>
-                {/* person */}
                 <circle cx="100" cy="56" r="10" fill="#BAE6FD"/>
                 <rect x="88" y="72" width="24" height="16" rx="6" fill="#0E7490"/>
-                {/* graduation cap */}
                 <rect x="92" y="46" width="16" height="3" rx="1.5" fill="#1C1917"/>
                 <polygon points="100,42 110,47 100,52 90,47" fill="#1C1917"/>
               </svg>
               <p className="text-[16px] font-bold text-[#1C1917] mb-1.5">No courses yet</p>
               <p className="text-sm text-[#A8A29E] mb-6 max-w-xs mx-auto">Create your first course and share the invite link with your students.</p>
-              <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-[#0E7490] hover:bg-[#0C6478] text-white text-[14px] font-medium rounded-md transition-colors">
+              <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
                 <IconPlus size={16} /> Create your first course
               </button>
             </div>
@@ -108,7 +161,10 @@ export default function TeacherDashboard() {
                   key={course.id}
                   course={course}
                   groupCount={groupCounts[course.id] ?? 0}
+                  memberCount={memberCounts[course.id]}
                   onClick={() => router.push(`/teacher/course/${course.id}`)}
+                  onEdit={() => openEdit(course)}
+                  onDelete={() => setConfirmDeleteId(course.id)}
                 />
               ))}
             </div>
@@ -118,12 +174,73 @@ export default function TeacherDashboard() {
 
       <button
         onClick={() => setShowModal(true)}
-        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-[#0E7490] text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+        className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
         style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
       >
         <IconPlus size={22} />
       </button>
 
+      {/* Delete course confirm */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4">
+          <div className="w-full max-w-[360px] bg-white rounded-[12px] p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
+            <h2 className="text-[15px] font-semibold text-[#1C1917] mb-1">Delete course?</h2>
+            <p className="text-sm text-[#57534E] mb-5">This will permanently delete the course and all its groups, tasks, and members. This cannot be undone.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium text-[#57534E] rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60"
+              >
+                {deleting ? 'Deleting…' : 'Delete course'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit course modal */}
+      {editingCourse && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingCourse(null); }}
+        >
+          <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px]">
+            <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
+              <h2 className="text-base font-semibold text-[#1C1917]">Edit Course</h2>
+              <button onClick={() => setEditingCourse(null)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
+            </div>
+            <form onSubmit={handleEditSave} className="p-5 flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1">
+                <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="e.g. Business Management"
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
+                <input type="text" value={editSubject} onChange={(e) => setEditSubject(e.target.value)} placeholder="e.g. MGT 402"
+                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+              </div>
+              {editError && <p className="text-sm text-red-500">{editError}</p>}
+              <div className="pt-1 border-t border-[#E7E5E4]">
+                <button type="submit" disabled={saving}
+                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  {saving ? 'Saving…' : 'Save changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create course modal */}
       {showModal && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
@@ -133,9 +250,11 @@ export default function TeacherDashboard() {
             <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
               <h2 className="text-base font-semibold text-[#1C1917]">New Course</h2>
-              <button onClick={() => setShowModal(false)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
+              <button onClick={() => setShowModal(false)} className="p-1 text-[#57534E] hover:text-[#1C1917] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </button>
             </div>
-            <form onSubmit={handleCreate} className="p-5 flex flex-col gap-3.5">
+            <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
@@ -148,12 +267,12 @@ export default function TeacherDashboard() {
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E7E5E4]">
-                <button type="submit" disabled={creating}
-                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                <button onClick={handleCreate} disabled={creating}
+                  className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create course'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

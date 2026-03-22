@@ -11,19 +11,19 @@ export default function AuthCallback() {
         subscription.unsubscribe();
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, role')
           .eq('id', session.user.id)
           .single();
-        router.replace(profile ? '/dashboard' : '/onboarding');
+        router.replace(!profile ? '/onboarding' : profile.role === 'teacher' ? '/teacher' : '/dashboard');
       } else if (event === 'INITIAL_SESSION' && session) {
         // Already signed in (e.g. user bookmarked /auth/callback)
         subscription.unsubscribe();
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, role')
           .eq('id', session.user.id)
           .single();
-        router.replace(profile ? '/dashboard' : '/onboarding');
+        router.replace(!profile ? '/onboarding' : profile.role === 'teacher' ? '/teacher' : '/dashboard');
       } else if (event === 'INITIAL_SESSION' && !session) {
         // No session yet — PKCE code exchange in progress, wait for SIGNED_IN
       } else if (!session) {

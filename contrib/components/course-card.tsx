@@ -1,12 +1,28 @@
+import { useState, useRef, useEffect } from 'react';
 import type { Course } from '@/types';
 
 interface CourseCardProps {
   course: Course;
   groupCount: number;
+  memberCount?: number;
   onClick: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function CourseCard({ course, groupCount, onClick }: CourseCardProps) {
+export default function CourseCard({ course, groupCount, memberCount, onClick, onEdit, onDelete }: CourseCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
   return (
     <div
       onClick={onClick}
@@ -20,11 +36,46 @@ export default function CourseCard({ course, groupCount, onClick }: CourseCardPr
         <p className="text-[15px] font-semibold text-[#1C1917] truncate">{course.name}</p>
         <p className="text-xs text-[#A8A29E] mt-0.5">
           {course.subject} · {groupCount} {groupCount === 1 ? 'group' : 'groups'}
+          {memberCount !== undefined && <> · {memberCount} {memberCount === 1 ? 'student' : 'students'}</>}
         </p>
       </div>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#A8A29E] flex-shrink-0">
-        <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      {(onEdit || onDelete) ? (
+        <div className="relative flex-shrink-0" ref={menuRef} onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="w-7 h-7 flex items-center justify-center rounded-md text-[#A8A29E] hover:text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="8" cy="3" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="8" cy="13" r="1.2"/>
+            </svg>
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-8 w-36 bg-white border border-[#E7E5E4] rounded-[8px] shadow-lg py-1 z-20"
+              style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}>
+              {onEdit && (
+                <button
+                  onClick={() => { setMenuOpen(false); onEdit(); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
+                >
+                  Edit course
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => { setMenuOpen(false); onDelete(); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  Delete course
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#A8A29E] flex-shrink-0">
+          <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
     </div>
   );
 }
