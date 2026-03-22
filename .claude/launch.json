@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["start-dev.js"],
       "port": 3000
+    },
+    {
+      "name": "Logo Preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path');h.createServer((q,r)=>{const fp=p.join(process.cwd(),q.url==='/'?'logo-concepts.html':q.url);f.readFile(fp,(e,d)=>{if(e){r.writeHead(404);r.end('Not found');}else{r.writeHead(200,{'Content-Type':'text/html'});r.end(d);}});}).listen(8080)"],
+      "port": 8080
     }
   ]
 }

@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase';
 import Nav from '@/components/nav';
+import TaskCard from '@/components/task-card';
 import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
-import EvidenceList from '@/components/evidence-list';
-import { IconExport } from '@/components/icons';
+import EvaluationResults from '@/components/evaluation-results';
+import { IconExport, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
-import { useCourse } from '@/hooks/use-course';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
 import { useActivity } from '@/hooks/use-activity';
 import { useGroupEvidence } from '@/hooks/use-group-evidence';
 import { useEvaluationSession } from '@/hooks/use-evaluation-session';
 import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
-import { generateReport } from '@/lib/pdf';
-import type { Task, TaskStatus, Evidence } from '@/types';
+import { generateReport, DEFAULT_PDF_THEME } from '@/lib/pdf';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
+import type { Group, GroupMember, Task, ActivityLog } from '@/types';
 
-type Tab = 'tasks' | 'activity' | 'members' | 'peer-review';
+type Tab = 'tasks' | 'activity' | 'members' | 'evaluation';
 
-const STATUS_COLS: { status: TaskStatus; label: string; headerClass: string; countClass: string }[] = [
-  { status: 'todo',       label: 'To Do',      headerClass: 'text-[#57534E]', countClass: 'bg-[#E8E5E3] text-[#57534E]' },
-  { status: 'inprogress', label: 'In Progress', headerClass: 'text-[#B45309]', countClass: 'bg-[#FDE68A] text-[#92400E]' },
-  { status: 'done',       label: 'Done',        headerClass: 'text-[#15803D]', countClass: 'bg-[#BBF7D0] text-[#15803D]' },
+const STATUS_COLS: { status: string; label: string; countClass: string; headerClass: string }[] = [
+  { status: 'todo',       label: 'To Do',       countClass: 'bg-[#E8E5E3] text-[#57534E]',  headerClass: 'bg-[#F5F5F4] text-[#57534E]' },
+  { status: 'inprogress', label: 'In Progress',  countClass: 'bg-[#FDE68A] text-[#92400E]', headerClass: 'bg-[#FEF3C7] text-[#B45309]' },
+  { status: 'done',       label: 'Done',         countClass: 'bg-[#BBF7D0] text-[#15803D]', headerClass: 'bg-[#DCFCE7] text-[#15803D]' },
 ];
 
 export default function TeacherGroupDetail() {
@@ -31,7 +31,6 @@ export default function TeacherGroupDetail() {
   const groupId = typeof router.query.groupId === 'string' ? router.query.groupId : undefined;
 
   const { user, profile, loading: userLoading, refreshProfile } = useUser();
-  const { course, isOwner, loading: courseLoading } = useCourse(courseId, user?.id);
   const { group, members, loading: groupLoading } = useGroup(groupId, user?.id);
   const { tasks } = useTasks(groupId);
   const { activity } = useActivity(groupId);
@@ -41,354 +40,253 @@ export default function TeacherGroupDetail() {
   const { summaries: evalSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
   const [tab, setTab] = useState<Tab>('tasks');
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [courseName, setCourseName] = useState('');
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     if (!userLoading && !user) { router.replace('/login'); return; }
-    if (!userLoading && profile && profile.role !== 'teacher') router.replace('/dashboard');
+    if (!userLoading && user && (!profile || profile.role !== 'teacher')) router.replace('/dashboard');
   }, [user, profile, userLoading, router]);
 
   useEffect(() => {
-    if (!courseLoading && course && !isOwner) router.replace('/teacher');
-  }, [course, isOwner, courseLoading, router]);
+    if (!courseId || !user) return;
+    supabase.from('courses').select('name, teacher_id').eq('id', courseId).single().then(({ data }) => {
+      if (!data) { router.replace('/teacher'); return; }
+      if (data.teacher_id !== user.id) { router.replace('/teacher'); return; }
+      setCourseName(data.name);
+      setIsOwner(true);
+    });
+  }, [courseId, user, router]);
 
   async function handleDownloadPdf() {
-    if (!group || !members.length) return;
-    setDownloading(true);
-    const { data: evidenceData } = await supabase
-      .from('evidence')
-      .select('*, uploader:profiles!evidence_uploaded_by_fkey(*)')
-      .in('task_id', taskIds.length > 0 ? taskIds : ['00000000-0000-0000-0000-000000000000']);
-    const byTask: Record<string, Evidence[]> = {};
-    ((evidenceData as Evidence[]) ?? []).forEach((e) => {
-      if (!byTask[e.task_id]) byTask[e.task_id] = [];
-      byTask[e.task_id].push(e);
-    });
-    generateReport(group, members, tasks, activity, byTask, evalSummaries);
-    setDownloading(false);
-  }
-
-  const loading = userLoading || courseLoading || groupLoading;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-dvh">
-        <div className="spinner" style={{ borderTopColor: '#1240C4' }} />
-      </div>
+    if (!group) return;
+    setDownloadingPdf(true);
+    const [{ data: membersData }, { data: tasksData }, { data: activityData }] = await Promise.all([
+      supabase.from('group_members').select('*, profile:profiles(*)').eq('group_id', group.id).order('joined_at', { ascending: true }),
+      supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
+      supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
+    ]);
+    generateReport(
+      group,
+      (membersData as GroupMember[]) ?? [],
+      (tasksData as Task[]) ?? [],
+      (activityData as ActivityLog[]) ?? [],
+      evidenceByTask,
+      evalSummaries,
+      DEFAULT_PDF_THEME,
     );
+    setDownloadingPdf(false);
   }
 
-  if (!group || !course) return null;
+  if (userLoading || groupLoading) {
+    return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
+  }
+
+  if (!group || !isOwner) return null;
 
   return (
     <div className="min-h-dvh bg-[#FAFAF9]">
-      <Nav profile={profile} role="teacher" onProfileUpdate={refreshProfile} />
+      <Nav
+        profile={profile}
+        role="teacher"
+        group={group}
+        backLabel={courseName || 'Course'}
+        onBack={() => router.push(`/teacher/course/${courseId}`)}
+        onProfileUpdate={refreshProfile}
+      />
 
       <div className="md:pl-[220px]">
-
-        {/* Desktop breadcrumb + export */}
+        {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
-          <div className="flex items-center gap-2 text-sm">
-            <button
-              onClick={() => router.push('/teacher')}
-              className="text-[#A8A29E] hover:text-[#1C1917] transition-colors"
-            >
+          <div className="flex items-center gap-1.5 text-sm">
+            <button onClick={() => router.push('/teacher')} className="text-[#A8A29E] hover:text-[#57534E] transition-colors">
               My Courses
             </button>
-            <span className="text-[#A8A29E]">/</span>
-            <button
-              onClick={() => router.push(`/teacher/course/${courseId}`)}
-              className="text-[#A8A29E] hover:text-[#1C1917] transition-colors"
-            >
-              {course.name}
+            <span className="text-[#D6D3D1]">›</span>
+            <button onClick={() => router.push(`/teacher/course/${courseId}`)} className="text-[#A8A29E] hover:text-[#57534E] transition-colors">
+              {courseName || '…'}
             </button>
-            <span className="text-[#A8A29E]">/</span>
+            <span className="text-[#D6D3D1]">›</span>
             <span className="font-semibold text-[#1C1917]">{group.name}</span>
+            <span className="text-[#A8A29E]">{group.subject}</span>
           </div>
           <button
             onClick={handleDownloadPdf}
-            disabled={downloading}
-            className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            disabled={downloadingPdf}
+            className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
-            <IconExport size={14} />
-            {downloading ? 'Exporting…' : 'Export Contribution Record'}
+            <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export PDF'}
           </button>
-        </div>
-
-        {/* Mobile header */}
-        <div className="md:hidden px-4 pt-14 pb-3 bg-white border-b border-[#E7E5E4]">
-          <button
-            onClick={() => router.push(`/teacher/course/${courseId}`)}
-            className="text-[12px] text-[#A8A29E] mb-1 flex items-center gap-1"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M9 11L5 7l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            {course.name}
-          </button>
-          <div className="flex items-center justify-between">
-            <h1 className="text-[17px] font-bold text-[#1C1917]">{group.name}</h1>
-            <button
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="h-8 px-3 border border-[#E7E5E4] bg-white text-[12px] font-medium rounded-md flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <IconExport size={13} />
-              PDF
-            </button>
-          </div>
         </div>
 
         {/* Tab bar */}
-        <div className="flex border-b border-[#E7E5E4] bg-white overflow-x-auto">
-          {(['tasks', 'activity', 'members', 'peer-review'] as Tab[]).map((t) => {
-            const label = t === 'tasks' ? 'Tasks' : t === 'activity' ? 'Timeline' : t === 'members' ? 'Members' : 'Peer Review';
-            return (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-5 py-3 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
-                  tab === t
-                    ? 'border-[#1240C4] text-[#1240C4]'
-                    : 'border-transparent text-[#57534E] hover:text-[#1C1917]'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
+        <div className="flex border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
+                tab === t ? 'text-brand border-brand' : 'text-[#A8A29E] border-transparent'
+              }`}
+            >
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
         </div>
 
-        <div className="px-4 md:px-6 py-5 max-w-2xl mx-auto">
-
-          {/* ── Tasks ── */}
-          {tab === 'tasks' && (
-            <div className="flex flex-col gap-5">
-              {tasks.length === 0 && (
-                <p className="text-[14px] text-[#A8A29E] text-center py-10">No tasks yet</p>
-              )}
-              {STATUS_COLS.map(({ status, label, headerClass, countClass }) => {
-                const filtered = tasks.filter((t) => t.status === status);
-                if (filtered.length === 0) return null;
-                return (
-                  <div key={status}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`text-[12px] font-semibold uppercase tracking-wide ${headerClass}`}>{label}</span>
-                      <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${countClass}`}>{filtered.length}</span>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      {filtered.map((task) => {
-                        const evidenceCount = (evidenceByTask[task.id] ?? []).length;
-                        return (
-                          <button
-                            key={task.id}
-                            onClick={() => setSelectedTask(task)}
-                            className="w-full text-left bg-white border border-[#E7E5E4] rounded-[8px] px-3 py-2.5 hover:border-[#1240C4]/40 hover:shadow-sm transition-all"
-                            style={{ boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-full bg-[#EEF2FF] text-[#1240C4] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                                {(task.assignee?.name ?? '?').slice(0, 2).toUpperCase()}
-                              </div>
-                              <span className="text-[13px] font-medium text-[#1C1917] flex-1 truncate">{task.title}</span>
-                              {evidenceCount > 0 && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#EEF2FF] text-[#1240C4] flex-shrink-0">
-                                  {evidenceCount} ev
-                                </span>
-                              )}
-                              {task.due_date && (
-                                <span className="text-[11px] text-[#A8A29E] flex-shrink-0">
-                                  {new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                                </span>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+        {/* ── TASKS TAB ── */}
+        {tab === 'tasks' && (
+          <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            {/* Stats row */}
+            <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
+              {[
+                { label: 'Total tasks', value: tasks.length,                                        color: '' },
+                { label: 'Done',        value: tasks.filter(t => t.status === 'done').length,       color: '#16A34A' },
+                { label: 'In progress', value: tasks.filter(t => t.status === 'inprogress').length, color: '#D97706' },
+                { label: 'To do',       value: tasks.filter(t => t.status === 'todo').length,       color: '#A8A29E' },
+              ].map((s) => (
+                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E7E5E4] rounded-[10px] px-3.5 py-2.5 min-w-[80px]"
+                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
+                  <p className="text-lg font-bold" style={{ color: s.color || '#1C1917' }}>{s.value}</p>
+                  <p className="text-[12px] text-[#A8A29E] mt-0.5">{s.label}</p>
+                </div>
+              ))}
             </div>
-          )}
 
-          {/* ── Timeline ── */}
-          {tab === 'activity' && (
-            <div>
-              {activity.length === 0 ? (
-                <p className="text-[14px] text-[#A8A29E] text-center py-10">No activity yet</p>
-              ) : (
-                activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)
-              )}
+            {/* Mobile: flat list */}
+            <div className="md:hidden">
+              {tasks.length === 0
+                ? <p className="text-sm text-[#A8A29E] text-center py-8">No tasks yet.</p>
+                : tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} isLead={false} currentUserId=""
+                      evidenceCount={evidenceByTask[task.id]?.length ?? 0}
+                      onClick={() => {}} onEdit={() => {}} onDelete={() => {}}
+                    />
+                  ))
+              }
             </div>
-          )}
 
-          {/* ── Members ── */}
-          {tab === 'members' && (
-            <div>
-              {members.length === 0 ? (
-                <p className="text-[14px] text-[#A8A29E] text-center py-10">No members</p>
-              ) : (
-                members.map((m) => {
-                  const summary = evalSummaries.find((s) => s.evaluatee_id === m.profile_id);
-                  return (
-                    <div key={m.id}>
-                      <MemberRow
-                        member={m}
-                        tasks={tasks}
-                        isThisMemberLead={m.profile_id === group.lead_id}
-                        canRemove={false}
-                      />
-                      {summary && (
-                        <div className="flex gap-2 pb-2 pl-12 -mt-1 flex-wrap">
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#1240C4]">
-                            Contribution {summary.avg_contribution.toFixed(1)}/5
-                          </span>
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#1240C4]">
-                            Collaboration {summary.avg_collaboration.toFixed(1)}/5
-                          </span>
-                          <span className="text-[11px] text-[#A8A29E]">
-                            {summary.eval_count} review{summary.eval_count !== 1 ? 's' : ''}
-                          </span>
+            {/* Desktop: kanban */}
+            <div className="hidden md:grid grid-cols-3 gap-4">
+              {tasks.length === 0
+                ? <p className="col-span-3 text-sm text-[#A8A29E] text-center py-8">No tasks yet.</p>
+                : STATUS_COLS.map((col) => {
+                    const colTasks = tasks.filter(t => t.status === col.status);
+                    return (
+                      <div key={col.status}>
+                        <div className={`flex items-center gap-1.5 mb-3 px-2.5 py-1.5 rounded-full w-fit ${col.headerClass}`}>
+                          {col.status === 'todo'       && <IconList size={13} />}
+                          {col.status === 'inprogress' && <IconActivity size={13} />}
+                          {col.status === 'done'       && <IconCheck size={13} />}
+                          <span className="text-[11px] font-bold uppercase tracking-wider">{col.label}</span>
+                          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
                         </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-
-          {/* ── Peer Review ── */}
-          {tab === 'peer-review' && (
-            <div>
-              {!evalSession ? (
-                <div className="text-center py-10">
-                  <p className="text-[14px] font-medium text-[#1C1917]">Peer review not opened</p>
-                  <p className="text-[13px] text-[#A8A29E] mt-1">The group lead has not opened peer review for this group yet.</p>
-                </div>
-              ) : evalSummaries.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-[14px] font-medium text-[#1C1917]">No submissions yet</p>
-                  <p className="text-[13px] text-[#A8A29E] mt-1">Students have not submitted their peer reviews yet.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-[#E7E5E4]">
-                        <th className="py-2.5 pr-4 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Member</th>
-                        <th className="py-2.5 pr-4 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Contribution</th>
-                        <th className="py-2.5 pr-4 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Collaboration</th>
-                        <th className="py-2.5 text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide">Reviews</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {evalSummaries.map((s) => {
-                        const member = members.find((m) => m.profile_id === s.evaluatee_id);
-                        const name = member?.profile?.name ?? '—';
-                        return (
-                          <tr key={s.evaluatee_id} className="border-b border-[#E7E5E4] last:border-none">
-                            <td className="py-3 pr-4">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-[#EEF2FF] text-[#1240C4] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                                  {name.slice(0, 2).toUpperCase()}
-                                </div>
-                                <span className="text-[13px] font-medium text-[#1C1917]">{name}</span>
-                              </div>
-                            </td>
-                            <td className="py-3 pr-4">
-                              <span className="text-[13px] font-semibold text-[#1240C4]">{s.avg_contribution.toFixed(1)}</span>
-                              <span className="text-[11px] text-[#A8A29E]">/5</span>
-                            </td>
-                            <td className="py-3 pr-4">
-                              <span className="text-[13px] font-semibold text-[#1240C4]">{s.avg_collaboration.toFixed(1)}</span>
-                              <span className="text-[11px] text-[#A8A29E]">/5</span>
-                            </td>
-                            <td className="py-3">
-                              <span className="text-[13px] text-[#57534E]">{s.eval_count}</span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-        </div>
-      </div>
-
-      {/* Read-only Task Detail Sheet */}
-      {selectedTask && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setSelectedTask(null); }}
-        >
-          <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px] max-h-[80dvh] overflow-y-auto">
-            <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4] sticky top-0 bg-white">
-              <h2 className="text-base font-semibold text-[#1C1917] truncate pr-4">{selectedTask.title}</h2>
-              <button
-                onClick={() => setSelectedTask(null)}
-                className="text-[#57534E] hover:text-[#1C1917] p-1 flex-shrink-0"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            <div className="p-5 flex flex-col gap-4">
-              {/* Status + assignee */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className={`text-[11px] font-bold px-2 py-1 rounded-full ${
-                  selectedTask.status === 'done' ? 'bg-[#DCFCE7] text-[#15803D]' :
-                  selectedTask.status === 'inprogress' ? 'bg-[#FEF3C7] text-[#B45309]' :
-                  'bg-[#F5F5F4] text-[#57534E]'
-                }`}>
-                  {selectedTask.status === 'todo' ? 'To Do' : selectedTask.status === 'inprogress' ? 'In Progress' : 'Done'}
-                </span>
-                {selectedTask.assignee && (
-                  <span className="text-[12px] text-[#57534E]">
-                    Assigned to <span className="font-medium">{selectedTask.assignee.name}</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Due date */}
-              {selectedTask.due_date && (
-                <p className="text-[13px] text-[#57534E]">
-                  Due{' '}
-                  <span className="font-medium">
-                    {new Date(selectedTask.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                </p>
-              )}
-
-              {/* Description */}
-              {selectedTask.description && (
-                <div>
-                  <p className="text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide mb-1.5">Description</p>
-                  <p className="text-[13px] text-[#1C1917] leading-relaxed">{selectedTask.description}</p>
-                </div>
-              )}
-
-              {/* Evidence */}
-              <div>
-                <p className="text-[11px] font-semibold text-[#A8A29E] uppercase tracking-wide mb-2">Evidence</p>
-                {(evidenceByTask[selectedTask.id] ?? []).length > 0 ? (
-                  <EvidenceList evidence={evidenceByTask[selectedTask.id]} />
-                ) : (
-                  <p className="text-[13px] text-[#A8A29E]">No evidence logged yet</p>
-                )}
-              </div>
+                        {colTasks.length === 0 ? (
+                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-[#E7E5E4] rounded-[10px]">
+                            <p className="text-[12px] text-[#C4C0BB]">No tasks here</p>
+                          </div>
+                        ) : colTasks.map((task) => (
+                          <TaskCard key={task.id} task={task} isLead={false} currentUserId=""
+                            evidenceCount={evidenceByTask[task.id]?.length ?? 0}
+                            onClick={() => {}} onEdit={() => {}} onDelete={() => {}}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })
+              }
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* ── ACTIVITY TAB ── */}
+        {tab === 'activity' && (
+          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">Recent activity</p>
+            {activity.length === 0 ? (
+              <div className="flex flex-col items-center py-14 text-center">
+                <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
+                  <ellipse cx="60" cy="82" rx="44" ry="6" fill="#F5F5F4"/>
+                  <circle cx="60" cy="42" r="28" fill="#F5F5F4" stroke="#E7E5E4" strokeWidth="2"/>
+                  <circle cx="60" cy="42" r="22" fill="white"/>
+                  <line x1="60" y1="42" x2="60" y2="26" stroke="#D6D3D1" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="60" y1="42" x2="70" y2="48" stroke="#D6D3D1" strokeWidth="2.5" strokeLinecap="round"/>
+                  <circle cx="60" cy="42" r="2.5" fill="#A8A29E"/>
+                  <line x1="60" y1="22" x2="60" y2="25" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="60" y1="59" x2="60" y2="62" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="40" y1="42" x2="43" y2="42" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="77" y1="42" x2="80" y2="42" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <p className="text-[14px] font-semibold text-[#57534E] mb-1">No activity yet</p>
+                <p className="text-sm text-[#A8A29E]">Actions will appear here as students work.</p>
+              </div>
+            ) : activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)}
+          </div>
+        )}
+
+        {/* ── MEMBERS TAB ── */}
+        {tab === 'members' && (
+          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">
+              {members.length} member{members.length !== 1 ? 's' : ''}
+            </p>
+            {members.map((m) => (
+              <MemberRow
+                key={m.id}
+                member={m}
+                tasks={tasks}
+                isThisMemberLead={m.profile_id === group.lead_id}
+                canRemove={false}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ── EVALUATION TAB ── */}
+        {tab === 'evaluation' && (
+          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            {!evalSession ? (
+              <div className="flex flex-col items-center py-14 text-center gap-2">
+                <svg viewBox="0 0 80 80" fill="none" className="w-20 mx-auto mb-2">
+                  <circle cx="40" cy="40" r="32" fill="#F0FDFA" stroke="#A5F3FC" strokeWidth="2"/>
+                  <path d="M28 40h24M40 28v24" stroke="#0E7490" strokeWidth="2.5" strokeLinecap="round" opacity=".3"/>
+                  <circle cx="40" cy="40" r="6" fill="#0E7490" opacity=".4"/>
+                </svg>
+                <p className="text-[15px] font-semibold text-[#1C1917]">Evaluation not started</p>
+                <p className="text-sm text-[#A8A29E] max-w-xs">
+                  Peer evaluation hasn&apos;t been opened yet. The group lead opens it when all tasks are done.
+                </p>
+              </div>
+            ) : (
+              <EvaluationResults
+                summaries={evalSummaries}
+                members={members}
+                currentUserId={user?.id ?? ''}
+                memberCount={members.length}
+              />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E7E5E4] flex"
+        style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {([
+          { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} /> },
+          { id: 'activity',   label: 'Activity', icon: <IconActivity size={22} /> },
+          { id: 'members',    label: 'Members',  icon: <IconUsers size={22} /> },
+          { id: 'evaluation', label: 'Eval',     icon: <IconCheck size={22} /> },
+        ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((item) => (
+          <button key={item.id} onClick={() => setTab(item.id)}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
+              tab === item.id ? 'text-brand' : 'text-[#A8A29E]'
+            }`}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }

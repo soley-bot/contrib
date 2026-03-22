@@ -37,8 +37,8 @@ export default function Onboarding() {
     const { error: insertError } = await supabase.from('profiles').insert({
       id: user.id,
       name: nameVal.trim() || 'User',
-      university: universityVal.trim() || null,
-      faculty: facultyVal.trim() || null,
+      university: universityVal.trim() || '',
+      faculty: facultyVal.trim() || '',
       year_of_study: yearVal || null,
       avatar_url: avatarUrl,
       role,

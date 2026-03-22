@@ -15,6 +15,8 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
   const router = useRouter();
   const [name, setName] = useState(profile.name ?? '');
   const [university, setUniversity] = useState(profile.university ?? '');
+  const [faculty, setFaculty] = useState(profile.faculty ?? '');
+  const [yearOfStudy, setYearOfStudy] = useState(profile.year_of_study ?? '');
   const [role, setRole] = useState<UserRole>(profile.role ?? 'student');
   const [error, setError] = useState('');
   const { updateProfile, saving } = useProfile();
@@ -22,7 +24,7 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError('Name is required.'); return; }
-    const err = await updateProfile(profile.id, name, university, role);
+    const err = await updateProfile(profile.id, name, university, role, faculty, yearOfStudy);
     if (err) { setError(err); return; }
     onSaved();
     onClose();
@@ -54,6 +56,23 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
             <label className="text-[13px] font-medium text-[#57534E]">University</label>
             <input type="text" value={university} onChange={(e) => setUniversity(e.target.value)}
               className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[13px] font-medium text-[#57534E]">Faculty <span className="font-normal text-[#A8A29E]">(optional)</span></label>
+            <input type="text" value={faculty} onChange={(e) => setFaculty(e.target.value)} placeholder="e.g. Business"
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[13px] font-medium text-[#57534E]">Year of study <span className="font-normal text-[#A8A29E]">(optional)</span></label>
+            <select value={yearOfStudy} onChange={(e) => setYearOfStudy(e.target.value)}
+              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white">
+              <option value="">Select year…</option>
+              <option value="Year 1">Year 1</option>
+              <option value="Year 2">Year 2</option>
+              <option value="Year 3">Year 3</option>
+              <option value="Year 4">Year 4</option>
+              <option value="Year 5+">Year 5+</option>
+            </select>
           </div>
           <RoleToggle value={role} onChange={setRole} />
           {error && <p className="text-sm text-red-500">{error}</p>}

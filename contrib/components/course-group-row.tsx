@@ -11,11 +11,24 @@ interface CourseGroupRowProps {
   inviteLink?: string;
   onDownloadPdf: () => void;
   downloading: boolean;
-  onViewGroup?: () => void;
+  onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onViewGroup }: CourseGroupRowProps) {
+function formatDueDate(dateStr: string): string {
+  const date = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  const yearSuffix = date.getFullYear() !== now.getFullYear() ? `, ${date.getFullYear()}` : '';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + yearSuffix;
+}
+
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onEdit, onDelete }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isOverdue = !!(group.due_date && new Date(group.due_date + 'T00:00:00') < today && taskDone < taskTotal);
 
   function handleCopy() {
     if (!inviteLink) return;
@@ -25,23 +38,29 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
   }
 
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-[10px] p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
+    <div
+      className={`bg-white border border-[#E7E5E4] rounded-[10px] p-4 ${onClick ? 'cursor-pointer hover:border-[#0E7490] hover:shadow-sm transition-all' : ''}`}
+      style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between gap-3">
-        <button
-          onClick={onViewGroup}
-          disabled={!onViewGroup}
-          className="flex items-center gap-3 flex-1 min-w-0 text-left group/name disabled:cursor-default"
-        >
-          <div className="w-10 h-10 rounded-[8px] bg-brand-light text-brand font-bold text-sm flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-[8px] bg-[#F0FDFA] text-[#0E7490] font-bold text-sm flex items-center justify-center flex-shrink-0">
             {group.name.slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold text-[#1C1917] truncate group-hover/name:underline group-disabled/name:no-underline">{group.name}</p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="text-[14px] font-semibold text-[#1C1917] truncate">{group.name}</p>
+              {isOverdue && (
+                <span className="flex-shrink-0 text-[10px] font-semibold bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full border border-red-100">Overdue</span>
+              )}
+            </div>
             <p className="text-[11px] text-[#A8A29E] mt-0.5">
               {memberCount} {memberCount === 1 ? 'member' : 'members'} · {taskDone}/{taskTotal} tasks done
+              {group.due_date && <> · Due {formatDueDate(group.due_date)}</>}
             </p>
           </div>
-        </button>
+        </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {inviteLink && (
             <button
@@ -58,6 +77,24 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           >
             {downloading ? 'Exporting…' : 'PDF'}
           </button>
+          {onEdit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              className="h-8 w-8 border border-[#E7E5E4] bg-white hover:bg-[#F0FDFA] hover:border-[#A5F3FC] text-[#A8A29E] hover:text-[#0E7490] rounded-md flex items-center justify-center transition-colors"
+              title="Edit group"
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2l2 2-7 7H2V9l7-7z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="h-8 w-8 border border-[#E7E5E4] bg-white hover:bg-red-50 hover:border-red-200 text-[#A8A29E] hover:text-red-500 rounded-md flex items-center justify-center transition-colors"
+              title="Delete group"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M11.5 3.5l-.7 7.7a1 1 0 01-1 .8H4.2a1 1 0 01-1-.8L2.5 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          )}
         </div>
       </div>
       <div className="mt-3">
