@@ -87,14 +87,31 @@ Instead of a vertical scrolling page with sections, the landing page uses **hori
 ## Illustrations
 
 All from Storyset/Freepik (free, customizable SVGs with built-in CSS animations).
+Files saved at `contrib/public/illustrations/`.
 
-| Beat | Storyset Name | Customize |
-|------|--------------|-----------|
-| 01 | "Overwhelmed" | Accent color to #1A56E8 |
-| 02 | "Classroom" | Accent color to #1A56E8 |
-| 03 | "Devices" | Accent color to #1A56E8 |
-| 04 | "Grades" | Accent color to #1A56E8 |
-| 05 | "Webinar" | Accent color to #1A56E8 |
+| Beat | File | Storyset Name |
+|------|------|--------------|
+| 01 | `beat-01-overwhelmed.svg` | "Overwhelmed" |
+| 02 | `beat-02-classroom.svg` | "Classroom" |
+| 03 | `beat-03-devices.svg` | "Devices" |
+| 04 | `beat-04-grades.svg` | "Grades" |
+| 05 | `beat-05-webinar.svg` | "Webinar" |
+
+### Illustration Treatment: Subtle Background
+
+Illustrations are used as **subtle backgrounds**, not inline images. Research-backed values:
+
+| Property | Value | Source |
+|----------|-------|--------|
+| **Opacity** | 8-15% (10% default) | Industry standard for line art backgrounds |
+| **Size** | 90% of slide width, max 700px | Tailwind UI uses 80-120% with overflow hidden |
+| **Position** | `absolute; right: -10%; bottom: -10%` | Bottom-right offset, partially off-screen |
+| **Z-index** | 0 (content at z-index 1) | Behind all foreground content |
+| **Dark slides** | `filter: invert(1) brightness(2)` at 10-15% | Inverts to white ghost on dark backgrounds |
+| **Light slides** | Direct SVG at 8-12% opacity | Brand blue tint shows through |
+| **Transition** | `opacity 1s ease 0.2s` | Fades in when slide becomes active |
+
+Customize accent colors to `#1A56E8` on Storyset before downloading.
 
 ## Colors (Brand-Only)
 
