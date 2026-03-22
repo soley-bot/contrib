@@ -59,10 +59,19 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
           </button>
         ) : (
           <span
-            className="text-base font-extrabold text-brand cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => router.push(homeRoute)}
           >
-            Contrib
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="11.5" y1="3" x2="11.5" y2="29" stroke="#1A56E8" strokeWidth="1.5" opacity="0.18" strokeLinecap="round"/>
+              <circle cx="11.5" cy="26" r="2" fill="#1A56E8" opacity="0.2"/>
+              <circle cx="11.5" cy="20" r="2" fill="#1A56E8" opacity="0.2"/>
+              <circle cx="11.5" cy="14.5" r="2.2" fill="#1A56E8" opacity="0.28"/>
+              <circle cx="11.5" cy="7.5" r="4" fill="#1A56E8"/>
+              <line x1="15.5" y1="7.5" x2="26" y2="7.5" stroke="#1A56E8" strokeWidth="2.5" strokeLinecap="round"/>
+              <circle cx="28" cy="7.5" r="2" fill="#1A56E8"/>
+            </svg>
+            <span className="text-base font-extrabold text-brand">Contrib</span>
           </span>
         )}
         {(group || title) && (
@@ -104,7 +113,18 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
 
       {/* ── DESKTOP SIDEBAR ────────────────────────────── */}
       <aside className="hidden md:flex flex-col fixed top-0 left-0 h-full w-[220px] bg-white border-r border-[#E7E5E4] z-50 py-5 px-3">
-        <div className="text-base font-extrabold text-brand px-2 mb-6">Contrib</div>
+        <div className="flex items-center gap-2 px-2 mb-6">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="11.5" y1="3" x2="11.5" y2="29" stroke="#1A56E8" strokeWidth="1.5" opacity="0.18" strokeLinecap="round"/>
+            <circle cx="11.5" cy="26" r="2" fill="#1A56E8" opacity="0.2"/>
+            <circle cx="11.5" cy="20" r="2" fill="#1A56E8" opacity="0.2"/>
+            <circle cx="11.5" cy="14.5" r="2.2" fill="#1A56E8" opacity="0.28"/>
+            <circle cx="11.5" cy="7.5" r="4" fill="#1A56E8"/>
+            <line x1="15.5" y1="7.5" x2="26" y2="7.5" stroke="#1A56E8" strokeWidth="2.5" strokeLinecap="round"/>
+            <circle cx="28" cy="7.5" r="2" fill="#1A56E8"/>
+          </svg>
+          <span className="text-base font-extrabold text-brand">Contrib</span>
+        </div>
 
         <div className="mb-5">
           <div className="text-[11px] font-semibold tracking-widest uppercase text-[#A8A29E] px-2 mb-1.5">
