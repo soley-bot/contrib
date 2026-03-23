@@ -24,6 +24,7 @@ export default function ProfilePage() {
 
   const [tasksDone, setTasksDone] = useState(0);
   const [tasksAssigned, setTasksAssigned] = useState(0);
+  const [statsLoaded, setStatsLoaded] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -50,6 +51,7 @@ export default function ProfilePage() {
         const tasks = data ?? [];
         setTasksAssigned(tasks.length);
         setTasksDone(tasks.filter((t) => t.status === 'done').length);
+        setStatsLoaded(true);
       });
   }, [user?.id]);
 
@@ -69,7 +71,7 @@ export default function ProfilePage() {
   if (loading) {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
-  if (!profile) return null;
+  if (!profile) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
 
   const initials = profile.name?.slice(0, 2).toUpperCase() ?? '??';
   const isStudent = profile.role === 'student';
@@ -163,16 +165,25 @@ export default function ProfilePage() {
             <div className="mt-4">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-2.5">Your stats</p>
               <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { label: 'Groups joined', value: groups.length },
-                  { label: 'Tasks done', value: tasksDone },
-                  { label: 'Tasks assigned', value: tasksAssigned },
-                ].map((s) => (
-                  <div key={s.label} className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-3 text-center shadow-sm">
-                    <p className="text-2xl font-bold text-[#0F172A]">{s.value}</p>
-                    <p className="text-[11px] text-[#94A3B8] mt-0.5 leading-tight">{s.label}</p>
-                  </div>
-                ))}
+                {!statsLoaded ? (
+                  [1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-3 text-center shadow-sm animate-pulse">
+                      <div className="h-7 w-8 bg-[#E2E8F0] rounded mx-auto mb-1" />
+                      <div className="h-3 w-16 bg-[#F1F5F9] rounded mx-auto" />
+                    </div>
+                  ))
+                ) : (
+                  [
+                    { label: 'Groups joined', value: groups.length },
+                    { label: 'Tasks done', value: tasksDone },
+                    { label: 'Tasks assigned', value: tasksAssigned },
+                  ].map((s) => (
+                    <div key={s.label} className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-3 text-center shadow-sm">
+                      <p className="text-2xl font-bold text-[#0F172A]">{s.value}</p>
+                      <p className="text-[11px] text-[#94A3B8] mt-0.5 leading-tight">{s.label}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}

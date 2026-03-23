@@ -105,7 +105,19 @@ export default function Dashboard() {
 
         {/* Content */}
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
-          {!groupsLoading && groups.length === 0 ? (
+          {groupsLoading ? (
+            <div className="flex flex-col gap-2.5 mt-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex items-center gap-3.5 animate-pulse">
+                  <div className="w-10 h-10 rounded-xl bg-[#E2E8F0]" />
+                  <div className="flex-1">
+                    <div className="h-4 w-32 bg-[#E2E8F0] rounded mb-2" />
+                    <div className="h-3 w-20 bg-[#F1F5F9] rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : groups.length === 0 ? (
             <div className="text-center py-14">
               <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
                 <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F1F5F9"/>
@@ -115,27 +127,27 @@ export default function Dashboard() {
                 <rect x="150" y="96" width="6" height="28" rx="3" fill="#CBD5E1"/>
                 {/* laptop */}
                 <rect x="60" y="56" width="80" height="52" rx="6" fill="#0F172A"/>
-                <rect x="64" y="60" width="72" height="44" rx="4" fill="#3A3632"/>
+                <rect x="64" y="60" width="72" height="44" rx="4" fill="#1E293B"/>
                 <rect x="67" y="63" width="66" height="38" rx="2" fill="#F8FAFF"/>
                 {/* screen content */}
-                <rect x="72" y="68" width="32" height="5" rx="2" fill="#FF5841"/>
+                <rect x="72" y="68" width="32" height="5" rx="2" fill="#1A56E8"/>
                 <rect x="72" y="76" width="24" height="3" rx="1.5" fill="#E2E8F0"/>
                 <rect x="72" y="82" width="28" height="3" rx="1.5" fill="#E2E8F0"/>
-                <rect x="110" y="68" width="16" height="16" rx="3" fill="#FFF0EE"/>
-                <path d="M114 76l2.5 2.5 4-4" stroke="#FF5841" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="110" y="68" width="16" height="16" rx="3" fill="#EBF0FF"/>
+                <path d="M114 76l2.5 2.5 4-4" stroke="#1A56E8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 {/* laptop base */}
-                <rect x="50" y="108" width="100" height="4" rx="2" fill="#2C2927"/>
+                <rect x="50" y="108" width="100" height="4" rx="2" fill="#1E293B"/>
                 {/* person left */}
-                <circle cx="52" cy="58" r="12" fill="#FFF0EE"/>
-                <circle cx="52" cy="52" r="6" fill="#FFCFC9"/>
-                <rect x="42" y="66" width="20" height="14" rx="5" fill="#FF5841"/>
+                <circle cx="52" cy="58" r="12" fill="#EBF0FF"/>
+                <circle cx="52" cy="52" r="6" fill="#93B4FF"/>
+                <rect x="42" y="66" width="20" height="14" rx="5" fill="#1A56E8"/>
                 {/* person right */}
                 <circle cx="148" cy="58" r="12" fill="#E0F2FE"/>
                 <circle cx="148" cy="52" r="6" fill="#BAE6FD"/>
-                <rect x="138" y="66" width="20" height="14" rx="5" fill="#0E7490"/>
+                <rect x="138" y="66" width="20" height="14" rx="5" fill="#1240C4"/>
                 {/* speech bubble */}
-                <rect x="155" y="34" width="34" height="18" rx="6" fill="#FF5841"/>
-                <path d="M158 52l-4 4 8-1z" fill="#FF5841"/>
+                <rect x="155" y="34" width="34" height="18" rx="6" fill="#1A56E8"/>
+                <path d="M158 52l-4 4 8-1z" fill="#1A56E8"/>
                 <rect x="160" y="39" width="24" height="3" rx="1.5" fill="white" fillOpacity="0.8"/>
                 <rect x="160" y="45" width="16" height="3" rx="1.5" fill="white" fillOpacity="0.6"/>
               </svg>
@@ -192,11 +204,11 @@ export default function Dashboard() {
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
               <h2 className="text-base font-semibold text-[#0F172A]">New Group</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 text-[#475569] hover:text-[#0F172A] transition-colors">
+              <button type="button" onClick={() => { if (!creating) setShowModal(false); }} className="p-1 text-[#475569] hover:text-[#0F172A] transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
-            <div className="p-5 flex flex-col gap-3.5">
+            <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-[#475569]">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
@@ -214,12 +226,12 @@ export default function Dashboard() {
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-[#E2E8F0]">
-                <button onClick={handleCreate} disabled={creating}
+                <button type="submit" disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

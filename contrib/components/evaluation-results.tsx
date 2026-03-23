@@ -12,7 +12,7 @@ function ScoreBar({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-        <div className="h-full bg-[#FF5841] rounded-full" style={{ width: `${(value / 5) * 100}%` }} />
+        <div className="h-full bg-[#1A56E8] rounded-full" style={{ width: `${(value / 5) * 100}%` }} />
       </div>
       <span className="text-sm font-semibold text-[#0F172A] w-7 text-right">{value}</span>
     </div>
@@ -45,7 +45,7 @@ export default function EvaluationResults({ summaries, members, currentUserId, m
           <span className="text-[12px] text-[#475569]">{submittedCount} of {totalRespondents} responded</span>
         </div>
         <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-          <div className="h-full bg-[#FF5841] rounded-full transition-all" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-[#1A56E8] rounded-full transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function EvaluationResults({ summaries, members, currentUserId, m
           const s = summaries.find((s) => s.evaluatee_id === m.profile_id);
           return (
             <div key={m.profile_id} className={`flex items-center gap-3 px-4 py-3 ${idx < members.length - 1 ? 'border-b border-[#E2E8F0]' : ''}`}>
-              <div className="w-7 h-7 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-[#EBF0FF] text-[#1A56E8] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {initialsFor(m.profile_id)}
               </div>
               <span className="text-sm text-[#0F172A] flex-1 min-w-0 truncate">{nameFor(m.profile_id)}</span>

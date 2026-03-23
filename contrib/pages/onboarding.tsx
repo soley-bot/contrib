@@ -73,14 +73,14 @@ export default function Onboarding() {
         {/* Welcome illustration */}
         <div className="flex items-center gap-4 mb-6 p-4 bg-white border border-[#E2E8F0] rounded-xl">
           <svg viewBox="0 0 64 64" fill="none" className="w-14 h-14 flex-shrink-0">
-            <circle cx="32" cy="32" r="32" fill="#FFF0EE"/>
-            <circle cx="32" cy="24" r="10" fill="#FFCFC9"/>
-            <rect x="16" y="40" width="32" height="18" rx="8" fill="#FF5841"/>
+            <circle cx="32" cy="32" r="32" fill="#EBF0FF"/>
+            <circle cx="32" cy="24" r="10" fill="#93B4FF"/>
+            <rect x="16" y="40" width="32" height="18" rx="8" fill="#1A56E8"/>
             {/* graduation cap */}
             <rect x="22" y="15" width="20" height="4" rx="2" fill="#0F172A"/>
             <polygon points="32,11 44,17 32,23 20,17" fill="#0F172A"/>
             <line x1="44" y1="17" x2="44" y2="24" stroke="#0F172A" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="44" cy="25" r="2" fill="#FF5841"/>
+            <circle cx="44" cy="25" r="2" fill="#1A56E8"/>
           </svg>
           <div>
             <p className="text-[15px] font-bold text-[#0F172A]">Welcome to Contrib</p>

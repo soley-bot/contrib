@@ -9,6 +9,7 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [expired, setExpired] = useState(false);
 
   useEffect(() => {
     // Supabase processes the recovery token in the URL hash and fires an
@@ -18,7 +19,11 @@ export default function ResetPassword() {
         setReady(true);
       }
     });
-    return () => subscription.unsubscribe();
+    // If no event fires within 5 seconds, the link is likely invalid/expired
+    const timeout = setTimeout(() => {
+      setExpired(true);
+    }, 5000);
+    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -39,11 +44,16 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F9FAFB]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 
-        {!ready ? (
+        {!ready && !expired ? (
+          <div className="text-center py-14">
+            <div className="spinner mx-auto mb-4" />
+            <p className="text-sm text-[#475569]">Verifying your reset link…</p>
+          </div>
+        ) : !ready && expired ? (
           <>
             <h1 className="text-[22px] font-bold mb-1">Link invalid or expired</h1>
             <p className="text-sm text-[#475569] mb-7">

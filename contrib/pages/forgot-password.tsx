@@ -28,7 +28,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F9FAFB]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 
@@ -41,7 +41,7 @@ export default function ForgotPassword() {
             </p>
             <p className="text-[13px] text-[#475569] text-center mt-4">
               Back to{' '}
-              <Link href="/login" className="text-[#C53678] font-medium">Log in</Link>
+              <Link href="/login" className="text-brand font-medium">Log in</Link>
             </p>
           </>
         ) : (
@@ -74,7 +74,7 @@ export default function ForgotPassword() {
 
             <p className="text-[13px] text-[#475569] text-center mt-4">
               Back to{' '}
-              <Link href="/login" className="text-[#C53678] font-medium">Log in</Link>
+              <Link href="/login" className="text-brand font-medium">Log in</Link>
             </p>
           </>
         )}

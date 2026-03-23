@@ -62,7 +62,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
         return (
           <div key={member.profile_id} className="bg-white border border-[#E2E8F0] rounded-xl p-4 mb-3">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#EBF0FF] text-[#1A56E8] text-[11px] font-bold flex items-center justify-center flex-shrink-0">
                 {initials}
               </div>
               <div>
@@ -83,8 +83,8 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
                     <button key={v} onClick={() => setScore(idx, field, v)}
                       className={`w-9 h-9 rounded-full text-sm font-semibold transition-colors ${
                         r[field] === v
-                          ? 'bg-[#FF5841] text-white'
-                          : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#FFCFC9] hover:text-[#FF5841]'
+                          ? 'bg-[#1A56E8] text-white'
+                          : 'bg-[#F1F5F9] text-[#475569] hover:bg-[#EBF0FF] hover:text-[#1A56E8]'
                       }`}
                     >
                       {v}
@@ -103,19 +103,19 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
                 onChange={(e) => setRatings((prev) => prev.map((x, i) => i === idx ? { ...x, comment: e.target.value } : x))}
                 placeholder="Leave a note for this teammate…"
                 rows={2}
-                className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#94A3B8] resize-none focus:outline-none focus:border-[#FF5841] transition-colors"
+                className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#94A3B8] resize-none focus:outline-none focus:border-[#1A56E8] transition-colors"
               />
             </div>
           </div>
         );
       })}
 
-      <div className="fixed bottom-0 inset-x-0 md:static md:mt-4 p-4 md:p-0 bg-white md:bg-transparent border-t border-[#E2E8F0] md:border-0"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+      <div className="fixed inset-x-0 md:static md:mt-4 p-4 md:p-0 bg-white md:bg-transparent border-t border-[#E2E8F0] md:border-0"
+        style={{ bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))', paddingBottom: '0.5rem' }}>
         {!showConfirm ? (
           <div>
             <button onClick={() => setShowConfirm(true)} disabled={!allScored}
-              className="w-full h-11 bg-[#FF5841] hover:bg-[#E04030] disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] text-white text-[14px] font-semibold rounded-md transition-colors">
+              className="w-full h-11 bg-[#1A56E8] hover:bg-[#1240C4] disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] text-white text-[14px] font-semibold rounded-md transition-colors">
               Submit Evaluation
             </button>
             {!allScored && (
@@ -123,7 +123,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
             )}
           </div>
         ) : (
-          <div className="bg-[#FFF0EE] border border-[#FFCFC9] rounded-md p-3">
+          <div className="bg-[#EBF0FF] border border-[#93B4FF] rounded-md p-3">
             <p className="text-sm font-medium text-[#0F172A] mb-0.5">Submit evaluation?</p>
             <p className="text-[12px] text-[#475569] mb-3">Your ratings cannot be changed after submitting.</p>
             <div className="flex gap-2">
@@ -132,7 +132,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
                 Cancel
               </button>
               <button onClick={handleSubmit} disabled={submitting}
-                className="flex-1 h-9 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-semibold rounded-md transition-colors disabled:opacity-60">
+                className="flex-1 h-9 bg-[#1A56E8] hover:bg-[#1240C4] text-white text-sm font-semibold rounded-md transition-colors disabled:opacity-60">
                 {submitting ? 'Submitting…' : 'Confirm'}
               </button>
             </div>

@@ -180,6 +180,7 @@ export default function GroupPage() {
   // ── Swipe navigation between tabs ──
   const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
   const touchRef = useRef({ x: 0, y: 0, active: false });
+  const anyModalOpen = !!(selectedTask || showNewTask || editingTask || taskToDelete || showEditGroup || showDeleteGroup || showTransferLead || showLeaveConfirm || memberToRemove || showResetEval);
 
   useEffect(() => {
     function onStart(e: TouchEvent) {
@@ -198,13 +199,14 @@ export default function GroupPage() {
         return TABS[next];
       });
     }
+    if (anyModalOpen) return; // Don't register swipe handlers when modals are open
     document.addEventListener('touchstart', onStart, { passive: true });
     document.addEventListener('touchend', onEnd, { passive: true });
     return () => {
       document.removeEventListener('touchstart', onStart);
       document.removeEventListener('touchend', onEnd);
     };
-  }, []);
+  }, [anyModalOpen]);
 
   if (userLoading || groupLoading) {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
@@ -292,16 +294,14 @@ export default function GroupPage() {
 
             {/* All-tasks-done evaluation nudge (lead only, evaluation not yet open) */}
             {isLead && !evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
-              <div className="bg-[#FFF0EE] border border-[#FFCFC9] rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
+              <div className="bg-[#EBF0FF] border border-[#93B4FF] rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
                 <p className="text-sm text-[#0F172A]">All tasks complete — ready for peer review?</p>
                 <button onClick={handleOpenEvaluation}
-                  className="flex-shrink-0 h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md transition-colors">
+                  className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
                   Open Peer Review
                 </button>
               </div>
             )}
-
-            {members.length < 6 && <InviteBanner token={group.invite_token} />}
 
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
@@ -483,7 +483,7 @@ export default function GroupPage() {
                 </p>
                 {isLead ? (
                   <button onClick={handleOpenEvaluation}
-                    className="mt-2 h-10 px-5 bg-[#FF5841] hover:bg-[#E04030] text-white text-sm font-semibold rounded-md transition-colors">
+                    className="mt-2 h-10 px-5 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-md transition-colors">
                     Open Peer Review
                   </button>
                 ) : (
