@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabase';
 import Nav from '@/components/nav';
@@ -177,6 +177,35 @@ export default function GroupPage() {
   const isMember = members.some((m) => m.profile_id === user?.id);
   const nonLeadMembers = members.filter((m) => m.profile_id !== group?.lead_id);
 
+  // ── Swipe + tap-edge navigation between tabs ──
+  const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const swiping = useRef(false);
+
+  const goTab = useCallback((direction: 1 | -1) => {
+    setTab((prev) => {
+      const idx = TABS.indexOf(prev);
+      const next = idx + direction;
+      if (next < 0 || next >= TABS.length) return prev;
+      return TABS[next];
+    });
+  }, []);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    swiping.current = true;
+  }
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (!swiping.current) return;
+    swiping.current = false;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return; // too short or too vertical
+    goTab(dx < 0 ? 1 : -1);
+  }
+
   if (userLoading || groupLoading) {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
@@ -194,7 +223,7 @@ export default function GroupPage() {
     <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
 
-      <div className="pt-14 md:pt-0 md:pl-[220px]">
+      <div className="pt-14 md:pt-0 md:pl-[220px]" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
 
         {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
@@ -205,16 +234,16 @@ export default function GroupPage() {
             <span className="text-[#CBD5E1]">›</span>
             <span className="font-semibold text-[#0F172A]">{group.name}</span>
             <span className="text-[#94A3B8]">{group.subject}</span>
-            {isLead && (
-              <div className="flex items-center gap-0.5 ml-1">
-                <button onClick={() => setShowEditGroup(true)} className="p-1.5 text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] rounded-md transition-colors" title="Edit group">
-                  <IconPencil size={13} />
-                </button>
+            <div className="flex items-center gap-0.5 ml-1">
+              <button onClick={() => setShowEditGroup(true)} className="p-1.5 text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] rounded-md transition-colors" title="Edit group">
+                <IconPencil size={13} />
+              </button>
+              {isLead && (
                 <button onClick={() => setShowDeleteGroup(true)} className="p-1.5 text-[#94A3B8] hover:text-red-500 hover:bg-red-50 rounded-md transition-colors" title="Delete group">
                   <IconTrash size={13} />
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isLead && (
@@ -249,7 +278,7 @@ export default function GroupPage() {
                 tab === t ? 'text-brand border-brand' : 'text-[#94A3B8] border-transparent'
               }`}
             >
-              {t === 'evaluation' ? 'Evaluation' : t.charAt(0).toUpperCase() + t.slice(1)}
+              {t === 'evaluation' ? 'Peer Review' : t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
           ))}
         </div>
@@ -391,6 +420,10 @@ export default function GroupPage() {
 
             {/* Group actions */}
             <div className="mt-6 flex flex-col gap-2">
+              <button onClick={() => setShowEditGroup(true)}
+                className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
+                <IconPencil size={15} /> Edit Group
+              </button>
               {isLead && (
                 <>
                   <button onClick={() => setShowTransferLead(true)}
@@ -415,10 +448,6 @@ export default function GroupPage() {
                       <IconExport size={15} /> Export Contribution Record
                     </button>
                   </div>
-                  <button onClick={() => setShowEditGroup(true)}
-                    className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
-                    <IconPencil size={15} /> Edit Group
-                  </button>
                   <button onClick={() => setShowDeleteGroup(true)}
                     className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
                     <IconTrash size={15} /> Delete Group
@@ -499,6 +528,14 @@ export default function GroupPage() {
           </div>
         )}
       </div>
+
+      {/* ── MOBILE TAP-EDGE ZONES ── */}
+      {TABS.indexOf(tab) > 0 && (
+        <div className="md:hidden fixed left-0 top-14 bottom-[60px] w-[48px] z-20" onClick={() => goTab(-1)} />
+      )}
+      {TABS.indexOf(tab) < TABS.length - 1 && (
+        <div className="md:hidden fixed right-0 top-14 bottom-[60px] w-[48px] z-20" onClick={() => goTab(1)} />
+      )}
 
       {/* ── MOBILE BOTTOM NAV ── */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] flex"
