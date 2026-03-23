@@ -362,7 +362,7 @@ function CTASlide({ active }: { active: boolean }) {
         <h2 className="font-extrabold text-[#0F172A] mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
           Your work.<br />On record.
         </h2>
-        <p className="text-[16px] text-[#64748B] mb-8">Free for students. Always.</p>
+        <p className="text-[16px] text-[#64748B] mb-8">Now in early access.</p>
         <Link
           href="/signup"
           className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-[#1A56E8] hover:bg-[#1240C4]"
