@@ -29,7 +29,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
 
   async function handleSignOut() {
     await signOut();
-    router.push('/');
+    window.location.href = '/';
   }
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
             {initials}
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-9 w-44 bg-white border border-[#E2E8F0] rounded-[10px] shadow-lg py-1 z-50"
+            <div className="absolute right-0 top-9 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 z-50"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}>
               {profile && (
                 <div className="px-3 py-2 border-b border-[#F3F4F6]">
