@@ -26,13 +26,13 @@ function Logo() {
 function Slide1Visual({ active }: { active: boolean }) {
   return (
     <div className="w-full max-w-[420px] mx-auto">
-      <div className="rounded-2xl bg-[#1E293B] border border-[#334155] overflow-hidden shadow-2xl">
+      <div className="rounded-2xl bg-white border border-[#E2E8F0] overflow-hidden shadow-lg">
         {/* chat header */}
-        <div className="px-4 py-3 border-b border-[#334155] flex items-center gap-2">
+        <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#EF4444]"/>
           <div className="w-2 h-2 rounded-full bg-[#F59E0B]"/>
           <div className="w-2 h-2 rounded-full bg-[#22C55E]"/>
-          <span className="ml-2 text-[12px] text-[#94A3B8] font-medium">Group Project — Mobile App</span>
+          <span className="ml-2 text-[12px] text-[#64748B] font-medium">Group Project — Mobile App</span>
         </div>
         {/* chat messages */}
         <div className="px-4 py-4 flex flex-col gap-3 min-h-[200px]">
@@ -40,7 +40,7 @@ function Slide1Visual({ active }: { active: boolean }) {
             { name: 'Dara', msg: 'I finished the wireframes', done: true, delay: 0 },
             { name: 'Dara', msg: 'Also fixed the login bug', done: true, delay: 0.3 },
             { name: 'Dara', msg: 'Starting the API docs now', done: true, delay: 0.6 },
-            { name: 'Sokha', msg: '👍', done: false, delay: 0.9 },
+            { name: 'Sokha', msg: '...', done: false, delay: 0.9 },
           ].map((m, i) => (
             <div
               key={i}
@@ -52,12 +52,12 @@ function Slide1Visual({ active }: { active: boolean }) {
               }}
             >
               <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold"
-                style={{ background: m.done ? '#1A56E8' : '#334155', color: 'white' }}>
+                style={{ background: m.done ? '#1A56E8' : '#CBD5E1', color: 'white' }}>
                 {m.name.slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <div className="text-[10px] text-[#64748B] mb-0.5">{m.name}</div>
-                <div className="text-[13px] text-[#E2E8F0] bg-[#293548] rounded-lg px-3 py-2 inline-block">
+                <div className="text-[10px] text-[#94A3B8] mb-0.5">{m.name}</div>
+                <div className="text-[13px] text-[#0F172A] bg-[#F1F5F9] rounded-lg px-3 py-2 inline-block">
                   {m.msg}
                 </div>
               </div>
@@ -66,12 +66,12 @@ function Slide1Visual({ active }: { active: boolean }) {
         </div>
         {/* verdict */}
         <div
-          className="mx-4 mb-4 rounded-lg border border-[#EF4444]/30 bg-[#EF4444]/10 px-4 py-3 text-center transition-all duration-500"
+          className="mx-4 mb-4 rounded-lg border border-[#EF4444]/20 bg-[#FEF2F2] px-4 py-3 text-center transition-all duration-500"
           style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.8s' : '0s' }}
         >
           <div className="text-[11px] font-bold text-[#EF4444] uppercase tracking-widest mb-1">Final Grade</div>
-          <div className="text-[18px] font-extrabold text-white">Everyone gets B+.</div>
-          <div className="text-[12px] text-[#94A3B8] mt-0.5">Same grade. Different effort.</div>
+          <div className="text-[18px] font-extrabold text-[#0F172A]">Everyone gets B+.</div>
+          <div className="text-[12px] text-[#64748B] mt-0.5">Same grade. Different effort.</div>
         </div>
       </div>
     </div>
@@ -118,10 +118,10 @@ function Slide2Visual({ active }: { active: boolean }) {
       {/* FORMALITY stamp */}
       <div
         className="absolute inset-0 flex items-center justify-center transition-all duration-500 pointer-events-none"
-        style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.1s' : '0s' }}
+        style={{ opacity: active ? 0.45 : 0, transitionDelay: active ? '1.1s' : '0s' }}
       >
-        <div className="border-4 border-[#EF4444]/60 rounded-lg px-5 py-2 rotate-[-12deg]">
-          <span className="text-[22px] font-extrabold text-[#EF4444]/70 tracking-[0.25em] uppercase">Formality</span>
+        <div className="border-4 border-[#EF4444]/50 rounded-lg px-5 py-2 rotate-[-12deg]">
+          <span className="text-[22px] font-extrabold text-[#EF4444]/60 tracking-[0.25em] uppercase">Formality</span>
         </div>
       </div>
     </div>
@@ -527,11 +527,17 @@ export default function Landing() {
               {i < SLIDES.length - 1 && (
                 <button
                   onClick={() => goTo(i + 1)}
-                  className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto animate-bounce"
+                  className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-1"
                   aria-label="Next slide"
                 >
-                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                    <path d="M8 12l6 5 6-5" stroke="#1A56E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Paper plane */}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="animate-bounce" style={{ animationDuration: '2s' }}>
+                    <path d="M22 2L11 13" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="#1A56E8" fillOpacity="0.08"/>
+                  </svg>
+                  {/* Chevron */}
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-pulse">
+                    <path d="M6 8l4 4 4-4" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
               )}
