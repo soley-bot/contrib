@@ -1,306 +1,624 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
-const IconCheck = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2.5 7l3 3 6-6" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IconArrowUp = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M7 11V3M3.5 6.5L7 3l3.5 3.5" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IconUsers = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <circle cx="5" cy="4.5" r="2" stroke="var(--brand)" strokeWidth="1.5"/>
-    <path d="M1 11.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M10 6.5c1.1 0 2 .9 2 2v1" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8.5 3c.8 0 1.5.7 1.5 1.5S9.3 6 8.5 6" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-const IconLink = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M6 8l-1 1a2.83 2.83 0 01-4-4l2-2a2.83 2.83 0 014 0" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8 6l1-1a2.83 2.83 0 014 4l-2 2a2.83 2.83 0 01-4 0" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M5 9l4-4" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-const IconTask = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <rect x="3" y="3" width="14" height="14" rx="3" stroke="var(--brand)" strokeWidth="1.5"/>
-    <path d="M6.5 10l2.5 2.5 4.5-5" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IconActivity = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M3 10h2.5l2-5 3 9 2-7 1.5 3H17" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IconPDF = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M5 3h7l4 4v11a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="var(--brand)" strokeWidth="1.5"/>
-    <path d="M12 3v4h4" stroke="var(--brand)" strokeWidth="1.5" strokeLinejoin="round"/>
-    <path d="M10 9v5M7.5 12l2.5 2.5L12.5 12" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+// ─── Logo ────────────────────────────────────────────────────────────────────
 
-const HeroIllustration = () => (
-  <svg viewBox="0 0 360 196" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-    <rect width="360" height="196" rx="14" fill="#F8FAFF"/>
-    <rect width="360" height="44" rx="14" fill="var(--brand)"/>
-    <rect y="28" width="360" height="16" fill="var(--brand)"/>
-    <circle cx="22" cy="22" r="5.5" fill="white" fillOpacity="0.35"/>
-    <circle cx="38" cy="22" r="5.5" fill="white" fillOpacity="0.35"/>
-    <circle cx="54" cy="22" r="5.5" fill="white" fillOpacity="0.35"/>
-    <rect x="76" y="14" width="160" height="16" rx="6" fill="white" fillOpacity="0.25"/>
-    <rect x="84" y="19" width="80" height="6" rx="3" fill="white" fillOpacity="0.4"/>
-    <circle cx="314" cy="22" r="11" fill="var(--brand)"/>
-    <text x="314" y="26" textAnchor="middle" fontSize="8" fontWeight="700" fill="white">SO</text>
-    <circle cx="330" cy="22" r="11" fill="var(--brand)" fillOpacity="0.6"/>
-    <text x="330" y="26" textAnchor="middle" fontSize="8" fontWeight="700" fill="white">VR</text>
-    <circle cx="346" cy="22" r="11" fill="white" fillOpacity="0.4"/>
-    <text x="346" y="26" textAnchor="middle" fontSize="8" fontWeight="700" fill="white">KD</text>
-    <rect x="14" y="56" width="100" height="13" rx="4" fill="#F3F4F6"/>
-    <text x="22" y="66" fontSize="8" fontWeight="700" fill="#64748B" letterSpacing="0.5">TO DO  2</text>
-    <rect x="128" y="56" width="104" height="13" rx="4" fill="var(--brand-light)"/>
-    <text x="136" y="66" fontSize="8" fontWeight="700" fill="var(--brand)" letterSpacing="0.5">IN PROGRESS  2</text>
-    <rect x="246" y="56" width="100" height="13" rx="4" fill="#D1FAE5"/>
-    <text x="254" y="66" fontSize="8" fontWeight="700" fill="#16A34A" letterSpacing="0.5">DONE  2</text>
-    <rect x="14" y="76" width="100" height="48" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1"/>
-    <rect x="22" y="86" width="56" height="7" rx="3" fill="#0F172A"/>
-    <rect x="22" y="97" width="40" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="101" cy="108" r="7" fill="var(--brand-light)"/>
-    <text x="101" y="111" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">SO</text>
-    <rect x="14" y="132" width="100" height="48" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1"/>
-    <rect x="22" y="142" width="48" height="7" rx="3" fill="#0F172A"/>
-    <rect x="22" y="153" width="60" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="101" cy="164" r="7" fill="var(--brand-light)"/>
-    <text x="101" y="167" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">KD</text>
-    <rect x="128" y="76" width="104" height="48" rx="8" fill="white" stroke="var(--brand-border)" strokeWidth="1"/>
-    <rect x="128" y="76" width="4" height="48" rx="2" fill="var(--brand)"/>
-    <rect x="140" y="86" width="65" height="7" rx="3" fill="#0F172A"/>
-    <rect x="140" y="97" width="42" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="219" cy="108" r="7" fill="var(--brand-light)"/>
-    <text x="219" y="111" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">VR</text>
-    <rect x="128" y="132" width="104" height="48" rx="8" fill="white" stroke="var(--brand-border)" strokeWidth="1"/>
-    <rect x="128" y="132" width="4" height="48" rx="2" fill="var(--brand)"/>
-    <rect x="140" y="142" width="55" height="7" rx="3" fill="#0F172A"/>
-    <rect x="140" y="153" width="48" height="5" rx="2.5" fill="#D1D5DB"/>
-    <circle cx="219" cy="164" r="7" fill="var(--brand-light)"/>
-    <text x="219" y="167" textAnchor="middle" fontSize="6" fontWeight="800" fill="var(--brand)">LM</text>
-    <rect x="246" y="76" width="100" height="48" rx="8" fill="white" stroke="#BBF7D0" strokeWidth="1" fillOpacity="0.7"/>
-    <rect x="254" y="86" width="52" height="7" rx="3" fill="#9CA3AF"/>
-    <rect x="254" y="97" width="40" height="5" rx="2.5" fill="#E5E7EB"/>
-    <circle cx="333" cy="100" r="9" fill="#DCFCE7"/>
-    <path d="M328 100l3 3 5-5" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <rect x="246" y="132" width="100" height="48" rx="8" fill="white" stroke="#BBF7D0" strokeWidth="1" fillOpacity="0.7"/>
-    <rect x="254" y="142" width="62" height="7" rx="3" fill="#9CA3AF"/>
-    <rect x="254" y="153" width="34" height="5" rx="2.5" fill="#E5E7EB"/>
-    <circle cx="333" cy="156" r="9" fill="#DCFCE7"/>
-    <path d="M328 156l3 3 5-5" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+function Logo() {
+  return (
+    <div className="flex items-center gap-2">
+      <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
+        <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
+        <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
+        <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
+        <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
+        <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
+      </svg>
+      <span className="text-lg font-extrabold tracking-tight text-[#0F172A]">Contrib</span>
+    </div>
+  );
+}
+
+// ─── Slide visuals ────────────────────────────────────────────────────────────
+
+function Slide1Visual({ active }: { active: boolean }) {
+  return (
+    <div className="w-full max-w-[420px] mx-auto">
+      <div className="rounded-2xl bg-[#1E293B] border border-[#334155] overflow-hidden shadow-2xl">
+        {/* chat header */}
+        <div className="px-4 py-3 border-b border-[#334155] flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#EF4444]"/>
+          <div className="w-2 h-2 rounded-full bg-[#F59E0B]"/>
+          <div className="w-2 h-2 rounded-full bg-[#22C55E]"/>
+          <span className="ml-2 text-[12px] text-[#94A3B8] font-medium">Group Project — Mobile App</span>
+        </div>
+        {/* chat messages */}
+        <div className="px-4 py-4 flex flex-col gap-3 min-h-[200px]">
+          {[
+            { name: 'Dara', msg: 'I finished the wireframes', done: true, delay: 0 },
+            { name: 'Dara', msg: 'Also fixed the login bug', done: true, delay: 0.3 },
+            { name: 'Dara', msg: 'Starting the API docs now', done: true, delay: 0.6 },
+            { name: 'Sokha', msg: '👍', done: false, delay: 0.9 },
+          ].map((m, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-2.5 transition-all duration-500"
+              style={{
+                opacity: active ? 1 : 0,
+                transform: active ? 'translateY(0)' : 'translateY(8px)',
+                transitionDelay: active ? `${m.delay + 0.4}s` : '0s',
+              }}
+            >
+              <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold"
+                style={{ background: m.done ? '#1A56E8' : '#334155', color: 'white' }}>
+                {m.name.slice(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <div className="text-[10px] text-[#64748B] mb-0.5">{m.name}</div>
+                <div className="text-[13px] text-[#E2E8F0] bg-[#293548] rounded-lg px-3 py-2 inline-block">
+                  {m.msg}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* verdict */}
+        <div
+          className="mx-4 mb-4 rounded-lg border border-[#EF4444]/30 bg-[#EF4444]/10 px-4 py-3 text-center transition-all duration-500"
+          style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.8s' : '0s' }}
+        >
+          <div className="text-[11px] font-bold text-[#EF4444] uppercase tracking-widest mb-1">Final Grade</div>
+          <div className="text-[18px] font-extrabold text-white">Everyone gets B+.</div>
+          <div className="text-[12px] text-[#94A3B8] mt-0.5">Same grade. Different effort.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide2Visual({ active }: { active: boolean }) {
+  const scores = [5, 5, 4, 5, 5, 4, 5, 5];
+  return (
+    <div className="w-full max-w-[420px] mx-auto relative">
+      <div
+        className="rounded-2xl bg-white border border-[#E2E8F0] overflow-hidden shadow-lg transition-all duration-500"
+        style={{ opacity: active ? 1 : 0, transform: active ? 'translateX(0)' : 'translateX(24px)', transitionDelay: active ? '0.3s' : '0s' }}
+      >
+        <div className="bg-[#F8FAFF] border-b border-[#E2E8F0] px-5 py-3">
+          <div className="text-[13px] font-bold text-[#0F172A]">Peer Evaluation Form</div>
+          <div className="text-[11px] text-[#64748B]">Group Project — Semester 2</div>
+        </div>
+        <div className="px-5 py-4">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr className="text-[#94A3B8]">
+                <th className="text-left pb-2 font-medium">Member</th>
+                <th className="text-center pb-2 font-medium">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {['Dara', 'Sokha', 'Rith', 'Maly'].map((name, i) => (
+                <tr key={name} className="border-t border-[#F1F5F9]">
+                  <td className="py-2 text-[#0F172A] font-medium">{name}</td>
+                  <td className="py-2 text-center">
+                    <div className="flex justify-center gap-0.5">
+                      {[1,2,3,4,5].map(star => (
+                        <div key={star} className={`w-3 h-3 rounded-sm ${star <= scores[i] ? 'bg-[#F59E0B]' : 'bg-[#E2E8F0]'}`}/>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {/* FORMALITY stamp */}
+      <div
+        className="absolute inset-0 flex items-center justify-center transition-all duration-500 pointer-events-none"
+        style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.1s' : '0s' }}
+      >
+        <div className="border-4 border-[#EF4444]/60 rounded-lg px-5 py-2 rotate-[-12deg]">
+          <span className="text-[22px] font-extrabold text-[#EF4444]/70 tracking-[0.25em] uppercase">Formality</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide3Visual({ active }: { active: boolean }) {
+  const members = [
+    { name: 'Dara', pct: 47, color: '#1A56E8' },
+    { name: 'Sokha', pct: 28, color: '#93B4FF' },
+    { name: 'Rith', pct: 15, color: '#CBD5E1' },
+    { name: 'Maly', pct: 10, color: '#E2E8F0' },
+  ];
+  return (
+    <div className="w-full max-w-[420px] mx-auto">
+      <div className="rounded-2xl bg-white border border-[#E2E8F0] shadow-lg overflow-hidden">
+        <div className="bg-[#F8FAFF] border-b border-[#E2E8F0] px-4 py-3 flex items-center justify-between">
+          <span className="text-[13px] font-bold text-[#0F172A]">Group Contributions</span>
+          <span className="text-[10px] font-semibold text-[#1A56E8] bg-[#EBF0FF] px-2 py-0.5 rounded-full">Live</span>
+        </div>
+        {/* tasks */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-2">Recent Tasks</div>
+          {[
+            { task: 'Wireframes', assignee: 'DA', done: true, delay: 0.3 },
+            { task: 'Login bug fix', assignee: 'DA', done: true, delay: 0.5 },
+            { task: 'API documentation', assignee: 'SK', done: false, delay: 0.7 },
+          ].map((t, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2.5 py-1.5 transition-all duration-500"
+              style={{ opacity: active ? 1 : 0, transform: active ? 'translateX(0)' : 'translateX(-12px)', transitionDelay: active ? `${t.delay}s` : '0s' }}
+            >
+              <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${t.done ? 'bg-[#16A34A]' : 'bg-[#EBF0FF] border border-[#93B4FF]'}`}>
+                {t.done && (
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                    <path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+              <span className="text-[13px] text-[#0F172A] flex-1">{t.task}</span>
+              <div className="w-6 h-6 rounded-full bg-[#EBF0FF] flex items-center justify-center text-[9px] font-bold text-[#1A56E8]">{t.assignee}</div>
+            </div>
+          ))}
+        </div>
+        {/* contribution bars */}
+        <div className="px-4 py-3 border-t border-[#F1F5F9]">
+          <div className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-3">Contribution</div>
+          {members.map((m, i) => (
+            <div key={m.name} className="flex items-center gap-2.5 mb-2">
+              <div className="w-16 text-[12px] font-medium text-[#0F172A]">{m.name}</div>
+              <div className="flex-1 h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: active ? `${m.pct}%` : '0%',
+                    background: m.color,
+                    transitionDelay: active ? `${0.9 + i * 0.15}s` : '0s',
+                  }}
+                />
+              </div>
+              <div className="w-8 text-right text-[11px] font-semibold text-[#64748B]"
+                style={{ opacity: active ? 1 : 0, transition: 'opacity 0.3s', transitionDelay: active ? `${1.3 + i * 0.15}s` : '0s' }}>
+                {m.pct}%
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide4Visual({ active }: { active: boolean }) {
+  const grades = [
+    { name: 'Dara', grade: 'A', color: '#16A34A', bg: '#DCFCE7', border: '#BBF7D0', delay: 0.3 },
+    { name: 'Sokha', grade: 'B+', color: '#1A56E8', bg: '#EBF0FF', border: '#93B4FF', delay: 0.55 },
+    { name: 'Rith', grade: 'C+', color: '#D97706', bg: '#FEF3C7', border: '#FDE68A', delay: 0.8 },
+    { name: 'Maly', grade: 'C', color: '#9CA3AF', bg: '#F9FAFB', border: '#E5E7EB', delay: 1.05 },
+  ];
+  return (
+    <div className="w-full max-w-[420px] mx-auto">
+      <div className="grid grid-cols-2 gap-3">
+        {grades.map((g) => (
+          <div
+            key={g.name}
+            className="rounded-2xl border p-4 text-center transition-all duration-500"
+            style={{
+              background: g.bg,
+              borderColor: g.border,
+              opacity: active ? 1 : 0,
+              transform: active ? 'scale(1)' : 'scale(0.85)',
+              transitionDelay: active ? `${g.delay}s` : '0s',
+            }}
+          >
+            <div className="text-[11px] font-bold text-[#64748B] mb-2">{g.name}</div>
+            <div className="text-[40px] font-extrabold leading-none" style={{ color: g.color }}>{g.grade}</div>
+          </div>
+        ))}
+      </div>
+      <div
+        className="mt-3 text-center text-[12px] text-[#64748B] transition-all duration-500"
+        style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.4s' : '0s' }}
+      >
+        Grades based on evidence, not memory.
+      </div>
+    </div>
+  );
+}
+
+function Slide5Visual({ active }: { active: boolean }) {
+  const stats = [
+    { value: '237K', label: 'university students', delay: 0.3 },
+    { value: '189', label: 'institutions', delay: 0.6 },
+    { value: '0', label: 'tools built for this', delay: 0.9 },
+  ];
+  return (
+    <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4">
+      {stats.map((s) => (
+        <div
+          key={s.label}
+          className="rounded-2xl border border-[#1E293B] bg-[#1E293B]/60 px-6 py-5 flex items-center gap-4 transition-all duration-600"
+          style={{
+            opacity: active ? 1 : 0,
+            transform: active ? 'translateY(0)' : 'translateY(20px)',
+            transitionDelay: active ? `${s.delay}s` : '0s',
+          }}
+        >
+          <div className="text-[42px] font-extrabold text-white leading-none w-24 flex-shrink-0">{s.value}</div>
+          <div className="text-[14px] text-[#93B4FF]">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Slide definitions ────────────────────────────────────────────────────────
+
+interface Slide {
+  id: number;
+  label: string;
+  title: string;
+  body: string;
+  bg: string;
+  textColor: string;
+  labelColor: string;
+  illustration: string;
+  illustrationInvert: boolean;
+  Visual: React.FC<{ active: boolean }>;
+}
+
+const SLIDES: Slide[] = [
+  {
+    id: 1,
+    label: 'Every semester',
+    title: 'The same thing happens.',
+    body: "A group of students gets assigned a project. Four people work. One doesn\u2019t. The deadline comes \u2014 and everyone gets the same grade.",
+    bg: '#0F172A',
+    textColor: 'white',
+    labelColor: '#93B4FF',
+    illustration: '/illustrations/beat-01-overwhelmed.svg',
+    illustrationInvert: true,
+    Visual: Slide1Visual,
+  },
+  {
+    id: 2,
+    label: 'The real problem',
+    title: "Teachers know. They just can\u2019t see.",
+    body: "Peer evaluation forms exist \u2014 but they\u2019re filled out at the end, from memory, under social pressure. The form becomes a formality.",
+    bg: '#FAFAF9',
+    textColor: '#0F172A',
+    labelColor: '#1A56E8',
+    illustration: '/illustrations/beat-02-classroom.svg',
+    illustrationInvert: false,
+    Visual: Slide2Visual,
+  },
+  {
+    id: 3,
+    label: 'The shift',
+    title: "Make effort visible \u2014 while it\u2019s happening.",
+    body: 'Students log tasks and review each other inside Contrib. Teachers get a live Contribution Record for every group.',
+    bg: '#FFFFFF',
+    textColor: '#0F172A',
+    labelColor: '#1A56E8',
+    illustration: '/illustrations/beat-03-devices.svg',
+    illustrationInvert: false,
+    Visual: Slide3Visual,
+  },
+  {
+    id: 4,
+    label: 'The result',
+    title: 'The grade reflects the work.',
+    body: 'The student who carried the group gets recognized. The teacher grades with evidence, not instinct.',
+    bg: '#F8FAFF',
+    textColor: '#0F172A',
+    labelColor: '#1A56E8',
+    illustration: '/illustrations/beat-04-grades.svg',
+    illustrationInvert: false,
+    Visual: Slide4Visual,
+  },
+  {
+    id: 5,
+    label: 'Why now. Why Cambodia.',
+    title: 'No tool was built for this.',
+    body: "Cambodia\u2019s higher education is growing fast \u2014 but fair group assessment hasn\u2019t kept up. Contrib gives universities the tool to do what they always intended.",
+    bg: '#0F172A',
+    textColor: 'white',
+    labelColor: '#93B4FF',
+    illustration: '/illustrations/beat-05-webinar.svg',
+    illustrationInvert: true,
+    Visual: Slide5Visual,
+  },
+];
+
+// ─── CTA Slide ────────────────────────────────────────────────────────────────
+
+function CTASlide({ active }: { active: boolean }) {
+  return (
+    <div
+      className="snap-start flex-shrink-0 w-screen min-h-[calc(100dvh-56px)] relative flex flex-col items-center justify-center px-6 py-12"
+      style={{ background: '#FFFFFF' }}
+    >
+      <div
+        className="text-center max-w-md transition-all duration-700"
+        style={{ opacity: active ? 1 : 0, transform: active ? 'translateY(0)' : 'translateY(20px)', transitionDelay: active ? '0.2s' : '0s' }}
+      >
+        {/* Record mark large */}
+        <div className="flex justify-center mb-6">
+          <svg width="48" height="48" viewBox="0 0 160 160" fill="none">
+            <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
+            <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
+            <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
+            <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
+            <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
+          </svg>
+        </div>
+        <h2 className="font-extrabold text-[#0F172A] mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
+          Your work.<br />On record.
+        </h2>
+        <p className="text-[16px] text-[#64748B] mb-8">Free for students. Always.</p>
+        <Link
+          href="/signup"
+          className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-[#1A56E8] hover:bg-[#1240C4]"
+        >
+          Get started — it&apos;s free
+        </Link>
+        <p className="mt-3 text-[13px] text-[#94A3B8]">No credit card. No setup. Just start.</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Landing() {
   const router = useRouter();
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [hintVisible, setHintVisible] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const totalSlides = SLIDES.length + 1; // +1 for CTA
 
+  // Redirect logged-in users
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) router.replace('/dashboard');
     });
   }, [router]);
 
-  return (
-    <div className="min-h-dvh bg-white">
+  // Track active slide via scroll
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const idx = Math.round(el.scrollLeft / el.clientWidth);
+      setActiveSlide(idx);
+      if (idx > 0) setHintVisible(false);
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
 
+  const goTo = useCallback((idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(totalSlides - 1, idx));
+    el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' });
+  }, [totalSlides]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') goTo(activeSlide + 1);
+      if (e.key === 'ArrowLeft') goTo(activeSlide - 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeSlide, goTo]);
+
+  return (
+    <div className="min-h-dvh bg-white overflow-hidden">
       {/* Nav */}
-      <nav className="h-14 border-b border-[#E2E8F0] sticky top-0 z-50 bg-white">
-        <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
-              <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
-              <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
-              <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
-              <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
-              <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
-              <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
-            </svg>
-            <span className="text-lg font-extrabold tracking-tight text-[#0F172A]">Contrib</span>
-          </div>
+      <nav className="h-14 sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#E2E8F0]">
+        <div className="max-w-none px-5 h-full flex items-center justify-between">
+          <Logo />
           <div className="flex gap-2">
             <Link href="/login" className="h-8 px-3 flex items-center text-sm text-[#6B7280] hover:text-[#111827] font-medium rounded-md transition-colors">
               Log in
             </Link>
-            <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-brand hover:bg-brand-hover">
+            <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-[#1A56E8] hover:bg-[#1240C4]">
               Sign up free
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div className="max-w-6xl mx-auto px-5">
-        <div className="py-10 md:py-16 flex flex-col md:flex-row md:items-center md:gap-12 lg:gap-20">
-
-          {/* Text */}
-          <div className="md:flex-1 text-center md:text-left mb-6 md:mb-0">
-            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full mb-4 bg-brand-light text-brand">
-              For Cambodian university students
-            </span>
-            <h1 className="text-[32px] md:text-[44px] lg:text-[52px] font-extrabold leading-tight tracking-tight text-[#111827] mb-4">
-              Track. Prove.<br />
-              <span className="text-brand">Export.</span>
-            </h1>
-            <p className="text-[15px] md:text-[17px] text-[#6B7280] leading-relaxed mb-7 max-w-xs mx-auto md:mx-0 md:max-w-sm">
-              Stop arguing about who did what. Contrib records every contribution and exports a PDF your teacher already expects.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-              <Link href="/signup" className="inline-flex items-center justify-center h-12 px-8 text-white text-[15px] font-semibold rounded-md transition-colors bg-brand hover:bg-brand-hover">
-                Get started — it&apos;s free
-              </Link>
-              <Link href="/login" className="inline-flex items-center justify-center h-12 px-4 text-[15px] font-medium text-[#6B7280] hover:text-[#111827] transition-colors">
-                Log in →
-              </Link>
-            </div>
-            {/* Pills — desktop */}
-            <div className="hidden md:flex gap-2 mt-6 flex-wrap">
-              {[
-                { icon: <IconCheck />, text: 'Timestamped logs' },
-                { icon: <IconArrowUp />, text: 'Contribution Record' },
-                { icon: <IconUsers />, text: '3–6 members' },
-                { icon: <IconLink />, text: 'Invite via link' },
-              ].map((pill) => (
-                <div key={pill.text} className="px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-full text-[12px] font-medium text-[#6B7280] flex items-center gap-1.5">
-                  {pill.icon} {pill.text}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Illustration */}
-          <div className="md:flex-1 md:max-w-[520px]">
-            <HeroIllustration />
-          </div>
-        </div>
-      </div>
-
-      {/* Pills — mobile */}
-      <div className="flex md:hidden gap-2 justify-center px-5 pb-8 flex-wrap">
-        {[
-          { icon: <IconCheck />, text: 'Timestamped logs' },
-          { icon: <IconArrowUp />, text: 'Contribution Record' },
-          { icon: <IconUsers />, text: '3–6 members' },
-          { icon: <IconLink />, text: 'Invite via link' },
-        ].map((pill) => (
-          <div key={pill.text} className="px-3.5 py-2 bg-white border border-[#E2E8F0] rounded-full text-[13px] font-medium text-[#64748B] flex items-center gap-1.5">
-            {pill.icon} {pill.text}
-          </div>
-        ))}
-      </div>
-
-      {/* Features */}
-      <div className="bg-[#FAFAF9] border-t border-[#F3F4F6]">
-        <div className="max-w-6xl mx-auto px-5 py-12">
-          <h2 className="text-[18px] md:text-[22px] font-extrabold tracking-tight text-[#111827] text-center mb-8">
-            Everything your group needs
-          </h2>
-          <div className="flex flex-col md:grid md:grid-cols-3 gap-4">
-            {[
-              { icon: <IconTask />, bg: 'var(--brand-light)', title: 'Task Tracking', desc: 'Assign tasks to members, track To Do → In Progress → Done. Every move is timestamped.' },
-              { icon: <IconActivity />, bg: 'var(--brand-light)', title: 'Timeline', desc: 'A live record of who did what and when. No editing, no deleting — honest data only.' },
-              { icon: <IconPDF />, bg: 'var(--brand-light)', title: 'Contribution Record', desc: 'One click generates a Contribution Record formatted exactly like the peer evaluation form your teacher uses.' },
-            ].map((f) => (
-              <div key={f.title} className="bg-white border border-[#E5E7EB] rounded-[10px] p-5">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: f.bg }}>
-                  {f.icon}
-                </div>
-                <h3 className="text-[15px] font-bold tracking-tight mb-1">{f.title}</h3>
-                <p className="text-[13px] text-[#6B7280] leading-relaxed">{f.desc}</p>
+      {/* Horizontal scroll container */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        style={{
+          height: 'calc(100dvh - 56px)',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {/* Story slides */}
+        {SLIDES.map((slide, i) => {
+          const isActive = activeSlide === i;
+          const { Visual } = slide;
+          return (
+            <div
+              key={slide.id}
+              className="snap-start flex-shrink-0 w-screen relative overflow-hidden"
+              style={{ background: slide.bg }}
+            >
+              {/* Illustration background */}
+              <div
+                className="absolute right-0 bottom-0 pointer-events-none select-none"
+                style={{
+                  width: 'min(90%, 700px)',
+                  maxHeight: '90%',
+                  opacity: isActive ? (slide.illustrationInvert ? 0.07 : 0.08) : 0,
+                  transition: 'opacity 1s ease 0.2s',
+                  filter: slide.illustrationInvert ? 'invert(1) brightness(2)' : 'none',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slide.illustration}
+                  alt=""
+                  aria-hidden="true"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* How it Works */}
-      <div className="bg-white border-t border-[#F3F4F6]">
-        <div className="max-w-6xl mx-auto px-5 py-12">
-          <h2 className="text-[18px] md:text-[22px] font-extrabold tracking-tight text-[#111827] text-center mb-2">
-            How it works
-          </h2>
-          <p className="text-center text-sm text-[#6B7280] mb-10">From first day to final submission, in three steps.</p>
-          <div className="flex flex-col md:flex-row gap-8 relative">
-            {/* connector line desktop */}
-            <div className="hidden md:block absolute top-8 left-[calc(16.67%+16px)] right-[calc(16.67%+16px)] h-px bg-[#E5E7EB]" />
-            {[
-              {
-                step: '01',
-                color: '#FFF0EE',
-                accent: '#FF5841',
-                title: 'Teacher creates a course',
-                desc: 'Set up a course and share the invite link. Students click it and join automatically — no manual enrolment.',
-                icon: (
-                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
-                    <circle cx="20" cy="20" r="20" fill="#FFF0EE"/>
-                    <rect x="10" y="12" width="20" height="16" rx="3" fill="#FF5841"/>
-                    <rect x="13" y="15" width="10" height="2" rx="1" fill="white" fillOpacity="0.8"/>
-                    <rect x="13" y="19" width="14" height="2" rx="1" fill="white" fillOpacity="0.6"/>
-                    <rect x="13" y="23" width="8" height="2" rx="1" fill="white" fillOpacity="0.6"/>
-                  </svg>
-                ),
-              },
-              {
-                step: '02',
-                color: '#EBF0FF',
-                accent: '#1A56E8',
-                title: 'Students track tasks',
-                desc: 'Split work into tasks, assign to members, and move cards across To Do → In Progress → Done. Every change is logged.',
-                icon: (
-                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
-                    <circle cx="20" cy="20" r="20" fill="#EBF0FF"/>
-                    <rect x="10" y="12" width="7" height="16" rx="2" fill="#93B4FF"/>
-                    <rect x="19" y="18" width="7" height="10" rx="2" fill="#1A56E8"/>
-                    <rect x="28" y="15" width="2" height="13" rx="1" fill="#C3D4FD"/>
-                    <path d="M12 20l2 2 3-3" stroke="#1A56E8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ),
-              },
-              {
-                step: '03',
-                color: '#DCFCE7',
-                accent: '#16A34A',
-                title: 'Export the Contribution Record',
-                desc: 'One click generates a Contribution Record with timestamps and evidence. Hand it straight to your teacher.',
-                icon: (
-                  <svg viewBox="0 0 40 40" fill="none" className="w-10 h-10">
-                    <circle cx="20" cy="20" r="20" fill="#DCFCE7"/>
-                    <rect x="13" y="10" width="14" height="20" rx="3" fill="#16A34A"/>
-                    <rect x="16" y="14" width="8" height="1.5" rx="0.75" fill="white" fillOpacity="0.8"/>
-                    <rect x="16" y="17" width="6" height="1.5" rx="0.75" fill="white" fillOpacity="0.6"/>
-                    <rect x="16" y="20" width="7" height="1.5" rx="0.75" fill="white" fillOpacity="0.6"/>
-                    <circle cx="27" cy="28" r="6" fill="#15803D"/>
-                    <path d="M24.5 28l2 2 3-3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ),
-              },
-            ].map((step) => (
-              <div key={step.step} className="flex-1 flex flex-col items-center text-center">
-                <div className="relative mb-4 z-10">{step.icon}</div>
-                <span className="text-[11px] font-bold tracking-widest uppercase mb-1" style={{ color: step.accent }}>Step {step.step}</span>
-                <h3 className="text-[15px] font-bold mb-1.5">{step.title}</h3>
-                <p className="text-[13px] text-[#6B7280] leading-relaxed max-w-[220px]">{step.desc}</p>
+              {/* Slide content — 2-col desktop, stacked mobile */}
+              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-10 gap-8 md:gap-16">
+                {/* Text col */}
+                <div className="flex-1 flex flex-col justify-center">
+                  <div
+                    className="transition-all duration-600 text-[10px] font-bold uppercase tracking-[2px] mb-4"
+                    style={{
+                      color: slide.labelColor,
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? 'translateY(0)' : 'translateY(10px)',
+                      transitionDelay: isActive ? '0.15s' : '0s',
+                    }}
+                  >
+                    {slide.label}
+                  </div>
+                  <h2
+                    className="font-extrabold mb-4 transition-all duration-600"
+                    style={{
+                      color: slide.textColor,
+                      fontSize: 'clamp(26px, 3.5vw, 42px)',
+                      lineHeight: 1.15,
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? 'translateY(0)' : 'translateY(14px)',
+                      transitionDelay: isActive ? '0.25s' : '0s',
+                    }}
+                  >
+                    {slide.title}
+                  </h2>
+                  <p
+                    className="text-[15px] leading-relaxed transition-all duration-600 max-w-sm"
+                    style={{
+                      color: slide.textColor === 'white' ? '#94A3B8' : '#64748B',
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? 'translateY(0)' : 'translateY(14px)',
+                      transitionDelay: isActive ? '0.35s' : '0s',
+                    }}
+                  >
+                    {slide.body}
+                  </p>
+                </div>
+
+                {/* Visual col */}
+                <div
+                  className="flex-1 flex items-center justify-center transition-all duration-600"
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? 'translateX(0)' : 'translateX(20px)',
+                    transitionDelay: isActive ? '0.1s' : '0s',
+                  }}
+                >
+                  <Visual active={isActive} />
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          );
+        })}
+
+        {/* CTA slide */}
+        <CTASlide active={activeSlide === SLIDES.length} />
       </div>
 
-      <footer className="py-6 text-center text-xs text-[#9CA3AF] border-t border-[#E5E7EB] bg-white">
-        © 2026 Contrib · Made for Cambodian universities
-      </footer>
+      {/* Navigation chrome */}
+      <div className="fixed bottom-6 left-0 right-0 z-50 flex flex-col items-center gap-3 pointer-events-none">
+        {/* Swipe hint — first slide only */}
+        {hintVisible && activeSlide === 0 && (
+          <div className="pointer-events-none flex items-center gap-1.5 text-[12px] text-[#94A3B8] animate-pulse">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 7h8M8 4l3 3-3 3" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Swipe or use arrow keys
+          </div>
+        )}
+
+        {/* Progress dots + counter */}
+        <div className="flex items-center gap-3 pointer-events-auto">
+          {/* Left arrow */}
+          <button
+            onClick={() => goTo(activeSlide - 1)}
+            disabled={activeSlide === 0}
+            className="hidden md:flex w-8 h-8 rounded-full items-center justify-center border transition-all disabled:opacity-20"
+            style={{
+              background: activeSlide === 0 ? 'transparent' : SLIDES[activeSlide]?.textColor === 'white' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)',
+              borderColor: activeSlide > 0 && SLIDES[activeSlide - 1]?.textColor === 'white' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)',
+            }}
+            aria-label="Previous slide"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M7.5 2.5L4 6l3.5 3.5" stroke={activeSlide > 0 && SLIDES[activeSlide - 1]?.textColor === 'white' ? 'white' : '#0F172A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          {/* Dots */}
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalSlides }).map((_, i) => {
+              const isDark = i < SLIDES.length && SLIDES[i].textColor === 'white';
+              const isCtaDot = i === SLIDES.length;
+              return (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width: i === activeSlide ? 20 : 6,
+                    height: 6,
+                    background: i === activeSlide
+                      ? (isDark || (isCtaDot && activeSlide === SLIDES.length) ? '#1A56E8' : '#1A56E8')
+                      : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.15)'),
+                  }}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              );
+            })}
+          </div>
+
+          {/* Right arrow */}
+          <button
+            onClick={() => goTo(activeSlide + 1)}
+            disabled={activeSlide === totalSlides - 1}
+            className="hidden md:flex w-8 h-8 rounded-full items-center justify-center border transition-all disabled:opacity-20"
+            style={{
+              background: activeSlide < totalSlides - 1 ? (SLIDES[activeSlide]?.textColor === 'white' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)') : 'transparent',
+              borderColor: SLIDES[activeSlide]?.textColor === 'white' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)',
+            }}
+            aria-label="Next slide"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M4.5 2.5L8 6l-3.5 3.5" stroke={SLIDES[activeSlide]?.textColor === 'white' ? 'white' : '#0F172A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Slide counter */}
+        <div
+          className="text-[11px] font-medium tabular-nums"
+          style={{ color: activeSlide < SLIDES.length && SLIDES[activeSlide].textColor === 'white' ? 'rgba(255,255,255,0.4)' : '#94A3B8' }}
+        >
+          {activeSlide + 1} / {totalSlides}
+        </div>
+      </div>
     </div>
   );
 }

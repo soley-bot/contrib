@@ -75,8 +75,8 @@ export default function Login() {
           </svg>
           <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
         </div>
-        <h1 className="text-[22px] font-bold mb-1">Welcome back</h1>
-        <p className="text-sm text-[#64748B] mb-7">Log in to your account</p>
+        <h1 className="text-[22px] font-bold mb-1">Your work is on record.</h1>
+        <p className="text-sm text-[#64748B] mb-7">Log in to continue.</p>
 
         <button
           type="button"

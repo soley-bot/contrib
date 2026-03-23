@@ -97,8 +97,8 @@ export default function Signup() {
           </svg>
           <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
         </div>
-        <h1 className="text-[22px] font-bold mb-1">Create your account</h1>
-        <p className="text-sm text-[#64748B] mb-7">Free forever. No credit card.</p>
+        <h1 className="text-[22px] font-bold mb-1">Put your work on the record.</h1>
+        <p className="text-sm text-[#64748B] mb-7">Free for students. Always.</p>
 
         <button
           type="button"
