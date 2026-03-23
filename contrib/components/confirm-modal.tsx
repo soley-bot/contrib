@@ -24,19 +24,19 @@ export default function ConfirmModal({
       className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
-      <div className="w-full max-w-[400px] bg-white rounded-[12px] p-5">
+      <div className="w-full max-w-[400px] bg-white rounded-xl p-5">
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-[15px] font-semibold text-[#1C1917]">{title}</h3>
-          <button onClick={onCancel} className="text-[#A8A29E] hover:text-[#57534E] ml-2 p-0.5">
+          <h3 className="text-[15px] font-semibold text-[#0F172A]">{title}</h3>
+          <button onClick={onCancel} className="text-[#94A3B8] hover:text-[#475569] ml-2 p-0.5">
             <IconClose size={15} />
           </button>
         </div>
-        <p className="text-sm text-[#57534E] mb-5 leading-relaxed">{message}</p>
+        <p className="text-sm text-[#475569] mb-5 leading-relaxed">{message}</p>
         <div className="flex gap-2 justify-end">
           {cancelLabel && (
             <button
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-[#57534E] border border-[#E7E5E4] rounded-md hover:bg-[#F5F5F4] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-[#475569] border border-[#E2E8F0] rounded-md hover:bg-[#F1F5F9] transition-colors"
             >
               {cancelLabel}
             </button>

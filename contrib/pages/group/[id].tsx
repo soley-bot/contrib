@@ -40,7 +40,7 @@ type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
 type StatusFilter = 'all' | TaskStatus;
 
 const STATUS_COLS: { status: TaskStatus; label: string; countClass: string; headerClass: string }[] = [
-  { status: 'todo',       label: 'To Do',      countClass: 'bg-[#E8E5E3] text-[#57534E]',  headerClass: 'bg-[#F5F5F4] text-[#57534E]' },
+  { status: 'todo',       label: 'To Do',      countClass: 'bg-[#E2E8F0] text-[#475569]',  headerClass: 'bg-[#F1F5F9] text-[#475569]' },
   { status: 'inprogress', label: 'In Progress', countClass: 'bg-[#FDE68A] text-[#92400E]', headerClass: 'bg-[#FEF3C7] text-[#B45309]' },
   { status: 'done',       label: 'Done',        countClass: 'bg-[#BBF7D0] text-[#15803D]', headerClass: 'bg-[#DCFCE7] text-[#15803D]' },
 ];
@@ -183,7 +183,7 @@ export default function GroupPage() {
 
   if (!group || !isMember) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-dvh gap-3 text-[#57534E]">
+      <div className="flex flex-col items-center justify-center min-h-dvh gap-3 text-[#475569]">
         <p>Group not found or you are not a member.</p>
         <button onClick={() => router.push('/dashboard')} className="text-brand text-sm">← Back to dashboard</button>
       </div>
@@ -191,26 +191,26 @@ export default function GroupPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#FAFAF9]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
 
       <div className="pt-14 md:pt-0 md:pl-[220px]">
 
         {/* Desktop topbar */}
-        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
+        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
           <div className="flex items-center gap-1.5 text-sm">
-            <button onClick={() => router.push('/dashboard')} className="text-[#A8A29E] hover:text-[#57534E] transition-colors">
+            <button onClick={() => router.push('/dashboard')} className="text-[#94A3B8] hover:text-[#475569] transition-colors">
               My Groups
             </button>
-            <span className="text-[#D6D3D1]">›</span>
-            <span className="font-semibold text-[#1C1917]">{group.name}</span>
-            <span className="text-[#A8A29E]">{group.subject}</span>
+            <span className="text-[#CBD5E1]">›</span>
+            <span className="font-semibold text-[#0F172A]">{group.name}</span>
+            <span className="text-[#94A3B8]">{group.subject}</span>
             {isLead && (
               <div className="flex items-center gap-0.5 ml-1">
-                <button onClick={() => setShowEditGroup(true)} className="p-1.5 text-[#A8A29E] hover:text-[#57534E] hover:bg-[#F5F5F4] rounded-md transition-colors" title="Edit group">
+                <button onClick={() => setShowEditGroup(true)} className="p-1.5 text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] rounded-md transition-colors" title="Edit group">
                   <IconPencil size={13} />
                 </button>
-                <button onClick={() => setShowDeleteGroup(true)} className="p-1.5 text-[#A8A29E] hover:text-red-500 hover:bg-red-50 rounded-md transition-colors" title="Delete group">
+                <button onClick={() => setShowDeleteGroup(true)} className="p-1.5 text-[#94A3B8] hover:text-red-500 hover:bg-red-50 rounded-md transition-colors" title="Delete group">
                   <IconTrash size={13} />
                 </button>
               </div>
@@ -224,13 +224,13 @@ export default function GroupPage() {
                     const isActive = pdfTheme.join() === t.color.join();
                     return (
                       <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
-                        className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#1C1917]' : 'opacity-60 hover:opacity-100'}`}
+                        className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-60 hover:opacity-100'}`}
                         style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
                       />
                     );
                   })}
                 </div>
-                <button onClick={handleExport} className="h-8 px-3 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
+                <button onClick={handleExport} className="h-8 px-3 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
                   <IconExport size={14} /> Export PDF
                 </button>
               </>
@@ -242,11 +242,11 @@ export default function GroupPage() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex border-b border-[#E7E5E4] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex border-b border-[#E2E8F0] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
-                tab === t ? 'text-brand border-brand' : 'text-[#A8A29E] border-transparent'
+                tab === t ? 'text-brand border-brand' : 'text-[#94A3B8] border-transparent'
               }`}
             >
               {t === 'evaluation' ? 'Evaluation' : t.charAt(0).toUpperCase() + t.slice(1)}
@@ -261,8 +261,8 @@ export default function GroupPage() {
 
             {/* All-tasks-done evaluation nudge (lead only, evaluation not yet open) */}
             {isLead && !evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
-              <div className="bg-[#FFF0EE] border border-[#FFCFC9] rounded-[10px] px-4 py-3 mb-4 flex items-center justify-between gap-3">
-                <p className="text-sm text-[#1C1917]">All tasks complete — ready for peer review?</p>
+              <div className="bg-[#FFF0EE] border border-[#FFCFC9] rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
+                <p className="text-sm text-[#0F172A]">All tasks complete — ready for peer review?</p>
                 <button onClick={handleOpenEvaluation}
                   className="flex-shrink-0 h-8 px-3 bg-[#FF5841] hover:bg-[#E04030] text-white text-[13px] font-medium rounded-md transition-colors">
                   Open Peer Review
@@ -276,12 +276,11 @@ export default function GroupPage() {
                 { label: 'Total tasks', value: tasks.length,                                        color: '' },
                 { label: 'Done',        value: tasks.filter(t => t.status === 'done').length,       color: '#16A34A' },
                 { label: 'In progress', value: tasks.filter(t => t.status === 'inprogress').length, color: '#D97706' },
-                { label: 'To do',       value: tasks.filter(t => t.status === 'todo').length,       color: '#A8A29E' },
+                { label: 'To do',       value: tasks.filter(t => t.status === 'todo').length,       color: '#94A3B8' },
               ].map((s) => (
-                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E7E5E4] rounded-[10px] px-3.5 py-2.5 min-w-[80px]"
-                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
-                  <p className="text-lg font-bold" style={{ color: s.color || '#1C1917' }}>{s.value}</p>
-                  <p className="text-[12px] text-[#A8A29E] mt-0.5">{s.label}</p>
+                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E2E8F0] rounded-xl px-3.5 py-2.5 min-w-[80px] shadow-sm">
+                  <p className="text-lg font-bold" style={{ color: s.color || '#0F172A' }}>{s.value}</p>
+                  <p className="text-[12px] text-[#94A3B8] mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -291,7 +290,7 @@ export default function GroupPage() {
               {(['all', 'todo', 'inprogress', 'done'] as StatusFilter[]).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
                   className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
-                    statusFilter === s ? 'bg-brand-light text-brand border-brand-border' : 'bg-white text-[#57534E] border-[#E7E5E4]'
+                    statusFilter === s ? 'bg-brand-light text-brand border-brand-border' : 'bg-white text-[#475569] border-[#E2E8F0]'
                   }`}
                 >
                   {{ all: `All (${tasks.length})`, todo: `To Do (${tasks.filter(t=>t.status==='todo').length})`, inprogress: `In Progress (${tasks.filter(t=>t.status==='inprogress').length})`, done: `Done (${tasks.filter(t=>t.status==='done').length})` }[s]}
@@ -302,9 +301,9 @@ export default function GroupPage() {
             {/* Mobile: flat list */}
             <div className="md:hidden">
               {tasks.length === 0
-                ? <p className="text-sm text-[#A8A29E] text-center py-8">No tasks yet. Add your first task to get started.</p>
+                ? <p className="text-sm text-[#94A3B8] text-center py-8">No tasks yet. Add your first task to get started.</p>
                 : filteredTasks.length === 0
-                ? <p className="text-sm text-[#A8A29E] text-center py-8">No tasks here.</p>
+                ? <p className="text-sm text-[#94A3B8] text-center py-8">No tasks here.</p>
                 : filteredTasks.map((task) => (
                     <TaskCard key={task.id} task={task} isLead={isLead} currentUserId={user!.id}
                       evidenceCount={evidenceByTask[task.id]?.length ?? 0}
@@ -317,7 +316,7 @@ export default function GroupPage() {
             {/* Desktop: kanban */}
             <div className="hidden md:grid grid-cols-3 gap-4">
               {tasks.length === 0
-                ? <p className="col-span-3 text-sm text-[#A8A29E] text-center py-8">No tasks yet. Add your first task to get started.</p>
+                ? <p className="col-span-3 text-sm text-[#94A3B8] text-center py-8">No tasks yet. Add your first task to get started.</p>
                 : STATUS_COLS.map((col) => {
                     const colTasks = tasks.filter(t => t.status === col.status);
                     return (
@@ -330,7 +329,7 @@ export default function GroupPage() {
                           <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
                         </div>
                         {colTasks.length === 0 ? (
-                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-[#E7E5E4] rounded-[10px]">
+                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-[#E2E8F0] rounded-xl">
                             <p className="text-[12px] text-[#C4C0BB]">No tasks here</p>
                           </div>
                         ) : colTasks.map((task) => (
@@ -350,26 +349,26 @@ export default function GroupPage() {
         {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">Recent activity</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Recent activity</p>
             {activity.length === 0 ? (
               <div className="flex flex-col items-center py-14 text-center">
                 <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
-                  <ellipse cx="60" cy="82" rx="44" ry="6" fill="#F5F5F4"/>
+                  <ellipse cx="60" cy="82" rx="44" ry="6" fill="#F1F5F9"/>
                   {/* clock body */}
-                  <circle cx="60" cy="42" r="28" fill="#F5F5F4" stroke="#E7E5E4" strokeWidth="2"/>
+                  <circle cx="60" cy="42" r="28" fill="#F1F5F9" stroke="#E2E8F0" strokeWidth="2"/>
                   <circle cx="60" cy="42" r="22" fill="white"/>
                   {/* clock hands */}
-                  <line x1="60" y1="42" x2="60" y2="26" stroke="#D6D3D1" strokeWidth="2.5" strokeLinecap="round"/>
-                  <line x1="60" y1="42" x2="70" y2="48" stroke="#D6D3D1" strokeWidth="2.5" strokeLinecap="round"/>
-                  <circle cx="60" cy="42" r="2.5" fill="#A8A29E"/>
+                  <line x1="60" y1="42" x2="60" y2="26" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="60" y1="42" x2="70" y2="48" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round"/>
+                  <circle cx="60" cy="42" r="2.5" fill="#94A3B8"/>
                   {/* tick marks */}
-                  <line x1="60" y1="22" x2="60" y2="25" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="60" y1="59" x2="60" y2="62" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="40" y1="42" x2="43" y2="42" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="77" y1="42" x2="80" y2="42" stroke="#E7E5E4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="60" y1="22" x2="60" y2="25" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="60" y1="59" x2="60" y2="62" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="40" y1="42" x2="43" y2="42" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="77" y1="42" x2="80" y2="42" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
-                <p className="text-[14px] font-semibold text-[#57534E] mb-1">No activity yet</p>
-                <p className="text-sm text-[#A8A29E]">Actions will appear here as your team works.</p>
+                <p className="text-[14px] font-semibold text-[#475569] mb-1">No activity yet</p>
+                <p className="text-sm text-[#94A3B8]">Actions will appear here as your team works.</p>
               </div>
             ) : activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)
             }
@@ -379,7 +378,7 @@ export default function GroupPage() {
         {/* ── MEMBERS TAB ── */}
         {tab === 'members' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A8A29E] mb-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">
               {members.length} member{members.length !== 1 ? 's' : ''}
             </p>
             {members.map((m) => (
@@ -395,29 +394,29 @@ export default function GroupPage() {
               {isLead && (
                 <>
                   <button onClick={() => setShowTransferLead(true)}
-                    className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                    className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
                     Transfer Lead
                   </button>
-                  <div className="w-full bg-white border border-[#E7E5E4] rounded-md px-4 py-2.5">
-                    <p className="text-[11px] text-[#A8A29E] mb-2">PDF theme color</p>
+                  <div className="w-full bg-white border border-[#E2E8F0] rounded-md px-4 py-2.5">
+                    <p className="text-[11px] text-[#94A3B8] mb-2">PDF theme color</p>
                     <div className="flex gap-2 mb-3">
                       {PDF_THEMES.map((t) => {
                         const isActive = pdfTheme.join() === t.color.join();
                         return (
                           <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
-                            className={`w-6 h-6 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#1C1917]' : 'opacity-50 hover:opacity-100'}`}
+                            className={`w-6 h-6 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-50 hover:opacity-100'}`}
                             style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
                           />
                         );
                       })}
                     </div>
                     <button onClick={handleExport}
-                      className="w-full h-9 border border-[#E7E5E4] bg-[#FAFAF9] hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                      className="w-full h-9 border border-[#E2E8F0] bg-[#F8FAFF] hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
                       <IconExport size={15} /> Export Contribution Record
                     </button>
                   </div>
                   <button onClick={() => setShowEditGroup(true)}
-                    className="w-full h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
+                    className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
                     <IconPencil size={15} /> Edit Group
                   </button>
                   <button onClick={() => setShowDeleteGroup(true)}
@@ -441,8 +440,8 @@ export default function GroupPage() {
             {/* Not open */}
             {!evalSession && (
               <div className="max-w-2xl mx-auto px-4 py-10 flex flex-col items-center text-center gap-3">
-                <p className="text-[15px] font-semibold text-[#1C1917]">Peer Review</p>
-                <p className="text-sm text-[#57534E] max-w-xs">
+                <p className="text-[15px] font-semibold text-[#0F172A]">Peer Review</p>
+                <p className="text-sm text-[#475569] max-w-xs">
                   When all work is done, the lead opens peer review so teammates can rate each other&apos;s contributions.
                 </p>
                 {isLead ? (
@@ -451,7 +450,7 @@ export default function GroupPage() {
                     Open Peer Review
                   </button>
                 ) : (
-                  <p className="text-sm text-[#A8A29E]">
+                  <p className="text-sm text-[#94A3B8]">
                     Waiting for the lead to open peer review.
                   </p>
                 )}
@@ -502,7 +501,7 @@ export default function GroupPage() {
       </div>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E7E5E4] flex"
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] flex"
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
           { id: 'dashboard',  label: 'Groups',   icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
@@ -513,7 +512,7 @@ export default function GroupPage() {
         ].map((item) => (
           <button key={item.id} onClick={item.action}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
-              item.id === tab ? 'text-brand' : 'text-[#A8A29E]'
+              item.id === tab ? 'text-brand' : 'text-[#94A3B8]'
             }`}
           >
             {item.icon}
@@ -526,7 +525,7 @@ export default function GroupPage() {
       {tab === 'tasks' && (
         <button onClick={() => setShowNewTask(true)}
           className="md:hidden fixed right-5 z-40 bg-brand text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: 'calc(60px + env(safe-area-inset-bottom) + 16px)', width: 52, height: 52, boxShadow: '0 4px 16px rgba(37,99,235,.3)' }}
+          style={{ bottom: 'calc(60px + env(safe-area-inset-bottom) + 16px)', width: 52, height: 52, boxShadow: '0 4px 16px rgba(26,86,232,.25)' }}
         >
           <IconPlus size={22} />
         </button>

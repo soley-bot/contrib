@@ -5,7 +5,7 @@ import RoleToggle from '@/components/role-toggle';
 import type { User } from '@supabase/supabase-js';
 import type { UserRole } from '@/types';
 
-const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate'];
+const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Graduate'];
 
 export default function Onboarding() {
   const router = useRouter();
@@ -66,73 +66,73 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F9FAFB]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-6">Contrib</div>
 
         {/* Welcome illustration */}
-        <div className="flex items-center gap-4 mb-6 p-4 bg-white border border-[#E7E5E4] rounded-[12px]">
+        <div className="flex items-center gap-4 mb-6 p-4 bg-white border border-[#E2E8F0] rounded-xl">
           <svg viewBox="0 0 64 64" fill="none" className="w-14 h-14 flex-shrink-0">
             <circle cx="32" cy="32" r="32" fill="#FFF0EE"/>
             <circle cx="32" cy="24" r="10" fill="#FFCFC9"/>
             <rect x="16" y="40" width="32" height="18" rx="8" fill="#FF5841"/>
             {/* graduation cap */}
-            <rect x="22" y="15" width="20" height="4" rx="2" fill="#1C1917"/>
-            <polygon points="32,11 44,17 32,23 20,17" fill="#1C1917"/>
-            <line x1="44" y1="17" x2="44" y2="24" stroke="#1C1917" strokeWidth="2" strokeLinecap="round"/>
+            <rect x="22" y="15" width="20" height="4" rx="2" fill="#0F172A"/>
+            <polygon points="32,11 44,17 32,23 20,17" fill="#0F172A"/>
+            <line x1="44" y1="17" x2="44" y2="24" stroke="#0F172A" strokeWidth="2" strokeLinecap="round"/>
             <circle cx="44" cy="25" r="2" fill="#FF5841"/>
           </svg>
           <div>
-            <p className="text-[15px] font-bold text-[#1C1917]">Welcome to Contrib! 🎉</p>
-            <p className="text-[13px] text-[#57534E] mt-0.5">Let&apos;s set up your profile so you can get started.</p>
+            <p className="text-[15px] font-bold text-[#0F172A]">Welcome to Contrib</p>
+            <p className="text-[13px] text-[#475569] mt-0.5">Let&apos;s set up your profile so you can get started.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">Full name</label>
+            <label className="text-[13px] font-medium text-[#475569]">Full name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Sophea Chea"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">
-              University <span className="font-normal text-[#A8A29E]">(optional)</span>
+            <label className="text-[13px] font-medium text-[#475569]">
+              University <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <input
               type="text"
               value={university}
               onChange={(e) => setUniversity(e.target.value)}
               placeholder="Royal University of Phnom Penh"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">
-              Faculty / Major <span className="font-normal text-[#A8A29E]">(optional)</span>
+            <label className="text-[13px] font-medium text-[#475569]">
+              Faculty / Major <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <input
               type="text"
               value={faculty}
               onChange={(e) => setFaculty(e.target.value)}
               placeholder="Computer Science"
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <RoleToggle value={role} onChange={setRole} />
 
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#57534E]">
-              Year of study <span className="font-normal text-[#A8A29E]">(optional)</span>
+            <label className="text-[13px] font-medium text-[#475569]">
+              Year of study <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <select
               value={yearOfStudy}
               onChange={(e) => setYearOfStudy(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             >
               <option value="">Select year…</option>
               {YEAR_OPTIONS.map((y) => (
@@ -141,12 +141,12 @@ export default function Onboarding() {
             </select>
           </div>
 
-          {error && <p className="text-sm text-[#EF4444]">{error}</p>}
+          {error && <p className="text-sm text-[#DC2626]">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
+            className="h-11 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
           >
             {loading ? 'Saving…' : 'Get started'}
           </button>
@@ -154,7 +154,7 @@ export default function Onboarding() {
             type="button"
             onClick={handleSkip}
             disabled={loading}
-            className="text-sm text-[#A8A29E] hover:text-[#57534E] transition-colors text-center disabled:opacity-60"
+            className="text-sm text-[#94A3B8] hover:text-[#475569] transition-colors text-center disabled:opacity-60"
           >
             Skip for now →
           </button>

@@ -35,11 +35,11 @@ export default function ForgotPassword() {
         {sent ? (
           <>
             <h1 className="text-[22px] font-bold mb-1">Check your email</h1>
-            <p className="text-sm text-[#57534E] mb-7">
+            <p className="text-sm text-[#475569] mb-7">
               We sent a password reset link to <span className="font-medium text-[#111827]">{email}</span>.
               Click the link in the email to set a new password.
             </p>
-            <p className="text-[13px] text-[#57534E] text-center mt-4">
+            <p className="text-[13px] text-[#475569] text-center mt-4">
               Back to{' '}
               <Link href="/login" className="text-[#C53678] font-medium">Log in</Link>
             </p>
@@ -47,21 +47,21 @@ export default function ForgotPassword() {
         ) : (
           <>
             <h1 className="text-[22px] font-bold mb-1">Forgot password?</h1>
-            <p className="text-sm text-[#57534E] mb-7">Enter your email and we&apos;ll send you a reset link.</p>
+            <p className="text-sm text-[#475569] mb-7">Enter your email and we&apos;ll send you a reset link.</p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Email</label>
+                <label className="text-[13px] font-medium text-[#475569]">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@university.edu.kh"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                 />
               </div>
 
-              {error && <p className="text-sm text-[#EF4444]">{error}</p>}
+              {error && <p className="text-sm text-[#DC2626]">{error}</p>}
 
               <button
                 type="submit"
@@ -72,7 +72,7 @@ export default function ForgotPassword() {
               </button>
             </form>
 
-            <p className="text-[13px] text-[#57534E] text-center mt-4">
+            <p className="text-[13px] text-[#475569] text-center mt-4">
               Back to{' '}
               <Link href="/login" className="text-[#C53678] font-medium">Log in</Link>
             </p>

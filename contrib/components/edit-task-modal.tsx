@@ -59,42 +59,42 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full md:max-w-[480px] bg-white rounded-t-[20px] md:rounded-[10px] max-h-[90dvh] overflow-y-auto"
+        className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
         style={{ animation: 'slideUp .25s ease' }}
       >
-        <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
-          <h2 className="text-base font-semibold text-[#1C1917]">Edit task</h2>
-          <button onClick={onClose} className="text-[#57534E] hover:text-[#1C1917] p-1">
+        <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
+          <h2 className="text-base font-semibold text-[#0F172A]">Edit task</h2>
+          <button onClick={onClose} className="text-[#475569] hover:text-[#0F172A] p-1">
             <IconClose size={16} />
           </button>
         </div>
         <div className="p-5 flex flex-col gap-4">
           <div>
-            <label className="text-[13px] font-medium text-[#57534E] mb-1.5 block">Title</label>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
-            <label className="text-[13px] font-medium text-[#57534E] mb-1.5 block">
-              Description <span className="font-normal text-[#A8A29E]">(optional)</span>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">
+              Description <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none resize-none"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none resize-none"
             />
           </div>
           <div>
-            <label className="text-[13px] font-medium text-[#57534E] mb-1.5 block">Assignee</label>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Assignee</label>
             <select
               value={assigneeId}
               onChange={(e) => setAssigneeId(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm text-[#1C1917] focus:border-brand outline-none bg-white"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm text-[#0F172A] focus:border-brand outline-none bg-white"
             >
               {members.map((m) => (
                 <option key={m.profile_id} value={m.profile_id}>{m.profile?.name ?? m.profile_id}</option>
@@ -102,18 +102,18 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             </select>
           </div>
           <div>
-            <label className="text-[13px] font-medium text-[#57534E] mb-1.5 block">
-              Due date <span className="font-normal text-[#A8A29E]">(optional)</span>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">
+              Due date <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
+              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
         </div>
-        <div className="px-5 py-3 border-t border-[#E7E5E4]">
+        <div className="px-5 py-3 border-t border-[#E2E8F0]">
           <button
             onClick={handleSave}
             disabled={saving || !title.trim()}

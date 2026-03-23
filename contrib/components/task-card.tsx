@@ -2,12 +2,12 @@ import { IconCalendar, IconPencil, IconTrash } from '@/components/icons';
 import type { Task } from '@/types';
 
 function dueDateClass(dueDate: string | null | undefined): string {
-  if (!dueDate) return 'text-[#A8A29E]';
+  if (!dueDate) return 'text-[#94A3B8]';
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
   if (dueDate < today) return 'text-red-500 font-semibold';
   if (dueDate <= tomorrow) return 'text-amber-500 font-medium';
-  return 'text-[#A8A29E]';
+  return 'text-[#94A3B8]';
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -16,7 +16,7 @@ const STATUS_LABEL: Record<string, string> = {
   done: 'Done',
 };
 const STATUS_BADGE: Record<string, string> = {
-  todo: 'bg-[#F5F5F4] text-[#57534E]',
+  todo: 'bg-[#F1F5F9] text-[#475569]',
   inprogress: 'bg-[#FEF3C7] text-[#D97706]',
   done: 'bg-[#DCFCE7] text-[#16A34A]',
 };
@@ -45,16 +45,16 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
   return (
     <div
       onClick={() => onClick(task)}
-      className={`group ${cardBg} border border-[#E7E5E4] border-l-4 ${LEFT_BORDER[task.status]} rounded-[10px] px-3.5 pt-3.5 pb-3.5 pl-[18px] mb-2.5 cursor-pointer active:shadow-md transition-all`}
+      className={`group ${cardBg} border border-[#E2E8F0] border-l-4 ${LEFT_BORDER[task.status]} rounded-xl px-3.5 pt-3.5 pb-3.5 pl-[18px] mb-2.5 cursor-pointer active:shadow-md transition-all`}
       style={isDone ? { animation: 'done-flash 0.6s ease-out forwards' } : undefined}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[14px] font-medium text-[#1C1917] mb-2 flex-1">{task.title}</p>
+        <p className="text-[14px] font-medium text-[#0F172A] mb-2 flex-1">{task.title}</p>
         <div className="flex items-center gap-0.5 flex-shrink-0 -mt-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           {canEdit && (
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(task); }}
-              className="p-1.5 rounded-md text-[#A8A29E] hover:text-[#57534E] hover:bg-[#F5F5F4] transition-colors"
+              className="p-1.5 rounded-md text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-colors"
               title="Edit task"
             >
               <IconPencil size={13} />
@@ -63,7 +63,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
           {isLead && (
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(task); }}
-              className="p-1.5 rounded-md text-[#A8A29E] hover:text-red-500 hover:bg-red-50 transition-colors"
+              className="p-1.5 rounded-md text-[#94A3B8] hover:text-red-500 hover:bg-red-50 transition-colors"
               title="Delete task"
             >
               <IconTrash size={13} />
@@ -75,7 +75,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
         <div className="w-5 h-5 rounded-full bg-brand-light text-brand text-[9px] font-bold flex items-center justify-center flex-shrink-0">
           {initials}
         </div>
-        <span className="text-xs text-[#57534E]">{task.assignee?.name ?? '—'}</span>
+        <span className="text-xs text-[#475569]">{task.assignee?.name ?? '—'}</span>
         {task.due_date && (
           <span className={`flex items-center gap-1 text-xs ${dueDateClass(task.due_date)}`}>
             <IconCalendar size={12} />
@@ -85,7 +85,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
         {task.status === 'done' && (
           evidenceCount > 0
             ? <span className="text-[11px] font-medium text-[#16A34A]">evidence ({evidenceCount})</span>
-            : <span className="text-[11px] text-[#A8A29E]">no evidence</span>
+            : <span className="text-[11px] text-[#94A3B8]">no evidence</span>
         )}
         <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[task.status]}`}>
           {STATUS_LABEL[task.status]}

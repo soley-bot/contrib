@@ -46,7 +46,7 @@ export default function ResetPassword() {
         {!ready ? (
           <>
             <h1 className="text-[22px] font-bold mb-1">Link invalid or expired</h1>
-            <p className="text-sm text-[#57534E] mb-7">
+            <p className="text-sm text-[#475569] mb-7">
               This reset link has expired or already been used. Request a new one.
             </p>
             <Link
@@ -59,21 +59,21 @@ export default function ResetPassword() {
         ) : (
           <>
             <h1 className="text-[22px] font-bold mb-1">Set new password</h1>
-            <p className="text-sm text-[#57534E] mb-7">Choose a password that&apos;s at least 8 characters.</p>
+            <p className="text-sm text-[#475569] mb-7">Choose a password that&apos;s at least 8 characters.</p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">New password</label>
+                <label className="text-[13px] font-medium text-[#475569]">New password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                 />
               </div>
 
-              {error && <p className="text-sm text-[#EF4444]">{error}</p>}
+              {error && <p className="text-sm text-[#DC2626]">{error}</p>}
 
               <button
                 type="submit"

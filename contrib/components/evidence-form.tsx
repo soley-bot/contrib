@@ -47,13 +47,13 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 bg-[#FAFAF9] border border-[#E7E5E4] rounded-md p-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 bg-[#F8FAFF] border border-[#E2E8F0] rounded-md p-3">
       <div className="flex gap-1.5">
         {TYPES.map((t) => (
           <button key={t.value} type="button"
             onClick={() => { setType(t.value); setContent(''); }}
             className={`flex-1 h-8 rounded-md text-[12px] font-medium border transition-colors ${
-              type === t.value ? 'bg-brand text-white border-brand' : 'bg-white text-[#57534E] border-[#E7E5E4]'
+              type === t.value ? 'bg-brand text-white border-brand' : 'bg-white text-[#475569] border-[#E2E8F0]'
             }`}>
             {t.label}
           </button>
@@ -63,18 +63,18 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
       {activeType.isText ? (
         <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3}
           placeholder={activeType.placeholder}
-          className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none resize-none bg-white" />
+          className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none resize-none bg-white" />
       ) : (
         <input type="url" value={content} onChange={(e) => setContent(e.target.value)}
           placeholder={activeType.placeholder}
-          className="w-full border border-[#E7E5E4] rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none bg-white" />
+          className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none bg-white" />
       )}
 
-      {error && <p className="text-xs text-[#EF4444]">{error}</p>}
+      {error && <p className="text-xs text-[#DC2626]">{error}</p>}
 
       <div className="flex gap-2">
         <button type="button" onClick={onCancel}
-          className="flex-1 h-9 border border-[#E7E5E4] text-[13px] font-medium text-[#57534E] rounded-md hover:bg-[#F5F5F4] transition-colors">
+          className="flex-1 h-9 border border-[#E2E8F0] text-[13px] font-medium text-[#475569] rounded-md hover:bg-[#F1F5F9] transition-colors">
           Cancel
         </button>
         <button type="submit" disabled={saving}

@@ -81,18 +81,18 @@ export default function Dashboard() {
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
 
   return (
-    <div className="min-h-dvh bg-[#FAFAF9]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} />
 
       {/* Desktop layout */}
       <div className="md:pl-[220px]">
 
         {/* Desktop topbar */}
-        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
+        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
           <div>
-            <span className="text-base font-semibold text-[#1C1917]">My Groups</span>
+            <span className="text-base font-semibold text-[#0F172A]">My Groups</span>
             {profile?.name && (
-              <span className="ml-2 text-sm text-[#A8A29E]">— {getGreeting()}, {profile.name.split(' ')[0]}</span>
+              <span className="ml-2 text-sm text-[#94A3B8]">— {getGreeting()}, {profile.name.split(' ')[0]}</span>
             )}
           </div>
           <button
@@ -108,19 +108,19 @@ export default function Dashboard() {
           {!groupsLoading && groups.length === 0 ? (
             <div className="text-center py-14">
               <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
-                <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F5F5F4"/>
+                <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F1F5F9"/>
                 {/* desk */}
-                <rect x="30" y="88" width="140" height="8" rx="4" fill="#E7E5E4"/>
-                <rect x="44" y="96" width="6" height="28" rx="3" fill="#D6D3D1"/>
-                <rect x="150" y="96" width="6" height="28" rx="3" fill="#D6D3D1"/>
+                <rect x="30" y="88" width="140" height="8" rx="4" fill="#E2E8F0"/>
+                <rect x="44" y="96" width="6" height="28" rx="3" fill="#CBD5E1"/>
+                <rect x="150" y="96" width="6" height="28" rx="3" fill="#CBD5E1"/>
                 {/* laptop */}
-                <rect x="60" y="56" width="80" height="52" rx="6" fill="#1C1917"/>
+                <rect x="60" y="56" width="80" height="52" rx="6" fill="#0F172A"/>
                 <rect x="64" y="60" width="72" height="44" rx="4" fill="#3A3632"/>
-                <rect x="67" y="63" width="66" height="38" rx="2" fill="#FAFAF9"/>
+                <rect x="67" y="63" width="66" height="38" rx="2" fill="#F8FAFF"/>
                 {/* screen content */}
                 <rect x="72" y="68" width="32" height="5" rx="2" fill="#FF5841"/>
-                <rect x="72" y="76" width="24" height="3" rx="1.5" fill="#E7E5E4"/>
-                <rect x="72" y="82" width="28" height="3" rx="1.5" fill="#E7E5E4"/>
+                <rect x="72" y="76" width="24" height="3" rx="1.5" fill="#E2E8F0"/>
+                <rect x="72" y="82" width="28" height="3" rx="1.5" fill="#E2E8F0"/>
                 <rect x="110" y="68" width="16" height="16" rx="3" fill="#FFF0EE"/>
                 <path d="M114 76l2.5 2.5 4-4" stroke="#FF5841" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 {/* laptop base */}
@@ -139,8 +139,8 @@ export default function Dashboard() {
                 <rect x="160" y="39" width="24" height="3" rx="1.5" fill="white" fillOpacity="0.8"/>
                 <rect x="160" y="45" width="16" height="3" rx="1.5" fill="white" fillOpacity="0.6"/>
               </svg>
-              <p className="text-[16px] font-bold text-[#1C1917] mb-1.5">No groups yet</p>
-              <p className="text-sm text-[#A8A29E] mb-6 max-w-xs mx-auto">Create your first group and invite your teammates — every contribution gets tracked.</p>
+              <p className="text-[16px] font-bold text-[#0F172A] mb-1.5">No groups yet</p>
+              <p className="text-sm text-[#94A3B8] mb-6 max-w-xs mx-auto">Create your first group and invite your teammates — every contribution gets tracked.</p>
               <button
                 onClick={() => setShowModal(true)}
                 className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors"
@@ -154,15 +154,14 @@ export default function Dashboard() {
                 <div
                   key={group.id}
                   onClick={() => router.push(`/group/${group.id}`)}
-                  className="bg-white border border-[#E7E5E4] rounded-[10px] p-4 flex items-center gap-3.5 cursor-pointer hover:border-brand transition-colors"
-                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}
+                  className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex items-center gap-3.5 cursor-pointer hover:border-brand transition-colors shadow-sm"
                 >
-                  <div className="w-11 h-11 rounded-[10px] bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">
                     {group.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-semibold text-[#1C1917] truncate">{group.name}</p>
-                    <p className="text-xs text-[#A8A29E] mt-0.5">
+                    <p className="text-[15px] font-semibold text-[#0F172A] truncate">{group.name}</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">
                       {group.subject}{group.due_date ? ` · Due ${formatDueDate(group.due_date)}` : ''}
                     </p>
                   </div>
@@ -178,7 +177,7 @@ export default function Dashboard() {
       <button
         onClick={() => setShowModal(true)}
         className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 16px rgba(37,99,235,.3)' }}
+        style={{ boxShadow: '0 4px 16px rgba(26,86,232,.25)' }}
       >
         <IconPlus size={22} />
       </button>
@@ -189,32 +188,32 @@ export default function Dashboard() {
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
-          <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px]">
-            <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
-              <h2 className="text-base font-semibold text-[#1C1917]">New Group</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 text-[#57534E] hover:text-[#1C1917] transition-colors">
+          <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
+            <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
+              <h2 className="text-base font-semibold text-[#0F172A]">New Group</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 text-[#475569] hover:text-[#0F172A] transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Group name</label>
+                <label className="text-[13px] font-medium text-[#475569]">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
+                <label className="text-[13px] font-medium text-[#475569]">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Due date <span className="font-normal text-[#A8A29E]">(optional)</span></label>
+                <label className="text-[13px] font-medium text-[#475569]">Due date <span className="font-normal text-[#94A3B8]">(optional)</span></label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
-              <div className="pt-1 border-t border-[#E7E5E4]">
+              <div className="pt-1 border-t border-[#E2E8F0]">
                 <button onClick={handleCreate} disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}

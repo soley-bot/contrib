@@ -118,3 +118,59 @@ export function IconTrash({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
+export function IconAlertTriangle({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M8 1.5L1.5 13h13L8 1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M8 6v3M8 11.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+export function IconRefresh({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M2.5 8a5.5 5.5 0 019.5-3.7M13.5 8a5.5 5.5 0 01-9.5 3.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M12 2v2.5h-2.5M4 13.5V11h2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+export function IconCrown({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M2 11l1.5-6L8 7.5 12.5 5 14 11H2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M2.5 13h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+export function IconSettings({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M8 1.5v2M8 12.5v2M2.4 4.5l1.7 1M11.9 10.5l1.7 1M2.4 11.5l1.7-1M11.9 5.5l1.7-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+export function IconUserPlus({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <circle cx="6" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M1.5 13c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M13 6v4M11 8h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+export function IconBan({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M3.75 3.75l8.5 8.5" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  );
+}
+export function IconClip({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M7 3.5l5.5 5.5a2.8 2.8 0 01-4 4L3 7.5a1.8 1.8 0 012.5-2.5L11 10.5a.8.8 0 01-1.1 1.1L4.5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}

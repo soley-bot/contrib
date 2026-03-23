@@ -16,11 +16,11 @@ export default function InviteBanner({ token }: InviteBannerProps) {
   }
 
   return (
-    <div className="border-[1.5px] border-dashed border-brand-border rounded-[10px] bg-brand-light p-3.5 flex items-center gap-2.5 mb-4">
+    <div className="border-[1.5px] border-dashed border-brand-border rounded-xl bg-brand-light p-3.5 flex items-center gap-2.5 mb-4">
       <IconUsers size={20} />
       <div className="flex-1 min-w-0" style={{ color: 'var(--brand)' }}>
         <p className="text-[11px] font-semibold text-brand mb-0.5">Invite link</p>
-        <p className="text-xs text-[#57534E] truncate">{link}</p>
+        <p className="text-xs text-[#475569] truncate">{link}</p>
       </div>
       <button
         onClick={handleCopy}

@@ -5,6 +5,9 @@
   --color-brand-hover: var(--brand-hover);
   --color-brand-light: var(--brand-light);
   --color-brand-border: var(--brand-border);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-bg-hover: var(--bg-hover);
 }
 
 :root {
@@ -21,6 +24,9 @@
   --green: #16A34A;
   --amber: #D97706;
   --red: #DC2626;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
+  --bg-hover: #F1F5F9;
 }
 
 * {
@@ -47,7 +53,7 @@ body {
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid #E7E5E4;
+  border: 2px solid var(--border);
   border-top-color: var(--brand);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;

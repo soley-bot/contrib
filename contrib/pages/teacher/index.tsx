@@ -114,12 +114,12 @@ export default function TeacherDashboard() {
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
 
   return (
-    <div className="min-h-dvh bg-[#FAFAF9]">
+    <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} role="teacher" onProfileUpdate={refreshProfile} />
 
       <div className="md:pl-[220px]">
-        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E7E5E4]">
-          <span className="text-base font-semibold text-[#1C1917]">My Courses</span>
+        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
+          <span className="text-base font-semibold text-[#0F172A]">My Courses</span>
           <button
             onClick={() => setShowModal(true)}
             className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
@@ -145,11 +145,11 @@ export default function TeacherDashboard() {
                 <rect x="30" y="100" width="140" height="8" rx="2" fill="#0A5468"/>
                 <circle cx="100" cy="56" r="10" fill="#BAE6FD"/>
                 <rect x="88" y="72" width="24" height="16" rx="6" fill="#0E7490"/>
-                <rect x="92" y="46" width="16" height="3" rx="1.5" fill="#1C1917"/>
-                <polygon points="100,42 110,47 100,52 90,47" fill="#1C1917"/>
+                <rect x="92" y="46" width="16" height="3" rx="1.5" fill="#0F172A"/>
+                <polygon points="100,42 110,47 100,52 90,47" fill="#0F172A"/>
               </svg>
-              <p className="text-[16px] font-bold text-[#1C1917] mb-1.5">No courses yet</p>
-              <p className="text-sm text-[#A8A29E] mb-6 max-w-xs mx-auto">Create your first course and share the invite link with your students.</p>
+              <p className="text-[16px] font-bold text-[#0F172A] mb-1.5">No courses yet</p>
+              <p className="text-sm text-[#94A3B8] mb-6 max-w-xs mx-auto">Create your first course and share the invite link with your students.</p>
               <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
                 <IconPlus size={16} /> Create your first course
               </button>
@@ -183,13 +183,13 @@ export default function TeacherDashboard() {
       {/* Delete course confirm */}
       {confirmDeleteId && (
         <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4">
-          <div className="w-full max-w-[360px] bg-white rounded-[12px] p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
-            <h2 className="text-[15px] font-semibold text-[#1C1917] mb-1">Delete course?</h2>
-            <p className="text-sm text-[#57534E] mb-5">This will permanently delete the course and all its groups, tasks, and members. This cannot be undone.</p>
+          <div className="w-full max-w-[360px] bg-white rounded-xl p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
+            <h2 className="text-[15px] font-semibold text-[#0F172A] mb-1">Delete course?</h2>
+            <p className="text-sm text-[#475569] mb-5">This will permanently delete the course and all its groups, tasks, and members. This cannot be undone.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDeleteId(null)}
-                className="flex-1 h-10 border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[13px] font-medium text-[#57534E] rounded-md transition-colors"
+                className="flex-1 h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium text-[#475569] rounded-md transition-colors"
               >
                 Cancel
               </button>
@@ -211,25 +211,25 @@ export default function TeacherDashboard() {
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
           onClick={(e) => { if (e.target === e.currentTarget) setEditingCourse(null); }}
         >
-          <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px]">
-            <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
-              <h2 className="text-base font-semibold text-[#1C1917]">Edit Course</h2>
-              <button onClick={() => setEditingCourse(null)} className="text-[#57534E] hover:text-[#1C1917] p-1">✕</button>
+          <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
+            <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
+              <h2 className="text-base font-semibold text-[#0F172A]">Edit Course</h2>
+              <button onClick={() => setEditingCourse(null)} className="text-[#475569] hover:text-[#0F172A] p-1">✕</button>
             </div>
             <form onSubmit={handleEditSave} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
+                <label className="text-[13px] font-medium text-[#475569]">Course name</label>
                 <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="e.g. Business Management"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
+                <label className="text-[13px] font-medium text-[#475569]">Subject code</label>
                 <input type="text" value={editSubject} onChange={(e) => setEditSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {editError && <p className="text-sm text-red-500">{editError}</p>}
-              <div className="pt-1 border-t border-[#E7E5E4]">
+              <div className="pt-1 border-t border-[#E2E8F0]">
                 <button type="submit" disabled={saving}
                   className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {saving ? 'Saving…' : 'Save changes'}
@@ -246,27 +246,27 @@ export default function TeacherDashboard() {
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
-          <div className="w-full md:max-w-[520px] bg-white rounded-t-[20px] md:rounded-[10px]">
-            <div className="w-10 h-1 rounded-full bg-[#D6D3D1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
-              <h2 className="text-base font-semibold text-[#1C1917]">New Course</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 text-[#57534E] hover:text-[#1C1917] transition-colors">
+          <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
+            <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
+              <h2 className="text-base font-semibold text-[#0F172A]">New Course</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 text-[#475569] hover:text-[#0F172A] transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Course name</label>
+                <label className="text-[13px] font-medium text-[#475569]">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#57534E]">Subject code</label>
+                <label className="text-[13px] font-medium text-[#475569]">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E7E5E4] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
-              <div className="pt-1 border-t border-[#E7E5E4]">
+              <div className="pt-1 border-t border-[#E2E8F0]">
                 <button onClick={handleCreate} disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create course'}

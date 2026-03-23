@@ -125,24 +125,31 @@ Run `ls hooks/` for the full list.
 - **Student side:** group creation/join, task management, evidence upload (immutable + versioned), timeline, peer review, Contribution Record PDF export
 - **Teacher side:** course creation, course detail with group list + progress bars + analytics, group drill-down (read-only view of tasks/timeline/members/peer review), edit/delete course & group, copy invite links, download Contribution Record
 
-## Landing Page Redesign (in progress)
+## Landing Page (completed)
 
-Spec at `docs/superpowers/specs/2026-03-22-landing-page-redesign.md`. Key decisions:
-- **Horizontal scroll-snap storyboard** — 5 beats from brand narrative + CTA slide
-- **2-column desktop** (text left, visual right), stacks on mobile
-- **Storyset/Freepik illustrations** as subtle backgrounds (8-15% opacity, bottom-right)
-- **Illustrations saved at** `public/illustrations/beat-01..05-*.svg`
-- Copy follows brand narrative beats 01-05 exactly
-- Still needed: login/signup copy updates, implementation
+Horizontal scroll-snap storyboard at `pages/index.tsx`. Spec at `docs/superpowers/specs/2026-03-22-landing-page-redesign.md`.
+
+- **6 slides** — 5 narrative beats + CTA slide, full-viewport (`100dvh`), `scroll-snap-type: x mandatory`
+- **2-column desktop** (text left `md:flex-1`, visual right `md:flex-[1.2]`), stacks `flex-col` on mobile
+- **Inline SVG visuals** — custom mockups (chat window, kanban, timeline, peer review, PDF), no background images
+- **Storyset illustrations** saved at `public/illustrations/beat-01..05-*.svg` with accent color `#1A56E8` — currently unused (replaced by inline visuals)
+- **Auto-hide nav** — `group/nav` with `-translate-y-full group-hover/nav:translate-y-0`, intentionally no mobile hover (storyboard IS the experience)
+- **Mobile tap-edge navigation** — fixed 48px tap zones on left/right screen edges
+- **Keyboard nav** — ArrowRight/Left and spacebar scroll between slides
+- **Slide entrance animations** — opacity + translateY with staggered delays per element
+- **Typography**: labels 11px bold uppercase tracking-[2.5px], titles `clamp(32px, 4.5vw, 52px)` extrabold, body 16px medium `#64748B`
+- **All backgrounds off-white** (`#F8FAFF`) — dark backgrounds dropped after testing
+- Auto-redirects signed-in users to dashboard/teacher page
 
 ## Launch Checklist
 
-1. **Landing page redesign** — implement horizontal scroll storyboard (spec ready)
-2. **Login/signup copy** — align with brand voice (currently generic)
-3. **UX polish** — smooth out rough edges across student and teacher flows
-4. **Bug fixes** — resolve known issues before real users hit them
-5. **Auth edge cases** — handle all login/signup/OAuth flows reliably
-6. **Production readiness** — error states, loading states, empty states, mobile responsiveness
+1. ~~**Landing page redesign**~~ — done (horizontal scroll storyboard, 10+ iterations)
+2. ~~**Login/signup copy**~~ — done ("Your work is on record." / "Put your work on the record." / "Now in early access.")
+3. ~~**Illustration accent colors**~~ — done (all Storyset SVGs recolored to `#1A56E8`)
+4. **UX polish** — smooth out rough edges across student and teacher flows
+5. **Bug fixes** — resolve known issues before real users hit them
+6. **Auth edge cases** — handle all login/signup/OAuth flows reliably
+7. **Production readiness** — error states, loading states, empty states, mobile responsiveness
 
 ## Z-Index Hierarchy
 
