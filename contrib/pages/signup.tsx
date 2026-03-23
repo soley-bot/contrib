@@ -28,9 +28,13 @@ export default function Signup() {
 
   async function handleGoogleSignIn() {
     setLoading(true);
+    const returnTo = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+    const callbackUrl = returnTo
+      ? `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
+      : `${window.location.origin}/auth/callback`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     });
   }
 

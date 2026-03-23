@@ -125,21 +125,23 @@ export default function Onboarding() {
           </div>
           <RoleToggle value={role} onChange={setRole} />
 
-          <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#475569]">
-              Year of study <span className="font-normal text-[#94A3B8]">(optional)</span>
-            </label>
-            <select
-              value={yearOfStudy}
-              onChange={(e) => setYearOfStudy(e.target.value)}
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
-            >
-              <option value="">Select year…</option>
-              {YEAR_OPTIONS.map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
+          {role === 'student' && (
+            <div className="flex flex-col gap-1">
+              <label className="text-[13px] font-medium text-[#475569]">
+                Year of study <span className="font-normal text-[#94A3B8]">(optional)</span>
+              </label>
+              <select
+                value={yearOfStudy}
+                onChange={(e) => setYearOfStudy(e.target.value)}
+                className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              >
+                <option value="">Select year…</option>
+                {YEAR_OPTIONS.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {error && <p className="text-sm text-[#DC2626]">{error}</p>}
 

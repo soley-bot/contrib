@@ -61,6 +61,7 @@ export default function GroupPage() {
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
   const [pdfTheme, setPdfTheme] = useState<[number, number, number]>(DEFAULT_PDF_THEME);
+  const [toast, setToast] = useState<{ msg: string; type: 'error' | 'success' } | null>(null);
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -82,55 +83,72 @@ export default function GroupPage() {
     setTaskToDelete(task);
   }
 
+  function showToast(msg: string, type: 'error' | 'success' = 'error') {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  }
+
   async function executeDeleteTask() {
     if (!taskToDelete || !user) return;
-    await supabase.from('activity_log').insert({
-      group_id: taskToDelete.group_id,
-      actor_id: user.id,
-      action: 'task_deleted',
-      task_id: taskToDelete.id,
-      meta: { task_title: taskToDelete.title },
-    });
-    await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('id', taskToDelete.id);
-    setTaskToDelete(null);
-    refreshTasks();
-    refreshActivity();
+    try {
+      await supabase.from('activity_log').insert({
+        group_id: taskToDelete.group_id,
+        actor_id: user.id,
+        action: 'task_deleted',
+        task_id: taskToDelete.id,
+        meta: { task_title: taskToDelete.title },
+      });
+      const { error } = await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('id', taskToDelete.id);
+      if (error) throw error;
+      setTaskToDelete(null);
+      refreshTasks();
+      refreshActivity();
+    } catch { showToast('Failed to delete task. Please try again.'); }
   }
 
   async function executeDeleteGroup() {
     if (!group || !isLead) return;
-    await supabase.from('groups').delete().eq('id', group.id);
-    router.push('/dashboard');
+    try {
+      const { error } = await supabase.from('groups').delete().eq('id', group.id);
+      if (error) throw error;
+      router.push('/dashboard');
+    } catch { showToast('Failed to delete group. Please try again.'); }
   }
 
   async function executeLeaveGroup() {
     if (!user || !group) return;
     const myMembership = members.find((m) => m.profile_id === user.id);
     if (!myMembership) return;
-    await supabase.from('activity_log').insert({
-      group_id: group.id,
-      actor_id: user.id,
-      action: 'member_left',
-      task_id: null,
-      meta: null,
-    });
-    await supabase.from('group_members').delete().eq('id', myMembership.id);
-    router.push('/dashboard');
+    try {
+      await supabase.from('activity_log').insert({
+        group_id: group.id,
+        actor_id: user.id,
+        action: 'member_left',
+        task_id: null,
+        meta: null,
+      });
+      const { error } = await supabase.from('group_members').delete().eq('id', myMembership.id);
+      if (error) throw error;
+      router.push('/dashboard');
+    } catch { showToast('Failed to leave group. Please try again.'); }
   }
 
   async function executeRemoveMember() {
     if (!memberToRemove || !user || !group || !isLead) return;
-    await supabase.from('activity_log').insert({
-      group_id: group.id,
-      actor_id: user.id,
-      action: 'member_removed',
-      task_id: null,
-      meta: { removed_name: memberToRemove.profile?.name ?? '' },
-    });
-    await supabase.from('group_members').delete().eq('id', memberToRemove.id);
-    setMemberToRemove(null);
-    refreshGroup();
-    refreshActivity();
+    try {
+      await supabase.from('activity_log').insert({
+        group_id: group.id,
+        actor_id: user.id,
+        action: 'member_removed',
+        task_id: null,
+        meta: { removed_name: memberToRemove.profile?.name ?? '' },
+      });
+      const { error } = await supabase.from('group_members').delete().eq('id', memberToRemove.id);
+      if (error) throw error;
+      setMemberToRemove(null);
+      refreshGroup();
+      refreshActivity();
+    } catch { showToast('Failed to remove member. Please try again.'); }
   }
 
   function handleExport() {
@@ -140,42 +158,47 @@ export default function GroupPage() {
 
   async function handleOpenEvaluation() {
     if (!groupId || !user) return;
-    await openEvaluation(groupId, user.id);
-    await supabase.from('activity_log').insert({
-      group_id: groupId,
-      actor_id: user.id,
-      action: 'evaluation_opened',
-      task_id: null,
-      meta: null,
-    });
-    refreshActivity();
+    try {
+      await openEvaluation(groupId, user.id);
+      await supabase.from('activity_log').insert({
+        group_id: groupId,
+        actor_id: user.id,
+        action: 'evaluation_opened',
+        task_id: null,
+        meta: null,
+      });
+      refreshActivity();
+    } catch { showToast('Failed to open peer review. Please try again.'); }
   }
 
   async function executeResetEvaluation() {
     if (!groupId) return;
-    await closeEvaluation(groupId);
-    refreshEvalSession();
-    refreshEvalSubmit();
-    setShowResetEval(false);
+    try {
+      await closeEvaluation(groupId);
+      refreshEvalSession();
+      refreshEvalSubmit();
+      setShowResetEval(false);
+    } catch { showToast('Failed to reset peer review. Please try again.'); }
   }
 
   async function handleSubmitEvaluation(entries: EvaluationInsert[]) {
     if (!groupId || !user) return;
-    await submitEvaluation(entries);
-    await supabase.from('activity_log').insert({
-      group_id: groupId,
-      actor_id: user.id,
-      action: 'evaluation_submitted',
-      task_id: null,
-      meta: null,
-    });
-    refreshSummaries();
-    refreshActivity();
+    try {
+      await submitEvaluation(entries);
+      await supabase.from('activity_log').insert({
+        group_id: groupId,
+        actor_id: user.id,
+        action: 'evaluation_submitted',
+        task_id: null,
+        meta: null,
+      });
+      refreshSummaries();
+      refreshActivity();
+    } catch { showToast('Failed to submit evaluation. Please try again.'); }
   }
 
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
   const isMember = members.some((m) => m.profile_id === user?.id);
-  const nonLeadMembers = members.filter((m) => m.profile_id !== group?.lead_id);
 
   // ── Swipe navigation between tabs ──
   const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
@@ -212,7 +235,7 @@ export default function GroupPage() {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
 
-  if (!group || !isMember) {
+  if (!user || !group || !isMember) {
     return (
       <div className="flex flex-col items-center justify-center min-h-dvh gap-3 text-[#475569]">
         <p>Group not found or you are not a member.</p>
@@ -224,6 +247,15 @@ export default function GroupPage() {
   return (
     <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-[110] px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium animate-[fadeIn_0.2s_ease-out] ${
+          toast.type === 'error' ? 'bg-[#DC2626] text-white' : 'bg-[#16A34A] text-white'
+        }`}>
+          {toast.msg}
+        </div>
+      )}
 
       <div className="pt-14 md:pt-0 md:pl-[220px]">
 

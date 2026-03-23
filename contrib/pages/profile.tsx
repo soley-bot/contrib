@@ -11,7 +11,7 @@ import type { UserRole } from '@/types';
 export default function ProfilePage() {
   const router = useRouter();
   const { user, profile, loading, refreshProfile } = useUser();
-  const { groups } = useGroups(user?.id);
+  const { groups, loading: groupsLoading } = useGroups(user?.id);
   const { updateProfile, saving } = useProfile();
 
   const [editing, setEditing] = useState(false);
@@ -139,7 +139,7 @@ export default function ProfilePage() {
                     <option value="Year 5+">Year 5+</option>
                   </select>
                 </div>
-                {!hasGroups && <RoleToggle value={role} onChange={setRole} />}
+                {!groupsLoading && !hasGroups && <RoleToggle value={role} onChange={setRole} />}
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <div className="flex gap-2 pt-1 border-t border-[#E2E8F0]">
                   <button onClick={() => { setEditing(false); setError(''); }}

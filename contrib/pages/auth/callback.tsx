@@ -1,41 +1,50 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabase';
 
 export default function AuthCallback() {
   const router = useRouter();
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
+    async function redirect(session: { user: { id: string } }) {
+      const returnTo = typeof router.query.returnTo === 'string' && router.query.returnTo.startsWith('/') && !router.query.returnTo.startsWith('//')
+        ? router.query.returnTo : null;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, role')
+        .eq('id', session.user.id)
+        .single();
+      if (!profile) { router.replace('/onboarding'); return; }
+      router.replace(returnTo ?? (profile.role === 'teacher' ? '/teacher' : '/dashboard'));
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
         subscription.unsubscribe();
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id, role')
-          .eq('id', session.user.id)
-          .single();
-        router.replace(!profile ? '/onboarding' : profile.role === 'teacher' ? '/teacher' : '/dashboard');
-      } else if (event === 'INITIAL_SESSION' && session) {
-        // Already signed in (e.g. user bookmarked /auth/callback)
-        subscription.unsubscribe();
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id, role')
-          .eq('id', session.user.id)
-          .single();
-        router.replace(!profile ? '/onboarding' : profile.role === 'teacher' ? '/teacher' : '/dashboard');
+        await redirect(session);
       } else if (event === 'INITIAL_SESSION' && !session) {
         // No session yet — PKCE code exchange in progress, wait for SIGNED_IN
       } else if (!session) {
         router.replace('/login');
       }
     });
-    return () => subscription.unsubscribe();
+
+    const timeout = setTimeout(() => setTimedOut(true), 10000);
+    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, [router]);
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF] flex items-center justify-center">
-      <p className="text-[15px] text-[#475569]">Signing you in…</p>
+    <div className="min-h-dvh bg-[#F8FAFF] flex flex-col items-center justify-center gap-3">
+      {timedOut ? (
+        <>
+          <p className="text-[15px] text-[#0F172A] font-medium">Sign-in is taking too long</p>
+          <p className="text-sm text-[#475569]">Something may have gone wrong. Please try again.</p>
+          <button onClick={() => router.push('/login')} className="mt-2 text-sm text-brand font-medium">Back to login</button>
+        </>
+      ) : (
+        <p className="text-[15px] text-[#475569]">Signing you in…</p>
+      )}
     </div>
   );
 }

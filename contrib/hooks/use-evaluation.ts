@@ -35,9 +35,18 @@ export function useEvaluation(
     setHasSubmitted((data?.length ?? 0) > 0);
   }
 
+  const [submitting, setSubmitting] = useState(false);
+
   async function submit(entries: EvaluationInsert[]) {
-    await supabase.from('evaluations').insert(entries);
-    setTick((t) => t + 1);
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('evaluations').insert(entries);
+      if (error) throw error;
+      setTick((t) => t + 1);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return { hasSubmitted, loading, submit, refresh: () => setTick((t) => t + 1) };

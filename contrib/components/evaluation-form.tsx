@@ -54,7 +54,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-36 md:pb-8">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Evaluate your teammates</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Review your teammates</p>
 
       {peers.map((member, idx) => {
         const r = ratings[idx];
@@ -116,7 +116,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
           <div>
             <button onClick={() => setShowConfirm(true)} disabled={!allScored}
               className="w-full h-11 bg-[#1A56E8] hover:bg-[#1240C4] disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] text-white text-[14px] font-semibold rounded-md transition-colors">
-              Submit Evaluation
+              Submit Peer Review
             </button>
             {!allScored && (
               <p className="text-[11px] text-[#94A3B8] text-center mt-1.5">Rate all teammates to submit</p>
@@ -124,7 +124,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
           </div>
         ) : (
           <div className="bg-[#EBF0FF] border border-[#93B4FF] rounded-md p-3">
-            <p className="text-sm font-medium text-[#0F172A] mb-0.5">Submit evaluation?</p>
+            <p className="text-sm font-medium text-[#0F172A] mb-0.5">Submit peer review?</p>
             <p className="text-[12px] text-[#475569] mb-3">Your ratings cannot be changed after submitting.</p>
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)}
