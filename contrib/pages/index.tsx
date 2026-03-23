@@ -268,7 +268,6 @@ interface Slide {
   bg: string;
   textColor: string;
   labelColor: string;
-  illustration: string;
   Visual: React.FC<{ active: boolean }>;
 }
 
@@ -281,7 +280,7 @@ const SLIDES: Slide[] = [
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
-    illustration: '/illustrations/beat-01-overwhelmed.svg',
+
     Visual: Slide1Visual,
   },
   {
@@ -292,7 +291,7 @@ const SLIDES: Slide[] = [
     bg: '#FAFAF9',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
-    illustration: '/illustrations/beat-02-classroom.svg',
+
     Visual: Slide2Visual,
   },
   {
@@ -303,7 +302,7 @@ const SLIDES: Slide[] = [
     bg: '#FFFFFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
-    illustration: '/illustrations/beat-03-devices.svg',
+
     Visual: Slide3Visual,
   },
   {
@@ -314,7 +313,7 @@ const SLIDES: Slide[] = [
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
-    illustration: '/illustrations/beat-04-grades.svg',
+
     Visual: Slide4Visual,
   },
   {
@@ -325,7 +324,7 @@ const SLIDES: Slide[] = [
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
-    illustration: '/illustrations/beat-05-webinar.svg',
+
     Visual: Slide5Visual,
   },
 ];
@@ -508,20 +507,6 @@ export default function Landing() {
                   >
                     {slide.body}
                   </p>
-                  {/* Illustration — desktop only */}
-                  <div
-                    className="mt-4 hidden md:block md:w-[360px] md:h-[360px] transition-all duration-700"
-                    aria-hidden="true"
-                    style={{
-                      opacity: isActive ? 1 : 0,
-                      transform: isActive ? 'translateY(0)' : 'translateY(10px)',
-                      transitionDelay: isActive ? '0.5s' : '0s',
-                      backgroundImage: `url(${slide.illustration})`,
-                      backgroundSize: 'contain',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center',
-                    }}
-                  />
                 </div>
 
                 {/* Visual col */}
