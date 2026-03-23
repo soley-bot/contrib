@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabase';
 import Nav from '@/components/nav';
@@ -177,34 +177,34 @@ export default function GroupPage() {
   const isMember = members.some((m) => m.profile_id === user?.id);
   const nonLeadMembers = members.filter((m) => m.profile_id !== group?.lead_id);
 
-  // ── Swipe + tap-edge navigation between tabs ──
+  // ── Swipe navigation between tabs ──
   const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const swiping = useRef(false);
+  const touchRef = useRef({ x: 0, y: 0, active: false });
 
-  const goTab = useCallback((direction: 1 | -1) => {
-    setTab((prev) => {
-      const idx = TABS.indexOf(prev);
-      const next = idx + direction;
-      if (next < 0 || next >= TABS.length) return prev;
-      return TABS[next];
-    });
+  useEffect(() => {
+    function onStart(e: TouchEvent) {
+      touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, active: true };
+    }
+    function onEnd(e: TouchEvent) {
+      if (!touchRef.current.active) return;
+      touchRef.current.active = false;
+      const dx = e.changedTouches[0].clientX - touchRef.current.x;
+      const dy = e.changedTouches[0].clientY - touchRef.current.y;
+      if (Math.abs(dx) < 80 || Math.abs(dy) > Math.abs(dx) * 0.5) return;
+      setTab((prev) => {
+        const idx = TABS.indexOf(prev);
+        const next = idx + (dx < 0 ? 1 : -1);
+        if (next < 0 || next >= TABS.length) return prev;
+        return TABS[next];
+      });
+    }
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', onStart);
+      document.removeEventListener('touchend', onEnd);
+    };
   }, []);
-
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    swiping.current = true;
-  }
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (!swiping.current) return;
-    swiping.current = false;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    const dy = e.changedTouches[0].clientY - touchStartY.current;
-    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return; // too short or too vertical
-    goTab(dx < 0 ? 1 : -1);
-  }
 
   if (userLoading || groupLoading) {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
@@ -223,7 +223,7 @@ export default function GroupPage() {
     <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
 
-      <div className="pt-14 md:pt-0 md:pl-[220px]" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <div className="pt-14 md:pt-0 md:pl-[220px]">
 
         {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
@@ -528,14 +528,6 @@ export default function GroupPage() {
           </div>
         )}
       </div>
-
-      {/* ── MOBILE TAP-EDGE ZONES ── */}
-      {TABS.indexOf(tab) > 0 && (
-        <div className="md:hidden fixed left-0 top-14 bottom-[60px] w-[48px] z-20" onClick={() => goTab(-1)} />
-      )}
-      {TABS.indexOf(tab) < TABS.length - 1 && (
-        <div className="md:hidden fixed right-0 top-14 bottom-[60px] w-[48px] z-20" onClick={() => goTab(1)} />
-      )}
 
       {/* ── MOBILE BOTTOM NAV ── */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] flex"
