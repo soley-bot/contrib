@@ -270,19 +270,6 @@ export default function GroupPage() {
           </div>
         </div>
 
-        {/* Tab bar */}
-        <div className="flex border-b border-[#E2E8F0] bg-white sticky top-14 md:top-0 z-30 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors capitalize ${
-                tab === t ? 'text-brand border-brand' : 'text-[#94A3B8] border-transparent'
-              }`}
-            >
-              {t === 'evaluation' ? 'Peer Review' : t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
-
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
