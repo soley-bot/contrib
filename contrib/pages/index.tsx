@@ -243,15 +243,15 @@ function Slide5Visual({ active }: { active: boolean }) {
       {stats.map((s) => (
         <div
           key={s.label}
-          className="rounded-2xl border border-[#1E293B] bg-[#1E293B]/60 px-6 py-5 flex items-center gap-4 transition-all duration-600"
+          className="rounded-2xl border border-[#E2E8F0] bg-white px-6 py-5 flex items-center gap-4 transition-all duration-600 shadow-sm"
           style={{
             opacity: active ? 1 : 0,
             transform: active ? 'translateY(0)' : 'translateY(20px)',
             transitionDelay: active ? `${s.delay}s` : '0s',
           }}
         >
-          <div className="text-[42px] font-extrabold text-white leading-none w-24 flex-shrink-0">{s.value}</div>
-          <div className="text-[14px] text-[#93B4FF]">{s.label}</div>
+          <div className="text-[42px] font-extrabold text-[#0F172A] leading-none w-24 flex-shrink-0">{s.value}</div>
+          <div className="text-[14px] text-[#64748B]">{s.label}</div>
         </div>
       ))}
     </div>
@@ -269,7 +269,6 @@ interface Slide {
   textColor: string;
   labelColor: string;
   illustration: string;
-  illustrationInvert: boolean;
   Visual: React.FC<{ active: boolean }>;
 }
 
@@ -279,11 +278,10 @@ const SLIDES: Slide[] = [
     label: 'Every semester',
     title: 'The same thing happens.',
     body: "A group of students gets assigned a project. Four people work. One doesn\u2019t. The deadline comes \u2014 and everyone gets the same grade.",
-    bg: '#0F172A',
-    textColor: 'white',
-    labelColor: '#93B4FF',
+    bg: '#F8FAFF',
+    textColor: '#0F172A',
+    labelColor: '#1A56E8',
     illustration: '/illustrations/beat-01-overwhelmed.svg',
-    illustrationInvert: true,
     Visual: Slide1Visual,
   },
   {
@@ -295,7 +293,6 @@ const SLIDES: Slide[] = [
     textColor: '#0F172A',
     labelColor: '#1A56E8',
     illustration: '/illustrations/beat-02-classroom.svg',
-    illustrationInvert: false,
     Visual: Slide2Visual,
   },
   {
@@ -307,7 +304,6 @@ const SLIDES: Slide[] = [
     textColor: '#0F172A',
     labelColor: '#1A56E8',
     illustration: '/illustrations/beat-03-devices.svg',
-    illustrationInvert: false,
     Visual: Slide3Visual,
   },
   {
@@ -319,7 +315,6 @@ const SLIDES: Slide[] = [
     textColor: '#0F172A',
     labelColor: '#1A56E8',
     illustration: '/illustrations/beat-04-grades.svg',
-    illustrationInvert: false,
     Visual: Slide4Visual,
   },
   {
@@ -327,11 +322,10 @@ const SLIDES: Slide[] = [
     label: 'Why now. Why Cambodia.',
     title: 'No tool was built for this.',
     body: "Cambodia\u2019s higher education is growing fast \u2014 but fair group assessment hasn\u2019t kept up. Contrib gives universities the tool to do what they always intended.",
-    bg: '#0F172A',
-    textColor: 'white',
-    labelColor: '#93B4FF',
+    bg: '#F8FAFF',
+    textColor: '#0F172A',
+    labelColor: '#1A56E8',
     illustration: '/illustrations/beat-05-webinar.svg',
-    illustrationInvert: true,
     Visual: Slide5Visual,
   },
 ];
@@ -341,7 +335,7 @@ const SLIDES: Slide[] = [
 function CTASlide({ active }: { active: boolean }) {
   return (
     <div
-      className="snap-start flex-shrink-0 w-screen min-h-[calc(100dvh-56px)] relative flex flex-col items-center justify-center px-6 py-12"
+      className="snap-start flex-shrink-0 w-screen min-h-dvh relative flex flex-col items-center justify-center px-6 py-12"
       style={{ background: '#FFFFFF' }}
     >
       <div
@@ -423,27 +417,31 @@ export default function Landing() {
 
   return (
     <div className="min-h-dvh bg-white overflow-hidden">
-      {/* Nav */}
-      <nav className="h-14 sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#E2E8F0]">
-        <div className="max-w-none px-5 h-full flex items-center justify-between">
-          <Logo />
-          <div className="flex gap-2">
-            <Link href="/login" className="h-8 px-3 flex items-center text-sm text-[#6B7280] hover:text-[#111827] font-medium rounded-md transition-colors">
-              Log in
-            </Link>
-            <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-[#1A56E8] hover:bg-[#1240C4]">
-              Sign up free
-            </Link>
+      {/* Nav — hidden by default, slides down on hover */}
+      <div className="fixed top-0 left-0 right-0 z-50 group/nav">
+        {/* Invisible hover zone */}
+        <div className="h-16" />
+        <nav className="absolute top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-sm border-b border-[#E2E8F0] transition-transform duration-300 -translate-y-full group-hover/nav:translate-y-0">
+          <div className="max-w-none px-5 h-full flex items-center justify-between">
+            <Logo />
+            <div className="flex gap-2">
+              <Link href="/login" className="h-8 px-3 flex items-center text-sm text-[#6B7280] hover:text-[#111827] font-medium rounded-md transition-colors">
+                Log in
+              </Link>
+              <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-[#1A56E8] hover:bg-[#1240C4]">
+                Sign up free
+              </Link>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
-      {/* Horizontal scroll container */}
+      {/* Horizontal scroll container — full viewport */}
       <div
         ref={scrollRef}
         className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         style={{
-          height: 'calc(100dvh - 56px)',
+          height: '100dvh',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
@@ -459,27 +457,6 @@ export default function Landing() {
               className="snap-start flex-shrink-0 w-screen relative overflow-hidden"
               style={{ background: slide.bg }}
             >
-              {/* Illustration background */}
-              <div
-                className="absolute right-0 bottom-0 pointer-events-none select-none"
-                style={{
-                  width: 'min(90%, 700px)',
-                  maxHeight: '90%',
-                  opacity: isActive ? (slide.illustrationInvert ? 0.07 : 0.08) : 0,
-                  transition: 'opacity 1s ease 0.2s',
-                  filter: slide.illustrationInvert ? 'invert(1) brightness(2)' : 'none',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={slide.illustration}
-                  alt=""
-                  aria-hidden="true"
-                  style={{ width: '100%', height: 'auto', display: 'block' }}
-                />
-              </div>
-
               {/* Slide content — 2-col desktop, stacked mobile */}
               <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-10 gap-8 md:gap-16">
                 {/* Text col */}
@@ -519,6 +496,20 @@ export default function Landing() {
                   >
                     {slide.body}
                   </p>
+                  {/* Illustration — inline below text */}
+                  <div
+                    className="mt-4 w-[200px] h-[200px] md:w-[360px] md:h-[360px] transition-all duration-700"
+                    aria-hidden="true"
+                    style={{
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? 'translateY(0)' : 'translateY(10px)',
+                      transitionDelay: isActive ? '0.5s' : '0s',
+                      backgroundImage: `url(${slide.illustration})`,
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }}
+                  />
                 </div>
 
                 {/* Visual col */}
@@ -532,6 +523,18 @@ export default function Landing() {
                 >
                   <Visual active={isActive} />
                 </div>
+              {/* Next slide arrow */}
+              {i < SLIDES.length - 1 && (
+                <button
+                  onClick={() => goTo(i + 1)}
+                  className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto animate-bounce"
+                  aria-label="Next slide"
+                >
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <path d="M8 12l6 5 6-5" stroke="#1A56E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
               </div>
             </div>
           );
@@ -559,63 +562,48 @@ export default function Landing() {
           <button
             onClick={() => goTo(activeSlide - 1)}
             disabled={activeSlide === 0}
-            className="hidden md:flex w-8 h-8 rounded-full items-center justify-center border transition-all disabled:opacity-20"
-            style={{
-              background: activeSlide === 0 ? 'transparent' : SLIDES[activeSlide]?.textColor === 'white' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)',
-              borderColor: activeSlide > 0 && SLIDES[activeSlide - 1]?.textColor === 'white' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)',
-            }}
+            className="hidden md:flex w-8 h-8 rounded-full items-center justify-center border border-[rgba(0,0,0,0.1)] transition-all disabled:opacity-20"
+            style={{ background: activeSlide === 0 ? 'transparent' : 'rgba(0,0,0,0.06)' }}
             aria-label="Previous slide"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M7.5 2.5L4 6l3.5 3.5" stroke={activeSlide > 0 && SLIDES[activeSlide - 1]?.textColor === 'white' ? 'white' : '#0F172A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7.5 2.5L4 6l3.5 3.5" stroke="#0F172A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
           {/* Dots */}
           <div className="flex items-center gap-2">
-            {Array.from({ length: totalSlides }).map((_, i) => {
-              const isDark = i < SLIDES.length && SLIDES[i].textColor === 'white';
-              const isCtaDot = i === SLIDES.length;
-              return (
-                <button
-                  key={i}
-                  onClick={() => goTo(i)}
-                  className="rounded-full transition-all duration-300"
-                  style={{
-                    width: i === activeSlide ? 20 : 6,
-                    height: 6,
-                    background: i === activeSlide
-                      ? (isDark || (isCtaDot && activeSlide === SLIDES.length) ? '#1A56E8' : '#1A56E8')
-                      : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.15)'),
-                  }}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              );
-            })}
+            {Array.from({ length: totalSlides }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: i === activeSlide ? 20 : 6,
+                  height: 6,
+                  background: i === activeSlide ? '#1A56E8' : 'rgba(0,0,0,0.15)',
+                }}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
           </div>
 
           {/* Right arrow */}
           <button
             onClick={() => goTo(activeSlide + 1)}
             disabled={activeSlide === totalSlides - 1}
-            className="hidden md:flex w-8 h-8 rounded-full items-center justify-center border transition-all disabled:opacity-20"
-            style={{
-              background: activeSlide < totalSlides - 1 ? (SLIDES[activeSlide]?.textColor === 'white' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)') : 'transparent',
-              borderColor: SLIDES[activeSlide]?.textColor === 'white' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.1)',
-            }}
+            className="hidden md:flex w-8 h-8 rounded-full items-center justify-center border border-[rgba(0,0,0,0.1)] transition-all disabled:opacity-20"
+            style={{ background: activeSlide < totalSlides - 1 ? 'rgba(0,0,0,0.06)' : 'transparent' }}
             aria-label="Next slide"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M4.5 2.5L8 6l-3.5 3.5" stroke={SLIDES[activeSlide]?.textColor === 'white' ? 'white' : '#0F172A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4.5 2.5L8 6l-3.5 3.5" stroke="#0F172A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>
 
         {/* Slide counter */}
-        <div
-          className="text-[11px] font-medium tabular-nums"
-          style={{ color: activeSlide < SLIDES.length && SLIDES[activeSlide].textColor === 'white' ? 'rgba(255,255,255,0.4)' : '#94A3B8' }}
-        >
+        <div className="text-[11px] font-medium tabular-nums text-[#94A3B8]">
           {activeSlide + 1} / {totalSlides}
         </div>
       </div>
