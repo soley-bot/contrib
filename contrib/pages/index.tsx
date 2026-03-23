@@ -458,11 +458,11 @@ export default function Landing() {
               style={{ background: slide.bg }}
             >
               {/* Slide content — 2-col desktop, stacked mobile */}
-              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-6 md:px-10 lg:px-16 py-10 gap-8 md:gap-16">
+              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-6 md:py-10 gap-4 md:gap-16">
                 {/* Text col */}
                 <div className="flex-1 flex flex-col justify-center">
                   <div
-                    className="transition-all duration-600 text-[10px] font-bold uppercase tracking-[2px] mb-4"
+                    className="transition-all duration-600 text-[10px] font-bold uppercase tracking-[2px] mb-2 md:mb-4"
                     style={{
                       color: slide.labelColor,
                       opacity: isActive ? 1 : 0,
@@ -473,7 +473,7 @@ export default function Landing() {
                     {slide.label}
                   </div>
                   <h2
-                    className="font-extrabold mb-4 transition-all duration-600"
+                    className="font-extrabold mb-2 md:mb-4 transition-all duration-600"
                     style={{
                       color: slide.textColor,
                       fontSize: 'clamp(26px, 3.5vw, 42px)',
@@ -496,9 +496,9 @@ export default function Landing() {
                   >
                     {slide.body}
                   </p>
-                  {/* Illustration — inline below text */}
+                  {/* Illustration — desktop only */}
                   <div
-                    className="mt-4 w-[200px] h-[200px] md:w-[360px] md:h-[360px] transition-all duration-700"
+                    className="mt-4 hidden md:block md:w-[360px] md:h-[360px] transition-all duration-700"
                     aria-hidden="true"
                     style={{
                       opacity: isActive ? 1 : 0,
@@ -514,7 +514,7 @@ export default function Landing() {
 
                 {/* Visual col */}
                 <div
-                  className="flex-1 flex items-center justify-center transition-all duration-600"
+                  className="flex-1 flex items-center justify-center transition-all duration-600 max-h-[45vh] md:max-h-none overflow-hidden"
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive ? 'translateX(0)' : 'translateX(20px)',
@@ -527,7 +527,7 @@ export default function Landing() {
               {i < SLIDES.length - 1 && (
                 <button
                   onClick={() => goTo(i + 1)}
-                  className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-1"
+                  className="absolute bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-1"
                   aria-label="Next slide"
                 >
                   {/* Paper plane */}
