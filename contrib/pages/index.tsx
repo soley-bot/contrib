@@ -457,9 +457,9 @@ export default function Landing() {
               style={{ background: slide.bg }}
             >
               {/* Slide content — 2-col desktop, stacked mobile */}
-              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-6 md:py-10 gap-4 md:gap-16">
+              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-4 md:py-10 pb-16 md:pb-4 gap-3 md:gap-16">
                 {/* Text col */}
-                <div className="flex-1 flex flex-col justify-center">
+                <div className="md:flex-1 flex flex-col justify-start md:justify-center">
                   <div
                     className="transition-all duration-600 text-[10px] font-bold uppercase tracking-[2px] mb-2 md:mb-4"
                     style={{
@@ -513,7 +513,7 @@ export default function Landing() {
 
                 {/* Visual col */}
                 <div
-                  className="flex-[1.2] flex items-center justify-center transition-all duration-600 max-h-[45vh] md:max-h-none overflow-hidden"
+                  className="flex-1 md:flex-[1.2] flex items-center justify-center transition-all duration-600 overflow-visible"
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive ? 'translateX(0)' : 'translateX(20px)',
