@@ -527,17 +527,18 @@ export default function Landing() {
               {i < SLIDES.length - 1 && (
                 <button
                   onClick={() => goTo(i + 1)}
-                  className="absolute bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-1"
+                  className="absolute bottom-16 md:bottom-12 right-6 md:right-10 pointer-events-auto flex items-center gap-0 animate-glide"
                   aria-label="Next slide"
                 >
-                  {/* Paper plane */}
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="animate-bounce" style={{ animationDuration: '2s' }}>
-                    <path d="M22 2L11 13" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="#1A56E8" fillOpacity="0.08"/>
-                  </svg>
-                  {/* Chevron */}
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-pulse">
-                    <path d="M6 8l4 4 4-4" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Dotted trail + paper plane pointing right */}
+                  <svg width="100" height="32" viewBox="0 0 100 32" fill="none">
+                    {/* Dotted trail */}
+                    <line x1="8" y1="16" x2="60" y2="16" stroke="#93B4FF" strokeWidth="1.5" strokeDasharray="3 5" strokeLinecap="round"/>
+                    {/* Paper plane pointing right */}
+                    <g transform="translate(62, 4)">
+                      <path d="M0 12L28 0L20 12L28 24L0 12Z" fill="#1A56E8" fillOpacity="0.12" stroke="#1A56E8" strokeWidth="1.2" strokeLinejoin="round"/>
+                      <path d="M0 12L20 12" stroke="#1A56E8" strokeWidth="1" strokeLinecap="round"/>
+                    </g>
                   </svg>
                 </button>
               )}

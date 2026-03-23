@@ -64,6 +64,15 @@ select {
   font-size: 16px;
 }
 
+@keyframes glide-right {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(12px); }
+}
+
+.animate-glide {
+  animation: glide-right 2.5s ease-in-out infinite;
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
