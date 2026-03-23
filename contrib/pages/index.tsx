@@ -468,24 +468,12 @@ export default function Landing() {
               className="snap-start flex-shrink-0 w-screen relative overflow-hidden"
               style={{ background: slide.bg }}
             >
-              {/* Subtle logo watermark */}
-              <div className="absolute top-4 left-5 md:top-6 md:left-10 opacity-30 pointer-events-none">
-                <svg width="20" height="20" viewBox="0 0 160 160" fill="none">
-                  <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
-                  <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
-                  <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
-                  <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
-                  <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
-                  <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
-                </svg>
-              </div>
-
               {/* Slide content — 2-col desktop, stacked mobile */}
               <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-4 md:py-10 pb-16 md:pb-4 gap-3 md:gap-16">
                 {/* Text col */}
                 <div className="md:flex-1 flex flex-col justify-start md:justify-center">
                   <div
-                    className="transition-all duration-600 text-[10px] font-bold uppercase tracking-[2px] mb-2 md:mb-4"
+                    className="transition-all duration-600 text-[11px] font-bold uppercase tracking-[2.5px] mb-3"
                     style={{
                       color: slide.labelColor,
                       opacity: isActive ? 1 : 0,
@@ -496,11 +484,12 @@ export default function Landing() {
                     {slide.label}
                   </div>
                   <h2
-                    className="font-extrabold mb-2 md:mb-4 transition-all duration-600"
+                    className="font-extrabold mb-3 md:mb-5 transition-all duration-600"
                     style={{
                       color: slide.textColor,
-                      fontSize: 'clamp(26px, 3.5vw, 42px)',
-                      lineHeight: 1.15,
+                      fontSize: 'clamp(32px, 4.5vw, 52px)',
+                      lineHeight: 1.1,
+                      letterSpacing: '-0.5px',
                       opacity: isActive ? 1 : 0,
                       transform: isActive ? 'translateY(0)' : 'translateY(14px)',
                       transitionDelay: isActive ? '0.25s' : '0s',
@@ -509,9 +498,9 @@ export default function Landing() {
                     {slide.title}
                   </h2>
                   <p
-                    className="text-[15px] leading-relaxed transition-all duration-600 max-w-sm"
+                    className="text-[16px] font-medium leading-[1.6] transition-all duration-600 max-w-sm"
                     style={{
-                      color: slide.textColor === 'white' ? '#94A3B8' : '#64748B',
+                      color: '#64748B',
                       opacity: isActive ? 1 : 0,
                       transform: isActive ? 'translateY(0)' : 'translateY(14px)',
                       transitionDelay: isActive ? '0.35s' : '0s',
