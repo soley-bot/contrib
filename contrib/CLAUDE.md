@@ -132,7 +132,7 @@ Horizontal scroll-snap storyboard at `pages/index.tsx`. Spec at `docs/superpower
 - **6 slides** — 5 narrative beats + CTA slide, full-viewport (`100dvh`), `scroll-snap-type: x mandatory`
 - **2-column desktop** (text left `md:flex-1`, visual right `md:flex-[1.2]`), stacks `flex-col` on mobile
 - **Inline SVG visuals** — custom mockups (chat window, kanban, timeline, peer review, PDF), no background images
-- **Storyset illustrations** saved at `public/illustrations/beat-01..05-*.svg` with accent color `#1A56E8` — currently unused (replaced by inline visuals)
+- **Storyset illustrations** deleted — were 452KB of animated SVGs causing flickering, replaced by lightweight inline visuals
 - **Auto-hide nav** — `group/nav` with `-translate-y-full group-hover/nav:translate-y-0`, intentionally no mobile hover (storyboard IS the experience)
 - **Mobile tap-edge navigation** — fixed 48px tap zones on left/right screen edges
 - **Keyboard nav** — ArrowRight/Left and spacebar scroll between slides
@@ -145,11 +145,11 @@ Horizontal scroll-snap storyboard at `pages/index.tsx`. Spec at `docs/superpower
 
 1. ~~**Landing page redesign**~~ — done (horizontal scroll storyboard, 10+ iterations)
 2. ~~**Login/signup copy**~~ — done ("Your work is on record." / "Put your work on the record." / "Now in early access.")
-3. ~~**Illustration accent colors**~~ — done (all Storyset SVGs recolored to `#1A56E8`)
-4. **UX polish** — smooth out rough edges across student and teacher flows
-5. **Bug fixes** — resolve known issues before real users hit them
-6. **Auth edge cases** — handle all login/signup/OAuth flows reliably
-7. **Production readiness** — error states, loading states, empty states, mobile responsiveness
+3. ~~**Illustration accent colors**~~ — done (Storyset SVGs deleted, inline visuals use `#1A56E8`)
+4. ~~**UX polish**~~ — done (cool slate palette migration, emoji removal, consistent sizing)
+5. ~~**Bug fixes**~~ — done (25 issues fixed: error handling, loading states, swipe-through-modal, auth flows)
+6. ~~**Auth edge cases**~~ — done (callback timeout, returnTo forwarding, reset-password loading state)
+7. **Production readiness** — remaining: accessibility (ARIA labels), confirm-password field, teacher page teal cleanup
 
 ## Z-Index Hierarchy
 
@@ -170,11 +170,64 @@ Full brand bible at `../contrib-markting/contrib-brand-guidelines.html`. Key rul
 - Feature names are locked (see Feature Names table above)
 - Voice: confident, direct, specific — not generic EdTech copy
 
+## Coding Standards (enforced)
+
+These rules exist because we found real bugs from violating them. Follow them on every new code.
+
+### Supabase mutations — always check errors
+```tsx
+// WRONG — silent failure
+await supabase.from('tasks').delete().eq('id', id);
+
+// RIGHT — catch and surface to user
+const { error } = await supabase.from('tasks').delete().eq('id', id);
+if (error) { showToast('Failed to delete task.'); return; }
+```
+
+### Loading states — never show stale data
+- Every page must show a spinner or skeleton while auth/data loads
+- Never `return null` for missing data — show a spinner or redirect
+- Stats/counts must not flash `0` before real data arrives — use a `loaded` flag
+- `useGroups`/`useTasks` loading states must be checked before rendering dependent UI
+
+### Modals — disable background interactions
+- Swipe navigation, backdrop clicks, and keyboard shortcuts must be disabled when a modal is open
+- Forms in modals must be wrapped in `<form onSubmit>` so Enter key works
+- Backdrop click must be guarded during async operations (`if (!creating) setShowModal(false)`)
+
+### Double-submit prevention
+- Every async submit function needs an in-flight guard (`if (submitting) return`)
+- Set guard before await, reset in `finally` block
+
+### Colors — brand palette only
+- Student UI: `#1A56E8` (brand), `#1240C4` (hover), `#EBF0FF` (light), `#93B4FF` (border)
+- Never use: `#FF5841` (coral), `#FFF0EE`, `#FFCFC9`, `#C53678` (pink), `#0E7490` (teal)
+- Never use: `#F9FAFB`, `#3A3632`, `#2C2927` (warm stone)
+- Page backgrounds: always `#F8FAFF`, never `#F9FAFB` or `#FAFAF9`
+
+### Auth flows
+- Google OAuth must forward `returnTo` query param through the callback
+- Auth callback must have a timeout (10s) with fallback UI — never hang forever
+- Reset password must show a loading state before the Supabase event fires
+
+### Mobile
+- Fixed bottom elements must account for bottom nav height (`bottom: calc(60px + env(safe-area-inset-bottom))`)
+- Don't render the same component (e.g. InviteBanner) on multiple tabs
+- Document-level touch handlers must check for open modals before firing
+
+### Feature names (locked)
+- Use "Peer Review" everywhere — not "Evaluation", not "Review" alone
+- Button text: "Submit Peer Review", "Open Peer Review"
+- Section headers: "Review your teammates" (not "Evaluate")
+
 ## Avoid
 
 - Teal anywhere — removed from brand
+- Coral `#FF5841` anywhere — removed from brand
 - Scope creep — every feature must answer: "does this make individual effort visible in group work?"
 - Old feature names (Activity, Evaluation, Export Report, PDF Report, Upload evidence)
+- Silent Supabase failures — always check `error` and surface it
+- `return null` for missing data — always show a loading state
 
 ## Git Workflow
 
