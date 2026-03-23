@@ -435,6 +435,18 @@ export default function Landing() {
         </nav>
       </div>
 
+      {/* Tap zones — mobile edge navigation */}
+      <div
+        className="fixed top-0 left-0 w-12 h-full z-40 md:hidden"
+        onClick={() => goTo(activeSlide - 1)}
+        style={{ opacity: activeSlide > 0 ? 1 : 0, pointerEvents: activeSlide > 0 ? 'auto' : 'none' }}
+      />
+      <div
+        className="fixed top-0 right-0 w-12 h-full z-40 md:hidden"
+        onClick={() => goTo(activeSlide + 1)}
+        style={{ opacity: activeSlide < totalSlides - 1 ? 1 : 0, pointerEvents: activeSlide < totalSlides - 1 ? 'auto' : 'none' }}
+      />
+
       {/* Horizontal scroll container — full viewport */}
       <div
         ref={scrollRef}
@@ -456,6 +468,18 @@ export default function Landing() {
               className="snap-start flex-shrink-0 w-screen relative overflow-hidden"
               style={{ background: slide.bg }}
             >
+              {/* Subtle logo watermark */}
+              <div className="absolute top-4 left-5 md:top-6 md:left-10 opacity-30 pointer-events-none">
+                <svg width="20" height="20" viewBox="0 0 160 160" fill="none">
+                  <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
+                  <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
+                  <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
+                  <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
+                  <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
+                  <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
+                </svg>
+              </div>
+
               {/* Slide content — 2-col desktop, stacked mobile */}
               <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-4 md:py-10 pb-16 md:pb-4 gap-3 md:gap-16">
                 {/* Text col */}
