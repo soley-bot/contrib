@@ -273,7 +273,22 @@ export default function GroupPage() {
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            {members.length < 6 && <InviteBanner token={group.invite_token} />}
+            {/* Peer review status banner */}
+            {evalSession && !hasSubmitted && (
+              <div className="bg-brand-light border border-brand-border rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
+                <p className="text-sm text-[#0F172A]">Peer Review is open — submit your ratings</p>
+                <button onClick={() => setTab('evaluation')}
+                  className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
+                  Go to Review
+                </button>
+              </div>
+            )}
+            {evalSession && hasSubmitted && (
+              <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl px-4 py-2.5 mb-4 flex items-center gap-2">
+                <IconCheck size={14} />
+                <p className="text-sm text-[#15803D]">Peer Review submitted — {evalSummaries.length > 0 ? `${Math.max(...evalSummaries.map(s => s.eval_count))}/${members.length - 1} responded` : 'waiting for others'}</p>
+              </div>
+            )}
 
             {/* All-tasks-done evaluation nudge (lead only, evaluation not yet open) */}
             {isLead && !evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
@@ -285,6 +300,8 @@ export default function GroupPage() {
                 </button>
               </div>
             )}
+
+            {members.length < 6 && <InviteBanner token={group.invite_token} />}
 
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
@@ -394,6 +411,8 @@ export default function GroupPage() {
         {/* ── MEMBERS TAB ── */}
         {tab === 'members' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            {members.length < 6 && <InviteBanner token={group.invite_token} />}
+
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">
               {members.length} member{members.length !== 1 ? 's' : ''}
             </p>
@@ -405,43 +424,45 @@ export default function GroupPage() {
               />
             ))}
 
-            {/* Group actions */}
-            <div className="mt-6 flex flex-col gap-2">
-              <button onClick={() => setShowEditGroup(true)}
-                className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
-                <IconPencil size={15} /> Edit Group
-              </button>
+            {/* Export Contribution Record */}
+            <div className="mt-6 bg-white border border-[#E2E8F0] rounded-xl px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-[#0F172A]">Contribution Record</p>
+                  <p className="text-[11px] text-[#94A3B8] mt-0.5">Download PDF with tasks, evidence, and peer review scores</p>
+                </div>
+                <button onClick={handleExport}
+                  className="flex-shrink-0 h-9 px-4 border border-[#E2E8F0] bg-[#F8FAFF] hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center gap-1.5 transition-colors">
+                  <IconExport size={14} /> Export
+                </button>
+              </div>
+              <div className="flex gap-1.5 mt-2.5">
+                {PDF_THEMES.map((t) => {
+                  const isActive = pdfTheme.join() === t.color.join();
+                  return (
+                    <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
+                      className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-50 hover:opacity-100'}`}
+                      style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Group management */}
+            <div className="mt-4 flex flex-col gap-2">
               {isLead && (
-                <>
-                  <button onClick={() => setShowTransferLead(true)}
-                    className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                    Transfer Lead
-                  </button>
-                  <div className="w-full bg-white border border-[#E2E8F0] rounded-md px-4 py-2.5">
-                    <p className="text-[11px] text-[#94A3B8] mb-2">PDF theme color</p>
-                    <div className="flex gap-2 mb-3">
-                      {PDF_THEMES.map((t) => {
-                        const isActive = pdfTheme.join() === t.color.join();
-                        return (
-                          <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
-                            className={`w-6 h-6 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-50 hover:opacity-100'}`}
-                            style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
-                          />
-                        );
-                      })}
-                    </div>
-                    <button onClick={handleExport}
-                      className="w-full h-9 border border-[#E2E8F0] bg-[#F8FAFF] hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                      <IconExport size={15} /> Export Contribution Record
-                    </button>
-                  </div>
-                  <button onClick={() => setShowDeleteGroup(true)}
-                    className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors md:hidden">
-                    <IconTrash size={15} /> Delete Group
-                  </button>
-                </>
+                <button onClick={() => setShowTransferLead(true)}
+                  className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                  Transfer Lead
+                </button>
               )}
-              {!isLead && (
+              {isLead ? (
+                <button onClick={() => setShowDeleteGroup(true)}
+                  className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
+                  <IconTrash size={15} /> Delete Group
+                </button>
+              ) : (
                 <button onClick={() => setShowLeaveConfirm(true)}
                   className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
                   Leave Group
