@@ -363,7 +363,6 @@ function CTASlide({ active }: { active: boolean }) {
         >
           Get started — it&apos;s free
         </Link>
-        <p className="mt-3 text-[13px] text-[#94A3B8]">No credit card. No setup. Just start.</p>
       </div>
     </div>
   );
@@ -514,7 +513,7 @@ export default function Landing() {
 
                 {/* Visual col */}
                 <div
-                  className="flex-1 flex items-center justify-center transition-all duration-600 max-h-[45vh] md:max-h-none overflow-hidden"
+                  className="flex-[1.2] flex items-center justify-center transition-all duration-600 max-h-[45vh] md:max-h-none overflow-hidden"
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive ? 'translateX(0)' : 'translateX(20px)',
@@ -524,24 +523,6 @@ export default function Landing() {
                   <Visual active={isActive} />
                 </div>
               {/* Next slide arrow */}
-              {i < SLIDES.length - 1 && (
-                <button
-                  onClick={() => goTo(i + 1)}
-                  className="absolute bottom-16 md:bottom-12 right-6 md:right-10 pointer-events-auto flex items-center gap-0 animate-glide"
-                  aria-label="Next slide"
-                >
-                  {/* Dotted trail + paper plane pointing right */}
-                  <svg width="100" height="32" viewBox="0 0 100 32" fill="none">
-                    {/* Dotted trail */}
-                    <line x1="8" y1="16" x2="60" y2="16" stroke="#93B4FF" strokeWidth="1.5" strokeDasharray="3 5" strokeLinecap="round"/>
-                    {/* Paper plane pointing right */}
-                    <g transform="translate(62, 4)">
-                      <path d="M0 12L28 0L20 12L28 24L0 12Z" fill="#1A56E8" fillOpacity="0.12" stroke="#1A56E8" strokeWidth="1.2" strokeLinejoin="round"/>
-                      <path d="M0 12L20 12" stroke="#1A56E8" strokeWidth="1" strokeLinecap="round"/>
-                    </g>
-                  </svg>
-                </button>
-              )}
               </div>
             </div>
           );
