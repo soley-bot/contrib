@@ -50,8 +50,8 @@ const GRAY_LIGHT = [160, 160, 160] as const;
 const GRAY_RULE  = [220, 220, 220] as const;
 const GRAY_ROW   = [248, 248, 248] as const;
 
-// Default theme (brand orange #FF5841) — also used as the UI default
-export const DEFAULT_PDF_THEME: [number, number, number] = [255, 88, 65];
+// Default theme (brand blue #1A56E8) — also used as the UI default
+export const DEFAULT_PDF_THEME: [number, number, number] = [26, 86, 232];
 
 // ── Colour helpers ────────────────────────────────────────────────────────────
 

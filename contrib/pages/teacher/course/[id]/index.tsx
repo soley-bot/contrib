@@ -91,32 +91,35 @@ export default function CourseDetail() {
   async function handleDeleteGroup() {
     if (!confirmDeleteGroupId) return;
     setDeletingGroupId(confirmDeleteGroupId);
-    await supabase.from('groups').delete().eq('id', confirmDeleteGroupId);
-    setConfirmDeleteGroupId(null);
+    const { error } = await supabase.from('groups').delete().eq('id', confirmDeleteGroupId);
     setDeletingGroupId(null);
+    if (error) { alert('Failed to delete group.'); return; }
+    setConfirmDeleteGroupId(null);
     refresh();
   }
 
   async function handleDownloadPdf(group: Group) {
     setDownloadingId(group.id);
-    const [{ data: membersData }, { data: tasksData }, { data: activityData }] = await Promise.all([
+    const [membersRes, tasksRes, activityRes] = await Promise.all([
       supabase.from('group_members').select('*, profile:profiles(*)').eq('group_id', group.id).order('joined_at', { ascending: true }),
       supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
     ]);
-    const taskIds = ((tasksData as Task[]) ?? []).map((t) => t.id);
-    const [{ data: evidenceData }, { data: evalData }] = await Promise.all([
+    if (membersRes.error || tasksRes.error || activityRes.error) { alert('Failed to load group data for PDF.'); setDownloadingId(null); return; }
+    const taskIds = ((tasksRes.data as Task[]) ?? []).map((t) => t.id);
+    const [evidenceRes, evalRes] = await Promise.all([
       taskIds.length > 0
         ? supabase.from('evidence').select('*, uploader:profiles(name)').in('task_id', taskIds)
-        : Promise.resolve({ data: [] }),
+        : Promise.resolve({ data: [] as Evidence[], error: null }),
       supabase.from('evaluation_summaries').select('*').eq('group_id', group.id),
     ]);
+    if (evidenceRes.error || evalRes.error) { alert('Failed to load evidence or evaluations for PDF.'); setDownloadingId(null); return; }
     const evidenceByTask: Record<string, Evidence[]> = {};
-    ((evidenceData as Evidence[]) ?? []).forEach((e) => {
+    ((evidenceRes.data as Evidence[]) ?? []).forEach((e) => {
       if (!evidenceByTask[e.task_id]) evidenceByTask[e.task_id] = [];
       evidenceByTask[e.task_id].push(e);
     });
-    generateReport(group, (membersData as GroupMember[]) ?? [], (tasksData as Task[]) ?? [], (activityData as ActivityLog[]) ?? [], evidenceByTask, (evalData as EvaluationSummary[]) ?? []);
+    generateReport(group, (membersRes.data as GroupMember[]) ?? [], (tasksRes.data as Task[]) ?? [], (activityRes.data as ActivityLog[]) ?? [], evidenceByTask, (evalRes.data as EvaluationSummary[]) ?? []);
     setDownloadingId(null);
   }
 
@@ -174,13 +177,13 @@ export default function CourseDetail() {
 
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {/* Course invite link for students */}
-          <div className="mb-4 p-3 bg-[#F0FDFA] rounded-[8px] border border-[#A5F3FC]">
-            <p className="text-[11px] font-semibold text-[#0E7490] uppercase tracking-wide mb-1">Student invite link</p>
-            <p className="text-[12px] text-[#0A5468] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#CFFAFE] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
+          <div className="mb-4 p-3 bg-[#EBF0FF] rounded-[8px] border border-[#93B4FF]">
+            <p className="text-[11px] font-semibold text-[#1240C4] uppercase tracking-wide mb-1">Student invite link</p>
+            <p className="text-[12px] text-[#0E3AAF] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#C5D5FF] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
             {inviteBase && (
               <button
                 onClick={() => navigator.clipboard.writeText(courseInviteLink)}
-                className="mt-1.5 text-[11px] text-[#0E7490] font-medium hover:underline"
+                className="mt-1.5 text-[11px] text-[#1240C4] font-medium hover:underline"
               >
                 Copy link
               </button>
@@ -206,14 +209,14 @@ export default function CourseDetail() {
           {groups.length === 0 ? (
             <div className="text-center py-12">
               <svg viewBox="0 0 160 100" fill="none" className="w-36 mx-auto mb-4">
-                <ellipse cx="80" cy="92" rx="56" ry="6" fill="#F0FDFA"/>
-                <circle cx="40" cy="36" r="10" fill="#BAE6FD"/>
-                <rect x="28" y="52" width="24" height="16" rx="6" fill="#0E7490"/>
-                <circle cx="80" cy="30" r="12" fill="#A5F3FC"/>
-                <rect x="66" y="48" width="28" height="18" rx="7" fill="#0C6478"/>
-                <circle cx="120" cy="36" r="10" fill="#BAE6FD"/>
-                <rect x="108" y="52" width="24" height="16" rx="6" fill="#0E7490"/>
-                <circle cx="80" cy="18" r="10" fill="#0E7490"/>
+                <ellipse cx="80" cy="92" rx="56" ry="6" fill="#EBF0FF"/>
+                <circle cx="40" cy="36" r="10" fill="#93B4FF"/>
+                <rect x="28" y="52" width="24" height="16" rx="6" fill="#1240C4"/>
+                <circle cx="80" cy="30" r="12" fill="#C5D5FF"/>
+                <rect x="66" y="48" width="28" height="18" rx="7" fill="#0E3AAF"/>
+                <circle cx="120" cy="36" r="10" fill="#93B4FF"/>
+                <rect x="108" y="52" width="24" height="16" rx="6" fill="#1240C4"/>
+                <circle cx="80" cy="18" r="10" fill="#1240C4"/>
                 <path d="M80 13v10M75 18h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               <p className="text-[15px] font-bold text-[#0F172A] mb-1">No groups yet</p>
@@ -245,7 +248,7 @@ export default function CourseDetail() {
       <button
         onClick={() => setShowModal(true)}
         className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
+        style={{ boxShadow: '0 4px 16px rgba(18,64,196,.4)' }}
       >
         <IconPlus size={22} />
       </button>
@@ -280,7 +283,7 @@ export default function CourseDetail() {
               {editGroupError && <p className="text-sm text-red-500">{editGroupError}</p>}
               <div className="pt-1 border-t border-[#E2E8F0]">
                 <button type="submit" disabled={savingGroup}
-                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  className="w-full h-11 bg-[#1240C4] hover:bg-[#0E3AAF] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {savingGroup ? 'Saving…' : 'Save changes'}
                 </button>
               </div>

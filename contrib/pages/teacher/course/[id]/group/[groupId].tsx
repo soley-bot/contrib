@@ -90,7 +90,7 @@ export default function TeacherGroupDetail() {
       <Nav
         profile={profile}
         role="teacher"
-        group={group}
+        title={group.name}
         backLabel={courseName || 'Course'}
         onBack={() => router.push(`/teacher/course/${courseId}`)}
         onProfileUpdate={refreshProfile}
@@ -136,6 +136,17 @@ export default function TeacherGroupDetail() {
           })}
         </div>
 
+        {/* Mobile export button */}
+        <div className="md:hidden px-4 pt-3">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+            className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium text-[#475569] rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+          >
+            <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export Contribution Record'}
+          </button>
+        </div>
+
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
@@ -157,7 +168,23 @@ export default function TeacherGroupDetail() {
             {/* Mobile: flat list */}
             <div className="md:hidden">
               {tasks.length === 0
-                ? <p className="text-sm text-[#94A3B8] text-center py-8">No tasks yet.</p>
+                ? (
+                  <div className="flex flex-col items-center py-14 text-center">
+                    <svg viewBox="0 0 120 100" fill="none" className="w-28 mx-auto mb-4 opacity-80">
+                      <ellipse cx="60" cy="90" rx="44" ry="6" fill="#F1F5F9"/>
+                      <rect x="24" y="14" width="72" height="64" rx="8" fill="#EBF0FF" stroke="#93B4FF" strokeWidth="1.5"/>
+                      <rect x="36" y="30" width="28" height="3" rx="1.5" fill="#93B4FF"/>
+                      <rect x="36" y="38" width="40" height="3" rx="1.5" fill="#C5D5FF"/>
+                      <rect x="36" y="46" width="20" height="3" rx="1.5" fill="#C5D5FF"/>
+                      <rect x="36" y="56" width="32" height="3" rx="1.5" fill="#93B4FF"/>
+                      <rect x="36" y="64" width="24" height="3" rx="1.5" fill="#C5D5FF"/>
+                      <circle cx="88" cy="72" r="16" fill="white" stroke="#93B4FF" strokeWidth="1.5"/>
+                      <path d="M82 72h12M88 66v12" stroke="#1240C4" strokeWidth="2" strokeLinecap="round" opacity=".4"/>
+                    </svg>
+                    <p className="text-[15px] font-semibold text-[#0F172A] mb-1">No tasks yet</p>
+                    <p className="text-sm text-[#94A3B8] max-w-xs">Tasks will appear here as students add them to their board.</p>
+                  </div>
+                )
                 : tasks.map((task) => (
                     <TaskCard key={task.id} task={task} isLead={false} currentUserId=""
                       evidenceCount={evidenceByTask[task.id]?.length ?? 0}
@@ -170,7 +197,23 @@ export default function TeacherGroupDetail() {
             {/* Desktop: kanban */}
             <div className="hidden md:grid grid-cols-3 gap-4">
               {tasks.length === 0
-                ? <p className="col-span-3 text-sm text-[#94A3B8] text-center py-8">No tasks yet.</p>
+                ? (
+                  <div className="col-span-3 flex flex-col items-center py-14 text-center">
+                    <svg viewBox="0 0 120 100" fill="none" className="w-28 mx-auto mb-4 opacity-80">
+                      <ellipse cx="60" cy="90" rx="44" ry="6" fill="#F1F5F9"/>
+                      <rect x="24" y="14" width="72" height="64" rx="8" fill="#EBF0FF" stroke="#93B4FF" strokeWidth="1.5"/>
+                      <rect x="36" y="30" width="28" height="3" rx="1.5" fill="#93B4FF"/>
+                      <rect x="36" y="38" width="40" height="3" rx="1.5" fill="#C5D5FF"/>
+                      <rect x="36" y="46" width="20" height="3" rx="1.5" fill="#C5D5FF"/>
+                      <rect x="36" y="56" width="32" height="3" rx="1.5" fill="#93B4FF"/>
+                      <rect x="36" y="64" width="24" height="3" rx="1.5" fill="#C5D5FF"/>
+                      <circle cx="88" cy="72" r="16" fill="white" stroke="#93B4FF" strokeWidth="1.5"/>
+                      <path d="M82 72h12M88 66v12" stroke="#1240C4" strokeWidth="2" strokeLinecap="round" opacity=".4"/>
+                    </svg>
+                    <p className="text-[15px] font-semibold text-[#0F172A] mb-1">No tasks yet</p>
+                    <p className="text-sm text-[#94A3B8] max-w-xs">Tasks will appear here as students add them to their board.</p>
+                  </div>
+                )
                 : STATUS_COLS.map((col) => {
                     const colTasks = tasks.filter(t => t.status === col.status);
                     return (
@@ -249,9 +292,9 @@ export default function TeacherGroupDetail() {
             {!evalSession ? (
               <div className="flex flex-col items-center py-14 text-center gap-2">
                 <svg viewBox="0 0 80 80" fill="none" className="w-20 mx-auto mb-2">
-                  <circle cx="40" cy="40" r="32" fill="#F0FDFA" stroke="#A5F3FC" strokeWidth="2"/>
-                  <path d="M28 40h24M40 28v24" stroke="#0E7490" strokeWidth="2.5" strokeLinecap="round" opacity=".3"/>
-                  <circle cx="40" cy="40" r="6" fill="#0E7490" opacity=".4"/>
+                  <circle cx="40" cy="40" r="32" fill="#EBF0FF" stroke="#93B4FF" strokeWidth="2"/>
+                  <path d="M28 40h24M40 28v24" stroke="#1240C4" strokeWidth="2.5" strokeLinecap="round" opacity=".3"/>
+                  <circle cx="40" cy="40" r="6" fill="#1240C4" opacity=".4"/>
                 </svg>
                 <p className="text-[15px] font-semibold text-[#0F172A]">Evaluation not started</p>
                 <p className="text-sm text-[#94A3B8] max-w-xs">
@@ -277,7 +320,7 @@ export default function TeacherGroupDetail() {
           { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} /> },
           { id: 'activity',   label: 'Timeline', icon: <IconActivity size={22} /> },
           { id: 'members',    label: 'Members',  icon: <IconUsers size={22} /> },
-          { id: 'evaluation', label: 'Review',   icon: <IconCheck size={22} /> },
+          { id: 'evaluation', label: 'Peer Review', icon: <IconCheck size={22} /> },
         ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((item) => (
           <button key={item.id} onClick={() => setTab(item.id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${

@@ -107,7 +107,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
               className="flex items-center gap-1.5 bg-[#F1F5F9] rounded-full px-2.5 py-1"
               title={m.profile?.name ?? ''}
             >
-              <div className="w-5 h-5 rounded-full bg-[#FFF0EE] text-[#FF5841] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 rounded-full bg-[#EBF0FF] text-[#1A56E8] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {(m.profile?.name ?? '?').slice(0, 1).toUpperCase()}
               </div>
               <span className="text-[11px] text-[#475569] font-medium max-w-[80px] truncate">

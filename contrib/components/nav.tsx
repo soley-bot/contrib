@@ -53,8 +53,8 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
             className="flex items-center gap-1 text-[#64748B] hover:text-[#0F172A] transition-colors flex-shrink-0"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="text-[13px] font-medium">
-              {group ? (isTeacher ? 'Courses' : 'Groups') : (backLabel ?? 'Back')}
+            <span className="text-[13px] font-medium truncate max-w-[120px]">
+              {backLabel ? backLabel : (group ? (isTeacher ? 'Courses' : 'Groups') : 'Back')}
             </span>
           </button>
         ) : (

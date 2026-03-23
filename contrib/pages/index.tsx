@@ -200,7 +200,7 @@ function Slide4Visual({ active }: { active: boolean }) {
     { name: 'Dara', grade: 'A', color: '#16A34A', bg: '#DCFCE7', border: '#BBF7D0', delay: 0.3 },
     { name: 'Sokha', grade: 'B+', color: '#1A56E8', bg: '#EBF0FF', border: '#93B4FF', delay: 0.55 },
     { name: 'Rith', grade: 'C+', color: '#D97706', bg: '#FEF3C7', border: '#FDE68A', delay: 0.8 },
-    { name: 'Maly', grade: 'C', color: '#9CA3AF', bg: '#F9FAFB', border: '#E5E7EB', delay: 1.05 },
+    { name: 'Maly', grade: 'C', color: '#9CA3AF', bg: '#F1F5F9', border: '#E5E7EB', delay: 1.05 },
   ];
   return (
     <div className="w-full max-w-[420px] mx-auto">
@@ -288,7 +288,7 @@ const SLIDES: Slide[] = [
     label: 'The real problem',
     title: "Teachers know. They just can\u2019t see.",
     body: "Peer evaluation forms exist \u2014 but they\u2019re filled out at the end, from memory, under social pressure. The form becomes a formality.",
-    bg: '#FAFAF9',
+    bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
 

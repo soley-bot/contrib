@@ -111,7 +111,7 @@ export default function TeacherDashboard() {
     refreshCourses();
   }
 
-  if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#0E7490' }} /></div>;
+  if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#1240C4' }} /></div>;
 
   return (
     <div className="min-h-dvh bg-[#F8FAFF]">
@@ -132,9 +132,9 @@ export default function TeacherDashboard() {
           {courses.length === 0 ? (
             <div className="text-center py-14">
               <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
-                <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F0FDFA"/>
-                <rect x="30" y="20" width="140" height="80" rx="6" fill="#0E7490"/>
-                <rect x="36" y="26" width="128" height="68" rx="4" fill="#0C6478"/>
+                <ellipse cx="100" cy="128" rx="72" ry="8" fill="#EBF0FF"/>
+                <rect x="30" y="20" width="140" height="80" rx="6" fill="#1240C4"/>
+                <rect x="36" y="26" width="128" height="68" rx="4" fill="#0E3AAF"/>
                 <rect x="46" y="36" width="48" height="4" rx="2" fill="white" fillOpacity="0.7"/>
                 <rect x="46" y="44" width="32" height="4" rx="2" fill="white" fillOpacity="0.5"/>
                 <rect x="46" y="52" width="40" height="4" rx="2" fill="white" fillOpacity="0.5"/>
@@ -142,9 +142,9 @@ export default function TeacherDashboard() {
                 <path d="M112 44l2.5 2.5 5.5-5.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <rect x="108" y="56" width="16" height="16" rx="3" fill="white" fillOpacity="0.15"/>
                 <rect x="108" y="76" width="16" height="6" rx="2" fill="white" fillOpacity="0.3"/>
-                <rect x="30" y="100" width="140" height="8" rx="2" fill="#0A5468"/>
-                <circle cx="100" cy="56" r="10" fill="#BAE6FD"/>
-                <rect x="88" y="72" width="24" height="16" rx="6" fill="#0E7490"/>
+                <rect x="30" y="100" width="140" height="8" rx="2" fill="#0E3AAF"/>
+                <circle cx="100" cy="56" r="10" fill="#93B4FF"/>
+                <rect x="88" y="72" width="24" height="16" rx="6" fill="#1240C4"/>
                 <rect x="92" y="46" width="16" height="3" rx="1.5" fill="#0F172A"/>
                 <polygon points="100,42 110,47 100,52 90,47" fill="#0F172A"/>
               </svg>
@@ -175,7 +175,7 @@ export default function TeacherDashboard() {
       <button
         onClick={() => setShowModal(true)}
         className="md:hidden fixed right-5 bottom-6 w-[52px] h-[52px] rounded-full bg-brand text-white shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 16px rgba(14,116,144,.4)' }}
+        style={{ boxShadow: '0 4px 16px rgba(18,64,196,.4)' }}
       >
         <IconPlus size={22} />
       </button>
@@ -231,7 +231,7 @@ export default function TeacherDashboard() {
               {editError && <p className="text-sm text-red-500">{editError}</p>}
               <div className="pt-1 border-t border-[#E2E8F0]">
                 <button type="submit" disabled={saving}
-                  className="w-full h-11 bg-[#0E7490] hover:bg-[#0C6478] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  className="w-full h-11 bg-[#1240C4] hover:bg-[#0E3AAF] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {saving ? 'Saving…' : 'Save changes'}
                 </button>
               </div>

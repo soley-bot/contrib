@@ -142,8 +142,8 @@ export default function Dashboard() {
                 <circle cx="52" cy="52" r="6" fill="#93B4FF"/>
                 <rect x="42" y="66" width="20" height="14" rx="5" fill="#1A56E8"/>
                 {/* person right */}
-                <circle cx="148" cy="58" r="12" fill="#E0F2FE"/>
-                <circle cx="148" cy="52" r="6" fill="#BAE6FD"/>
+                <circle cx="148" cy="58" r="12" fill="#EBF0FF"/>
+                <circle cx="148" cy="52" r="6" fill="#93B4FF"/>
                 <rect x="138" y="66" width="20" height="14" rx="5" fill="#1240C4"/>
                 {/* speech bubble */}
                 <rect x="155" y="34" width="34" height="18" rx="6" fill="#1A56E8"/>
