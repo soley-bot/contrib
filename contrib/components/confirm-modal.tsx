@@ -24,10 +24,10 @@ export default function ConfirmModal({
       className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
-      <div className="w-full max-w-[400px] bg-white rounded-xl p-5">
+      <div role="dialog" aria-modal="true" aria-label="Confirm action" className="w-full max-w-[400px] bg-white rounded-xl p-5">
         <div className="flex items-start justify-between mb-3">
           <h3 className="text-[15px] font-semibold text-[#0F172A]">{title}</h3>
-          <button onClick={onCancel} className="text-[#94A3B8] hover:text-[#475569] ml-2 p-0.5">
+          <button onClick={onCancel} aria-label="Close" className="text-[#94A3B8] hover:text-[#475569] ml-2 p-0.5">
             <IconClose size={15} />
           </button>
         </div>

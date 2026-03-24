@@ -56,16 +56,17 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
       className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-[400px] bg-white rounded-xl">
+      <div role="dialog" aria-modal="true" aria-label="Transfer group lead" className="w-full max-w-[400px] bg-white rounded-xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
           <h2 className="text-base font-semibold text-[#0F172A]">Transfer lead</h2>
-          <button onClick={onClose} className="text-[#475569] hover:text-[#0F172A] p-1">
+          <button onClick={onClose} aria-label="Close" className="text-[#475569] hover:text-[#0F172A] p-1">
             <IconClose size={16} />
           </button>
         </div>
         <div className="p-5">
-          <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Select new lead</label>
+          <label htmlFor="transfer-lead-select" className="text-[13px] font-medium text-[#475569] mb-1.5 block">Select new lead</label>
           <select
+            id="transfer-lead-select"
             value={newLeadId}
             onChange={(e) => setNewLeadId(e.target.value)}
             className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm text-[#0F172A] focus:border-brand outline-none bg-white"

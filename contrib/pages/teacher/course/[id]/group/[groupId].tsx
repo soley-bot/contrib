@@ -314,7 +314,7 @@ export default function TeacherGroupDetail() {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] flex"
+      <nav aria-label="Mobile navigation" className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] flex"
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {([
           { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} /> },
