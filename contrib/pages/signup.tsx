@@ -22,6 +22,7 @@ export default function Signup() {
   const [university, setUniversity] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,10 @@ export default function Signup() {
     }
     if (password.length < 8) {
       setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
     setLoading(true);
@@ -160,12 +165,29 @@ export default function Signup() {
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
+          <div>
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-[#0F172A] mb-1">
+              Confirm password
+            </label>
+            <input
+              id="confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter your password"
+              required
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A56E8] focus:border-transparent"
+            />
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-sm text-red-500 mt-1">Passwords do not match.</p>
+            )}
+          </div>
 
           {error && <p className="text-sm text-[#DC2626]">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (!!confirmPassword && password !== confirmPassword)}
             className="h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
           >
             {loading ? 'Creating account…' : 'Create account'}
