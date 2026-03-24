@@ -56,6 +56,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
               onClick={(e) => { e.stopPropagation(); onEdit(task); }}
               className="p-1.5 rounded-md text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-colors"
               title="Edit task"
+              aria-label="Edit task"
             >
               <IconPencil size={13} />
             </button>
@@ -65,6 +66,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
               onClick={(e) => { e.stopPropagation(); onDelete(task); }}
               className="p-1.5 rounded-md text-[#94A3B8] hover:text-red-500 hover:bg-red-50 transition-colors"
               title="Delete task"
+              aria-label="Delete task"
             >
               <IconTrash size={13} />
             </button>

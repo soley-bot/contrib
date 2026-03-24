@@ -6,9 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.45.0",
     "@supabase/supabase-js": "^2.99.1",
     "jspdf": "^4.2.0",
     "next": "16.1.6",
@@ -20,11 +23,14 @@
     "@types/node": "20.19.37",
     "@types/react": "19.2.14",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "jsdom": "^29.0.1",
     "supabase": "^2.82.0",
     "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.1.1"
   }
 }
