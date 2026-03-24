@@ -1,10 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Track the most recently created jsPDF instance so tests can inspect it
-let lastMockDoc: Record<string, ReturnType<typeof vi.fn>> | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let lastMockDoc: Record<string, any> | null = null;
 
 vi.mock('jspdf', () => {
-  const MockJsPDF = function (this: Record<string, ReturnType<typeof vi.fn>>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const MockJsPDF = function (this: Record<string, any>) {
     this.setFontSize = vi.fn().mockReturnThis();
     this.setFont = vi.fn().mockReturnThis();
     this.setTextColor = vi.fn().mockReturnThis();
@@ -24,8 +26,7 @@ vi.mock('jspdf', () => {
       pageSize: { getWidth: () => 210, getHeight: () => 297 },
       getNumberOfPages: () => 1,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    lastMockDoc = this as any;
+    lastMockDoc = this;
   };
   return { default: MockJsPDF };
 });
