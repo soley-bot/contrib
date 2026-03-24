@@ -149,7 +149,7 @@ Horizontal scroll-snap storyboard at `pages/index.tsx`. Spec at `docs/superpower
 4. ~~**UX polish**~~ — done (cool slate palette migration, emoji removal, consistent sizing)
 5. ~~**Bug fixes**~~ — done (25 issues fixed: error handling, loading states, swipe-through-modal, auth flows)
 6. ~~**Auth edge cases**~~ — done (callback timeout, returnTo forwarding, reset-password loading state)
-7. **Production readiness** — remaining: accessibility (ARIA labels), confirm-password field, teacher page teal cleanup
+7. ~~**Production readiness**~~ — done (ARIA labels added, confirm-password field added, teal cleanup verified, Sentry monitoring active, smoke tests passing)
 
 ## Z-Index Hierarchy
 
