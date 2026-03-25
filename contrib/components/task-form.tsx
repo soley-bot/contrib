@@ -33,10 +33,16 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
     if (taskError || !task) { setError(taskError?.message ?? 'Failed to create task.'); setCreating(false); return; }
 
     const assigneeMember = members.find((m) => m.profile_id === assignee);
-    await supabase.from('activity_log').insert({
-      group_id: groupId, actor_id: userId, action: 'task_created',
-      task_id: task.id, meta: { task_title: title.trim(), assignee_name: assigneeMember?.profile?.name ?? null },
-    });
+    await supabase.from('activity_log').insert([
+      {
+        group_id: groupId, actor_id: userId, action: 'task_created',
+        task_id: task.id, meta: { task_title: title.trim(), assignee_name: assigneeMember?.profile?.name ?? null },
+      },
+      {
+        group_id: groupId, actor_id: assignee, action: 'task_assigned',
+        task_id: task.id, meta: { task_title: title.trim() },
+      },
+    ]);
 
     onCreated();
     onClose();

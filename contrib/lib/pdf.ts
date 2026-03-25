@@ -237,7 +237,7 @@ export function generateReport(
     const name        = m.profile?.name ?? m.profile_id;
     const isLead      = m.profile_id === group.lead_id;
     const academic    = [
-      m.profile?.year_of_study ? `Year ${m.profile.year_of_study}` : '',
+      m.profile?.year_of_study ?? '',
       m.profile?.faculty ?? '',
     ].filter(Boolean).join(' · ');
 
