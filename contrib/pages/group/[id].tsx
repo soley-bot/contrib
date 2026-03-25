@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
-import { requireAuth } from '@/lib/supabase-server';
+import { requireStudent } from '@/lib/supabase-server';
 import Nav from '@/components/nav';
 import TaskCard from '@/components/task-card';
 import TaskModal from '@/components/task-modal';
@@ -746,7 +746,7 @@ export default function GroupPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { redirect } = await requireAuth(ctx);
+  const { redirect } = await requireStudent(ctx);
   if (redirect) return { redirect };
   return { props: {} };
 };

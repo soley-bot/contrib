@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { IconClose } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
+import { useRoleLock } from '@/hooks/use-role-lock';
 import RoleToggle from '@/components/role-toggle';
 import type { Profile, UserRole } from '@/types';
 
@@ -20,6 +21,7 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
   const [role, setRole] = useState<UserRole>(profile.role ?? 'student');
   const [error, setError] = useState('');
   const { updateProfile, saving } = useProfile();
+  const { locked: roleLocked, reason: lockReason, loading: lockLoading } = useRoleLock(profile.id, profile.role);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -74,7 +76,26 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
               <option value="Year 5+">Year 5+</option>
             </select>
           </div>
-          <RoleToggle value={role} onChange={setRole} />
+          {!lockLoading && roleLocked ? (
+            <div className="flex flex-col gap-1">
+              <label className="text-[13px] font-medium text-[#475569]">Role</label>
+              <div className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] text-[#0F172A] bg-[#F8FAFF]">
+                {profile.role === 'teacher' ? 'Teacher' : 'Student'}
+              </div>
+              <p className="text-[12px] text-[#64748B] leading-snug">
+                Your role is locked because you have active {lockReason === 'courses' ? 'courses' : 'groups'}. Contact support to change it.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-0">
+              <RoleToggle value={role} onChange={setRole} />
+              {role !== profile.role && (
+                <p className="text-[12px] text-[#D97706] bg-[#FEF3C7] rounded px-2 py-1.5 mt-1.5 leading-snug">
+                  Switching to {role === 'teacher' ? 'teacher' : 'student'} will change your dashboard and features. This can be changed until you create your first {role === 'teacher' ? 'course' : 'group'}.
+                </p>
+              )}
+            </div>
+          )}
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="pt-1 border-t border-[#E2E8F0] flex gap-2">
             <button type="button" onClick={onClose}

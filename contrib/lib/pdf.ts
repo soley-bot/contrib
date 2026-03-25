@@ -29,7 +29,12 @@ function actionLabel(action: string, meta: Record<string, unknown> | null): stri
     case 'evaluation_submitted':   return 'Submitted peer evaluation';
     case 'report_shared':          return 'Shared contribution record link';
     case 'report_exported':        return `Exported contribution record (${meta?.mode ?? 'PDF'})`;
-    default: return action;
+    case 'lead_transferred':       return `Transferred leadership${meta?.new_lead_name ? ` to ${meta.new_lead_name}` : ''}`;
+    case 'member_removed':         return `Removed member${meta?.member_name ? `: ${meta.member_name}` : ''}`;
+    case 'member_left':            return 'Left the group';
+    case 'group_created':          return 'Created the group';
+    case 'task_deleted':           return `Deleted task: ${meta?.task_title ?? ''}`;
+    default: return action.replace(/_/g, ' ');
   }
 }
 

@@ -125,7 +125,12 @@ export default function Onboarding() {
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <RoleToggle value={role} onChange={setRole} />
+          <div className="flex flex-col gap-0">
+            <RoleToggle value={role} onChange={setRole} />
+            <p className="text-[12px] text-[#64748B] mt-1.5 leading-snug">
+              This determines your experience. You can change it later in your profile -- until you create your first group or course.
+            </p>
+          </div>
 
           {role === 'student' && (
             <div className="flex flex-col gap-1">
