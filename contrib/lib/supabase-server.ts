@@ -1,27 +1,34 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient as createSSRClient } from '@supabase/ssr';
 import type { GetServerSidePropsContext } from 'next';
 
 /**
  * Create a Supabase client for server-side use in getServerSideProps.
- * Reads the user's auth token from cookies to make authenticated requests.
+ * Uses @supabase/ssr to properly read/write auth cookies in Pages Router.
  */
 export function createServerClient(ctx: GetServerSidePropsContext) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  // Supabase stores tokens in cookies named sb-<ref>-auth-token
-  // For Pages Router, we read cookies from the request
-  const cookies = ctx.req.headers.cookie ?? '';
-
-  return createClient(url, anonKey, {
-    global: {
-      headers: { cookie: cookies },
-    },
-    auth: {
-      flowType: 'pkce',
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
+  return createSSRClient(url, anonKey, {
+    cookies: {
+      getAll() {
+        const cookieHeader = ctx.req.headers.cookie ?? '';
+        return cookieHeader.split(';').map((c) => {
+          const [name, ...rest] = c.trim().split('=');
+          return { name: name ?? '', value: decodeURIComponent(rest.join('=') || '') };
+        }).filter((c) => c.name);
+      },
+      setAll(cookies) {
+        cookies.forEach(({ name, value, options }) => {
+          const parts = [`${name}=${encodeURIComponent(value)}`];
+          if (options?.path) parts.push(`Path=${options.path}`);
+          if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);
+          if (options?.httpOnly) parts.push('HttpOnly');
+          if (options?.secure) parts.push('Secure');
+          if (options?.sameSite) parts.push(`SameSite=${options.sameSite}`);
+          ctx.res.appendHeader('Set-Cookie', parts.join('; '));
+        });
+      },
     },
   });
 }
