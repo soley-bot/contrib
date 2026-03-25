@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { signupSchema } from '@/lib/validation';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const adminClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +11,12 @@ const adminClient = createClient(
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  // Rate limit: 5 signup attempts per IP per minute
+  const ip = getClientIp(req.headers);
+  if (!rateLimit(`signup:${ip}`, 5, 60_000)) {
+    return res.status(429).json({ error: 'Too many signup attempts. Please wait a moment.' });
+  }
 
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
