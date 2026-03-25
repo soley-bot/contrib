@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import type { GetServerSidePropsContext } from 'next';
+import { createServerClient } from '@/lib/supabase-server';
 
 // ─── Logo ────────────────────────────────────────────────────────────────────
 
@@ -376,12 +377,7 @@ export default function Landing() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const totalSlides = SLIDES.length + 1; // +1 for CTA
 
-  // Redirect logged-in users
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace('/dashboard');
-    });
-  }, [router]);
+  // Auth redirect handled by getServerSideProps below
 
   // Track active slide via scroll
   useEffect(() => {
@@ -595,4 +591,22 @@ export default function Landing() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const supabase = createServerClient(ctx);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    const { data: profile } = await supabase
+      .from('profiles').select('role').eq('id', session.user.id).single();
+    if (profile) {
+      return {
+        redirect: {
+          destination: profile.role === 'teacher' ? '/teacher' : '/dashboard',
+          permanent: false,
+        },
+      };
+    }
+  }
+  return { props: {} };
 }

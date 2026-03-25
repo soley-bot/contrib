@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
 
 function GoogleIcon() {
   return (
@@ -29,15 +31,7 @@ export default function Login() {
     });
   }
 
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) return;
-      const { data: profile } = await supabase
-        .from('profiles').select('role').eq('id', session.user.id).single();
-      if (!profile) router.replace('/onboarding');
-      else router.replace(profile.role === 'teacher' ? '/teacher' : '/dashboard');
-    });
-  }, [router]);
+  // Auth redirect handled by getServerSideProps below
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -136,4 +130,23 @@ export default function Login() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const serverClient = createServerClient(ctx);
+  const { data: { session } } = await serverClient.auth.getSession();
+  if (session) {
+    const { data: profile } = await serverClient
+      .from('profiles').select('role').eq('id', session.user.id).single();
+    if (!profile) {
+      return { redirect: { destination: '/onboarding', permanent: false } };
+    }
+    return {
+      redirect: {
+        destination: profile.role === 'teacher' ? '/teacher' : '/dashboard',
+        permanent: false,
+      },
+    };
+  }
+  return { props: {} };
 }
