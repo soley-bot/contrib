@@ -6,7 +6,7 @@ interface UseEvaluationSessionResult {
   session: EvaluationSession | null;
   loading: boolean;
   openEvaluation: (groupId: string, userId: string) => Promise<void>;
-  closeEvaluation: (groupId: string) => Promise<void>;
+  resetEvaluation: (groupId: string) => Promise<void>;
   refresh: () => void;
 }
 
@@ -31,18 +31,22 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
   }
 
   async function openEvaluation(groupId: string, userId: string) {
-    await supabase.from('evaluation_sessions').insert({
+    const { error } = await supabase.from('evaluation_sessions').insert({
       group_id: groupId,
       opened_by: userId,
     });
+    if (error) throw new Error(error.message);
     setTick((t) => t + 1);
   }
 
-  async function closeEvaluation(groupId: string) {
-    await supabase.from('evaluations').delete().eq('group_id', groupId);
-    await supabase.from('evaluation_sessions').delete().eq('group_id', groupId);
+  async function resetEvaluation(groupId: string) {
+    // Delete evaluations first (child rows), then the session
+    const { error: evalError } = await supabase.from('evaluations').delete().eq('group_id', groupId);
+    if (evalError) throw new Error(evalError.message);
+    const { error: sessionError } = await supabase.from('evaluation_sessions').delete().eq('group_id', groupId);
+    if (sessionError) throw new Error(sessionError.message);
     setTick((t) => t + 1);
   }
 
-  return { session, loading, openEvaluation, closeEvaluation, refresh: () => setTick((t) => t + 1) };
+  return { session, loading, openEvaluation, resetEvaluation, refresh: () => setTick((t) => t + 1) };
 }

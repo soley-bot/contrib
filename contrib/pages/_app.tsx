@@ -1,9 +1,14 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import * as Sentry from "@sentry/nextjs";
+import ToastProvider from "@/components/toast-provider";
 
 function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <ToastProvider>
+      <Component {...pageProps} />
+    </ToastProvider>
+  );
 }
 
 export default Sentry.withErrorBoundary(App, {

@@ -1,5 +1,7 @@
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
 import Nav from '@/components/nav';
+import { requireTeacher } from '@/lib/supabase-server';
 import TaskCard from '@/components/task-card';
 import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
@@ -335,3 +337,9 @@ export default function TeacherGroupDetail() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { redirect } = await requireTeacher(ctx);
+  if (redirect) return { redirect };
+  return { props: {} };
+};

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
 import Nav from '@/components/nav';
 import RoleToggle from '@/components/role-toggle';
 import { useUser } from '@/hooks/use-user';
+import { requireAuth } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
 import { useProfile } from '@/hooks/use-profile';
 import { supabase } from '@/lib/supabase';
@@ -192,3 +194,9 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { redirect } = await requireAuth(ctx);
+  if (redirect) return { redirect };
+  return { props: {} };
+};

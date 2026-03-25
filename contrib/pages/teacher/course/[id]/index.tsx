@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
 import Nav from '@/components/nav';
 import CourseGroupRow from '@/components/course-group-row';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
+import { requireTeacher } from '@/lib/supabase-server';
 import { useCourse } from '@/hooks/use-course';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
@@ -359,3 +361,9 @@ export default function CourseDetail() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { redirect } = await requireTeacher(ctx);
+  if (redirect) return { redirect };
+  return { props: {} };
+};

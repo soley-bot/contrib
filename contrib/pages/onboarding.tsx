@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
+import { requireAuth } from '@/lib/supabase-server';
 import RoleToggle from '@/components/role-toggle';
 import type { User } from '@supabase/supabase-js';
 import type { UserRole } from '@/types';
@@ -165,3 +167,9 @@ export default function Onboarding() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { redirect } = await requireAuth(ctx);
+  if (redirect) return { redirect };
+  return { props: {} };
+};

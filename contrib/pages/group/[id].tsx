@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
+import { requireAuth } from '@/lib/supabase-server';
 import Nav from '@/components/nav';
 import TaskCard from '@/components/task-card';
 import TaskModal from '@/components/task-modal';
@@ -56,7 +58,7 @@ export default function GroupPage() {
   const { activity, refresh: refreshActivity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
   const { evidenceByTask, refresh: refreshEvidence } = useGroupEvidence(taskIds);
-  const { session: evalSession, loading: evalSessionLoading, openEvaluation, closeEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
+  const { session: evalSession, loading: evalSessionLoading, openEvaluation, resetEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
   const { hasSubmitted, submit: submitEvaluation, refresh: refreshEvalSubmit } = useEvaluation(groupId, user?.id);
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
@@ -174,7 +176,7 @@ export default function GroupPage() {
   async function executeResetEvaluation() {
     if (!groupId) return;
     try {
-      await closeEvaluation(groupId);
+      await resetEvaluation(groupId);
       refreshEvalSession();
       refreshEvalSubmit();
       setShowResetEval(false);
@@ -679,3 +681,9 @@ export default function GroupPage() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { redirect } = await requireAuth(ctx);
+  if (redirect) return { redirect };
+  return { props: {} };
+};

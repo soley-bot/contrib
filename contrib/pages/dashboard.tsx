@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
 import Nav from '@/components/nav';
 import { IconPlus, IconChevronRight } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
+import { requireStudent } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
@@ -238,3 +240,9 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { redirect } = await requireStudent(ctx);
+  if (redirect) return { redirect };
+  return { props: {} };
+};
