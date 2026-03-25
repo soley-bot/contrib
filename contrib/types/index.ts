@@ -77,7 +77,9 @@ export type ActivityAction =
   | 'member_removed'
   | 'lead_transferred'
   | 'evaluation_opened'
-  | 'evaluation_submitted';
+  | 'evaluation_submitted'
+  | 'report_shared'
+  | 'report_exported';
 
 export interface ActivityLog {
   id: string;
@@ -131,4 +133,13 @@ export interface EvaluationSummary {
   avg_collaboration: number;
   eval_count: number;
   comments: string[] | null;
+}
+
+export interface ReportShare {
+  id: string;
+  group_id: string;
+  token: string;
+  created_by: string;
+  created_at: string;
+  expires_at: string | null;
 }

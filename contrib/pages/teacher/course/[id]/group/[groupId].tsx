@@ -77,6 +77,7 @@ export default function TeacherGroupDetail() {
       evidenceByTask,
       evalSummaries,
       DEFAULT_PDF_THEME,
+      'teacher',
     );
     setDownloadingPdf(false);
   }
@@ -152,6 +153,11 @@ export default function TeacherGroupDetail() {
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            {/* Read-only indicator */}
+            <div className="bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <p className="text-[12px] text-[#64748B] font-medium">Read-only view — students manage their own tasks</p>
+            </div>
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
               {[
@@ -188,10 +194,12 @@ export default function TeacherGroupDetail() {
                   </div>
                 )
                 : tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} isLead={false} currentUserId=""
-                      evidenceCount={evidenceByTask[task.id]?.length ?? 0}
-                      onClick={() => {}} onEdit={() => {}} onDelete={() => {}}
-                    />
+                    <div key={task.id} className="pointer-events-none opacity-90">
+                      <TaskCard task={task} isLead={false} currentUserId=""
+                        evidenceCount={evidenceByTask[task.id]?.length ?? 0}
+                        onClick={() => {}} onEdit={() => {}} onDelete={() => {}}
+                      />
+                    </div>
                   ))
               }
             </div>
@@ -232,10 +240,12 @@ export default function TeacherGroupDetail() {
                             <p className="text-[12px] text-[#C4C0BB]">No tasks here</p>
                           </div>
                         ) : colTasks.map((task) => (
-                          <TaskCard key={task.id} task={task} isLead={false} currentUserId=""
-                            evidenceCount={evidenceByTask[task.id]?.length ?? 0}
-                            onClick={() => {}} onEdit={() => {}} onDelete={() => {}}
-                          />
+                          <div key={task.id} className="pointer-events-none opacity-90">
+                            <TaskCard task={task} isLead={false} currentUserId=""
+                              evidenceCount={evidenceByTask[task.id]?.length ?? 0}
+                              onClick={() => {}} onEdit={() => {}} onDelete={() => {}}
+                            />
+                          </div>
                         ))}
                       </div>
                     );

@@ -121,7 +121,7 @@ export default function CourseDetail() {
       if (!evidenceByTask[e.task_id]) evidenceByTask[e.task_id] = [];
       evidenceByTask[e.task_id].push(e);
     });
-    generateReport(group, (membersRes.data as GroupMember[]) ?? [], (tasksRes.data as Task[]) ?? [], (activityRes.data as ActivityLog[]) ?? [], evidenceByTask, (evalRes.data as EvaluationSummary[]) ?? []);
+    generateReport(group, (membersRes.data as GroupMember[]) ?? [], (tasksRes.data as Task[]) ?? [], (activityRes.data as ActivityLog[]) ?? [], evidenceByTask, (evalRes.data as EvaluationSummary[]) ?? [], undefined, 'teacher');
     setDownloadingId(null);
   }
 

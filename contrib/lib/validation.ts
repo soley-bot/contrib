@@ -63,6 +63,16 @@ export const createCourseSchema = z.object({
   subject: z.string().trim().min(1, 'Subject code is required.').max(100, 'Subject code must be 100 characters or less.'),
 });
 
+// ── Report sharing ─────────────────────────────────────────────────────────
+
+export const reportLookupSchema = z.object({
+  token: z.string().min(1, 'Token is required.').max(50, 'Invalid token.'),
+});
+
+export const reportShareSchema = z.object({
+  group_id: z.string().uuid('Invalid group.'),
+});
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /**

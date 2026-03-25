@@ -17,7 +17,7 @@ import InviteBanner from '@/components/invite-banner';
 import EvaluationForm from '@/components/evaluation-form';
 import EvaluationResults from '@/components/evaluation-results';
 import TaskBoardSkeleton from '@/components/task-skeleton';
-import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
+import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck, IconLink, IconCopy } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
@@ -154,10 +154,65 @@ export default function GroupPage() {
     } catch { showToast('Failed to remove member. Please try again.'); }
   }
 
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+
   function handleExport() {
     if (!group) return;
-    generateReport(group, members, tasks, activity, evidenceByTask, evalSummaries, pdfTheme);
+    generateReport(group, members, tasks, activity, evidenceByTask, [], pdfTheme, 'student');
+    // Log export
+    if (user) {
+      supabase.from('activity_log').insert({
+        group_id: group.id, actor_id: user.id, action: 'report_exported',
+        task_id: null, meta: { mode: 'student' },
+      });
+    }
   }
+
+  async function handleShareLink() {
+    if (!group || !user || shareLoading) return;
+    setShareLoading(true);
+    try {
+      const res = await fetch('/api/report/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group_id: group.id }),
+      });
+      if (!res.ok) { showToast('Failed to create share link.'); return; }
+      const data = await res.json();
+      setShareUrl(data.url);
+      await navigator.clipboard.writeText(data.url);
+      showToast('Link copied to clipboard!', 'success');
+      // Log share
+      if (!data.existing) {
+        await supabase.from('activity_log').insert({
+          group_id: group.id, actor_id: user.id, action: 'report_shared',
+          task_id: null, meta: { token: data.token },
+        });
+        refreshActivity();
+      }
+    } catch { showToast('Failed to create share link.'); }
+    finally { setShareLoading(false); }
+  }
+
+  async function handleRevokeShare() {
+    if (!group || !user) return;
+    try {
+      const res = await fetch(`/api/report/share?group_id=${group.id}`, { method: 'DELETE' });
+      if (!res.ok) { showToast('Failed to revoke link.'); return; }
+      setShareUrl(null);
+      showToast('Share link revoked.', 'success');
+    } catch { showToast('Failed to revoke link.'); }
+  }
+
+  // Fetch existing share link on load
+  useEffect(() => {
+    if (!groupId || !isLead) return;
+    fetch(`/api/report/share?group_id=${groupId}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.share) setShareUrl(`${window.location.origin}/report/${d.share.token}`); })
+      .catch(() => {});
+  }, [groupId, isLead]);
 
   async function handleOpenEvaluation() {
     if (!groupId || !user) return;
@@ -283,24 +338,6 @@ export default function GroupPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isLead && (
-              <>
-                <div className="flex items-center gap-1">
-                  {PDF_THEMES.map((t) => {
-                    const isActive = pdfTheme.join() === t.color.join();
-                    return (
-                      <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
-                        className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-60 hover:opacity-100'}`}
-                        style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
-                      />
-                    );
-                  })}
-                </div>
-                <button onClick={handleExport} className="h-8 px-3 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
-                  <IconExport size={14} /> Export PDF
-                </button>
-              </>
-            )}
             <button onClick={() => setShowNewTask(true)} className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
               <IconPlus size={14} /> Add task
             </button>
@@ -335,6 +372,52 @@ export default function GroupPage() {
                   className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
                   Open Peer Review
                 </button>
+              </div>
+            )}
+
+            {/* Contribution Record — lead only */}
+            {isLead && (
+              <div className="bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 mb-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-[#0F172A]">Contribution Record</p>
+                    <p className="text-[11px] text-[#94A3B8] mt-0.5">Share or download your group&apos;s contribution record</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button onClick={handleShareLink} disabled={shareLoading}
+                      className="h-8 px-3 border border-[#E2E8F0] bg-[#F8FAFF] hover:bg-[#F1F5F9] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-60">
+                      <IconLink size={14} /> {shareLoading ? 'Sharing...' : 'Share Link'}
+                    </button>
+                    <button onClick={handleExport}
+                      className="h-8 px-3 border border-[#E2E8F0] bg-[#F8FAFF] hover:bg-[#F1F5F9] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
+                      <IconExport size={14} /> Download PDF
+                    </button>
+                  </div>
+                </div>
+                {shareUrl && (
+                  <div className="mt-2.5 flex items-center gap-2 bg-[#F8FAFF] border border-[#E2E8F0] rounded-md px-3 py-2">
+                    <p className="text-[12px] text-[#64748B] truncate flex-1">{shareUrl}</p>
+                    <button onClick={() => { navigator.clipboard.writeText(shareUrl); showToast('Link copied!', 'success'); }}
+                      className="flex-shrink-0 p-1 text-[#64748B] hover:text-[#0F172A] transition-colors" title="Copy link">
+                      <IconCopy size={14} />
+                    </button>
+                    <button onClick={handleRevokeShare}
+                      className="flex-shrink-0 text-[11px] text-[#DC2626] hover:text-[#B91C1C] font-medium transition-colors">
+                      Revoke
+                    </button>
+                  </div>
+                )}
+                <div className="flex gap-1.5 mt-2.5">
+                  {PDF_THEMES.map((t) => {
+                    const isActive = pdfTheme.join() === t.color.join();
+                    return (
+                      <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
+                        className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-50 hover:opacity-100'}`}
+                        style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -462,31 +545,6 @@ export default function GroupPage() {
                 onRemove={() => setMemberToRemove(m)}
               />
             ))}
-
-            {/* Export Contribution Record */}
-            <div className="mt-6 bg-white border border-[#E2E8F0] rounded-xl px-4 py-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[#0F172A]">Contribution Record</p>
-                  <p className="text-[11px] text-[#94A3B8] mt-0.5">Download PDF with tasks, evidence, and peer review scores</p>
-                </div>
-                <button onClick={handleExport}
-                  className="flex-shrink-0 h-9 px-4 border border-[#E2E8F0] bg-[#F8FAFF] hover:bg-[#F1F5F9] text-sm font-medium rounded-md flex items-center gap-1.5 transition-colors">
-                  <IconExport size={14} /> Export
-                </button>
-              </div>
-              <div className="flex gap-1.5 mt-2.5">
-                {PDF_THEMES.map((t) => {
-                  const isActive = pdfTheme.join() === t.color.join();
-                  return (
-                    <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
-                      className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[#0F172A]' : 'opacity-50 hover:opacity-100'}`}
-                      style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
 
             {/* Group management */}
             <div className="mt-4 flex flex-col gap-2">
