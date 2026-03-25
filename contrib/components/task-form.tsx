@@ -47,11 +47,11 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
       className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto">
+      <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto" role="dialog" aria-labelledby="task-form-title">
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-          <h2 className="text-base font-semibold text-[#0F172A]">Add Task</h2>
-          <button onClick={onClose} className="text-[#475569] hover:text-[#0F172A] p-1">
+          <h2 id="task-form-title" className="text-base font-semibold text-[#0F172A]">Add Task</h2>
+          <button onClick={onClose} aria-label="Close dialog" className="text-[#475569] hover:text-[#0F172A] p-1">
             <IconClose size={16} />
           </button>
         </div>

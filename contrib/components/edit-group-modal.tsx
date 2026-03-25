@@ -43,38 +43,35 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
       className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div role="dialog" aria-modal="true" aria-label="Edit group" className="w-full max-w-[440px] bg-white rounded-xl">
+      <div className="w-full max-w-[440px] bg-white rounded-xl" role="dialog" aria-labelledby="edit-group-title">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-          <h2 className="text-base font-semibold text-[#0F172A]">Edit group</h2>
-          <button onClick={onClose} aria-label="Close" className="text-[#475569] hover:text-[#0F172A] p-1">
+          <h2 id="edit-group-title" className="text-base font-semibold text-[#0F172A]">Edit group</h2>
+          <button onClick={onClose} aria-label="Close dialog" className="text-[#475569] hover:text-[#0F172A] p-1">
             <IconClose size={16} />
           </button>
         </div>
         <div className="p-5 flex flex-col gap-4">
           <div>
-            <label htmlFor="edit-group-name" className="text-[13px] font-medium text-[#475569] mb-1.5 block">Group name</label>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Group name</label>
             <input
-              id="edit-group-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
-            <label htmlFor="edit-group-subject" className="text-[13px] font-medium text-[#475569] mb-1.5 block">Subject code</label>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Subject code</label>
             <input
-              id="edit-group-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
-            <label htmlFor="edit-group-due-date" className="text-[13px] font-medium text-[#475569] mb-1.5 block">
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">
               Due date <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <input
-              id="edit-group-due-date"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}

@@ -46,7 +46,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
   return (
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────── */}
-      <header aria-label="Main navigation" className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-4 gap-2">
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-4 gap-2" role="banner">
         {(group || onBack) ? (
           <button
             onClick={group ? () => router.push(homeRoute) : onBack}
@@ -110,7 +110,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
       </header>
 
       {/* ── DESKTOP SIDEBAR ────────────────────────────── */}
-      <aside aria-label="Main navigation" className="hidden md:flex flex-col fixed top-0 left-0 h-full w-[220px] bg-white border-r border-[#E2E8F0] z-50 py-5 px-3">
+      <aside className="hidden md:flex flex-col fixed top-0 left-0 h-full w-[220px] bg-white border-r border-[#E2E8F0] z-50 py-5 px-3" role="navigation" aria-label="Main navigation">
         <div className="flex items-center gap-2 px-2 mb-6">
           <svg width="24" height="24" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
             <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>

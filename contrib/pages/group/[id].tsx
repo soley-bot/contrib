@@ -16,6 +16,7 @@ import MemberRow from '@/components/member-row';
 import InviteBanner from '@/components/invite-banner';
 import EvaluationForm from '@/components/evaluation-form';
 import EvaluationResults from '@/components/evaluation-results';
+import TaskBoardSkeleton from '@/components/task-skeleton';
 import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
@@ -54,7 +55,7 @@ export default function GroupPage() {
 
   const { user, profile, loading: userLoading } = useUser();
   const { group, members, isLead, loading: groupLoading, refresh: refreshGroup } = useGroup(groupId, user?.id);
-  const { tasks, refresh: refreshTasks } = useTasks(groupId);
+  const { tasks, loading: tasksLoading, refresh: refreshTasks } = useTasks(groupId);
   const { activity, refresh: refreshActivity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
   const { evidenceByTask, refresh: refreshEvidence } = useGroupEvidence(taskIds);
@@ -337,6 +338,9 @@ export default function GroupPage() {
               </div>
             )}
 
+            {/* Task board skeleton while loading */}
+            {tasksLoading ? <TaskBoardSkeleton /> : <>
+
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
               {[
@@ -410,6 +414,7 @@ export default function GroupPage() {
                   })
               }
             </div>
+            </>}
           </div>
         )}
 

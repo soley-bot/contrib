@@ -47,7 +47,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 bg-[#F8FAFF] border border-[#E2E8F0] rounded-md p-3">
+    <form onSubmit={handleSubmit} aria-label="Log your work" className="flex flex-col gap-3 bg-[#F8FAFF] border border-[#E2E8F0] rounded-md p-3">
       <div className="flex gap-1.5">
         {TYPES.map((t) => (
           <button key={t.value} type="button"

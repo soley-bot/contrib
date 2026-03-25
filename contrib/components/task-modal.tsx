@@ -49,12 +49,12 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
   return (
     <div className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-label="Task details" className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
-        style={{ animation: 'slideUp .25s ease' }}>
+      <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
+        style={{ animation: 'slideUp .25s ease' }} role="dialog" aria-label="Task details">
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
           <h2 className="text-base font-semibold text-[#0F172A] truncate">{task.title}</h2>
-          <button onClick={onClose} aria-label="Close" className="text-[#475569] hover:text-[#0F172A] ml-2 p-1"><IconClose size={16} /></button>
+          <button onClick={onClose} className="text-[#475569] hover:text-[#0F172A] ml-2 p-1"><IconClose size={16} /></button>
         </div>
 
         <div className="p-5 flex flex-col gap-4">

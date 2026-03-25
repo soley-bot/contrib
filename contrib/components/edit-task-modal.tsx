@@ -59,33 +59,31 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        role="dialog" aria-modal="true" aria-label="Edit task"
         className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
         style={{ animation: 'slideUp .25s ease' }}
+        role="dialog" aria-labelledby="edit-task-title"
       >
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-          <h2 className="text-base font-semibold text-[#0F172A]">Edit task</h2>
-          <button onClick={onClose} aria-label="Close" className="text-[#475569] hover:text-[#0F172A] p-1">
+          <h2 id="edit-task-title" className="text-base font-semibold text-[#0F172A]">Edit task</h2>
+          <button onClick={onClose} className="text-[#475569] hover:text-[#0F172A] p-1">
             <IconClose size={16} />
           </button>
         </div>
         <div className="p-5 flex flex-col gap-4">
           <div>
-            <label htmlFor="edit-task-title" className="text-[13px] font-medium text-[#475569] mb-1.5 block">Title</label>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Title</label>
             <input
-              id="edit-task-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
-            <label htmlFor="edit-task-description" className="text-[13px] font-medium text-[#475569] mb-1.5 block">
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">
               Description <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <textarea
-              id="edit-task-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -93,9 +91,8 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             />
           </div>
           <div>
-            <label htmlFor="edit-task-assignee" className="text-[13px] font-medium text-[#475569] mb-1.5 block">Assignee</label>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Assignee</label>
             <select
-              id="edit-task-assignee"
               value={assigneeId}
               onChange={(e) => setAssigneeId(e.target.value)}
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm text-[#0F172A] focus:border-brand outline-none bg-white"
@@ -106,11 +103,10 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             </select>
           </div>
           <div>
-            <label htmlFor="edit-task-due-date" className="text-[13px] font-medium text-[#475569] mb-1.5 block">
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">
               Due date <span className="font-normal text-[#94A3B8]">(optional)</span>
             </label>
             <input
-              id="edit-task-due-date"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
