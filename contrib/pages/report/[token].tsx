@@ -93,6 +93,11 @@ export default function PublicReportPage() {
   const leadMember = members.find((m) => m.profile_id === group.lead_id);
   const university = leadMember?.profile?.university ?? null;
 
+  // Timeline stats
+  const sortedActivity = [...activity].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const activeDays = new Set(sortedActivity.map((e) => new Date(e.created_at).toDateString())).size;
+  const fmtShort = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
   return (
     <div className="min-h-dvh bg-[#F8FAFF]">
       {/* Header */}
@@ -135,40 +140,39 @@ export default function PublicReportPage() {
           ))}
         </div>
 
-        {/* Member Contributions */}
+        {/* Member Contributions with visual bars */}
         <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-[#E2E8F0]">
             <h2 className="text-sm font-semibold text-[#0F172A]">Member Contributions</h2>
           </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[#F8FAFF] text-[#64748B] text-[12px]">
-                <th className="text-left px-4 py-2 font-medium">Member</th>
-                <th className="text-right px-4 py-2 font-medium">Assigned</th>
-                <th className="text-right px-4 py-2 font-medium">Done</th>
-                <th className="text-right px-4 py-2 font-medium">Completion</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((m) => {
-                const mt = tasks.filter((t) => t.assignee_id === m.profile_id);
-                const md = mt.filter((t) => t.status === 'done').length;
-                const pct = mt.length > 0 ? Math.round((md / mt.length) * 100) : 0;
-                const isLead = m.profile_id === group.lead_id;
-                return (
-                  <tr key={m.id} className="border-t border-[#F1F5F9]">
-                    <td className="px-4 py-2.5">
-                      <span className={isLead ? 'font-semibold' : ''}>{m.profile?.name ?? 'Unknown'}</span>
-                      {isLead && <span className="ml-1.5 text-[10px] text-[#1A56E8] font-medium">Lead</span>}
-                    </td>
-                    <td className="text-right px-4 py-2.5 text-[#64748B]">{mt.length}</td>
-                    <td className="text-right px-4 py-2.5 text-[#16A34A] font-medium">{md}</td>
-                    <td className={`text-right px-4 py-2.5 font-medium ${pct === 100 ? 'text-[#1A56E8]' : 'text-[#0F172A]'}`}>{pct}%</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="divide-y divide-[#F1F5F9]">
+            {members.map((m) => {
+              const mt = tasks.filter((t) => t.assignee_id === m.profile_id);
+              const md = mt.filter((t) => t.status === 'done').length;
+              const pct = mt.length > 0 ? Math.round((md / mt.length) * 100) : 0;
+              const isLead = m.profile_id === group.lead_id;
+              return (
+                <div key={m.id} className="px-4 py-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className={`text-sm truncate ${isLead ? 'font-semibold' : ''} text-[#0F172A]`}>{m.profile?.name ?? 'Unknown'}</span>
+                      {isLead && <span className="text-[10px] text-[#1A56E8] font-medium flex-shrink-0">Lead</span>}
+                    </div>
+                    <span className="text-[12px] text-[#64748B] flex-shrink-0 ml-2">{md}/{mt.length} tasks</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex-1 h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#1A56E8' : pct >= 50 ? '#16A34A' : pct > 0 ? '#D97706' : '#CBD5E1' }}
+                      />
+                    </div>
+                    <span className={`text-[12px] font-semibold w-8 text-right ${pct === 100 ? 'text-[#1A56E8]' : 'text-[#0F172A]'}`}>{pct}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Task List */}
@@ -207,23 +211,34 @@ export default function PublicReportPage() {
           </div>
         </div>
 
-        {/* Activity Summary */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl px-4 py-3">
-          <h2 className="text-sm font-semibold text-[#0F172A] mb-1">Activity</h2>
-          <p className="text-sm text-[#64748B]">
-            {activity.length} activities logged
-            {activity.length > 0 && (
-              <> between {new Date(activity[0].created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
-              {' '}&ndash;{' '}
-              {new Date(activity[activity.length - 1].created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</>
-            )}
-          </p>
-        </div>
+        {/* Timeline Summary */}
+        {sortedActivity.length > 0 && (
+          <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#E2E8F0]">
+              <h2 className="text-sm font-semibold text-[#0F172A]">Timeline</h2>
+            </div>
+            <div className="grid grid-cols-3 gap-px bg-[#F1F5F9]">
+              {[
+                { label: 'Total activities', value: String(sortedActivity.length) },
+                { label: 'Active days', value: String(activeDays) },
+                { label: 'Contributors', value: String(new Set(sortedActivity.map((e) => e.actor_id)).size) },
+              ].map((s) => (
+                <div key={s.label} className="bg-white px-4 py-3 text-center">
+                  <p className="text-base font-bold text-[#0F172A]">{s.value}</p>
+                  <p className="text-[11px] text-[#94A3B8]">{s.label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="px-4 py-2.5 border-t border-[#F1F5F9] text-[12px] text-[#64748B]">
+              {fmtShort(sortedActivity[0].created_at)} &ndash; {fmtShort(sortedActivity[sortedActivity.length - 1].created_at)}
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center pb-8">
           <p className="text-[11px] text-[#94A3B8]">
-            Generated by <span className="font-medium">Contrib</span> &middot; This report contains personal data of group members
+            Generated by <span className="font-medium">Contrib</span>
           </p>
         </div>
       </div>
