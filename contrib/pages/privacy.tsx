@@ -20,7 +20,7 @@ export default function Privacy() {
                 <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
                 <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
               </svg>
-              <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
+              <span className="text-xl font-extrabold text-[#1A56E8]">Contrib</span>
             </Link>
           </div>
 

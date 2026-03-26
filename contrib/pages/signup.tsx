@@ -104,7 +104,7 @@ export default function Signup() {
             <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
-          <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
+          <span className="text-xl font-extrabold text-[#1A56E8]">Contrib</span>
         </div>
         <h1 className="text-[22px] font-bold mb-1">Put your work on the record.</h1>
         <p className="text-sm text-[#64748B] mb-7">Now in early access.</p>
