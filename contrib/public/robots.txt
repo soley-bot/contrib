@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /teacher
+Disallow: /group/
+Disallow: /profile
+Disallow: /onboarding
+
+Sitemap: https://joincontrib.com/sitemap.xml
