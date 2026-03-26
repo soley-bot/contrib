@@ -429,11 +429,9 @@ export default function Landing() {
         <meta name="twitter:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
         <link rel="canonical" href="https://joincontrib.com" />
       </Head>
-      {/* Nav — hidden by default, slides down on hover */}
-      <div className="fixed top-0 left-0 right-0 z-50 group/nav">
-        {/* Invisible hover zone */}
-        <div className="h-16" />
-        <nav className="absolute top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-sm border-b border-[#E2E8F0] transition-transform duration-300 -translate-y-full group-hover/nav:translate-y-0">
+      {/* Nav — always visible for branding (Google OAuth verification requires app name on homepage) */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <nav className="h-14 bg-white/95 backdrop-blur-sm border-b border-[#E2E8F0]">
           <div className="max-w-none px-5 h-full flex items-center justify-between">
             <Logo />
             <div className="flex gap-2">
