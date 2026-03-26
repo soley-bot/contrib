@@ -480,7 +480,7 @@ export default function Landing() {
               style={{ background: slide.bg }}
             >
               {/* Slide content — 2-col desktop, stacked mobile */}
-              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-4 md:py-10 pb-16 md:pb-4 gap-3 md:gap-16">
+              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 pt-16 md:pt-10 pb-16 md:pb-4 gap-3 md:gap-16">
                 {/* Text col */}
                 <div className="md:flex-1 flex flex-col justify-start md:justify-center">
                   <div
