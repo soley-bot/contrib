@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { createServerClient } from '@/lib/supabase-server';
 
@@ -363,6 +364,13 @@ function CTASlide({ active }: { active: boolean }) {
         >
           Get started — it&apos;s free
         </Link>
+        <div className="mt-10 flex items-center gap-4 text-[12px] text-[#94A3B8]">
+          <Link href="/privacy" className="hover:text-[#64748B] transition-colors">Privacy</Link>
+          <span>|</span>
+          <Link href="/terms" className="hover:text-[#64748B] transition-colors">Terms</Link>
+          <span>|</span>
+          <a href="mailto:support@joincontrib.com" className="hover:text-[#64748B] transition-colors">Contact</a>
+        </div>
       </div>
     </div>
   );
@@ -411,6 +419,16 @@ export default function Landing() {
 
   return (
     <div className="min-h-dvh bg-white overflow-hidden">
+      <Head>
+        <title>Contrib - Make group contributions visible</title>
+        <meta name="description" content="Track individual contributions in group projects. Students log tasks and review each other. Teachers get a live Contribution Record for every group." />
+        <meta property="og:title" content="Contrib - Make group contributions visible" />
+        <meta property="og:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
+        <meta property="og:url" content="https://joincontrib.com" />
+        <meta name="twitter:title" content="Contrib - Make group contributions visible" />
+        <meta name="twitter:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
+        <link rel="canonical" href="https://joincontrib.com" />
+      </Head>
       {/* Nav — hidden by default, slides down on hover */}
       <div className="fixed top-0 left-0 right-0 z-50 group/nav">
         {/* Invisible hover zone */}

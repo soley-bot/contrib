@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
@@ -56,6 +57,11 @@ export default function Login() {
   }
 
   return (
+    <>
+    <Head>
+      <title>Log in - Contrib</title>
+      <meta name="description" content="Log in to Contrib. Track your group contributions and export your Contribution Record." />
+    </Head>
     <div className="min-h-dvh bg-[#F8FAFF]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="flex items-center gap-2 mb-8">
@@ -129,6 +135,7 @@ export default function Login() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 
