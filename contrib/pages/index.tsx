@@ -607,6 +607,15 @@ export default function Landing() {
           {activeSlide + 1} / {totalSlides}
         </div>
       </div>
+
+      {/* Footer — always in DOM for search engines and Google OAuth verification */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-1.5 text-[11px] text-[#94A3B8]">
+        <span>&copy; {new Date().getFullYear()} Contrib</span>
+        <div className="flex items-center gap-3">
+          <Link href="/privacy" className="hover:text-[#64748B] transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-[#64748B] transition-colors">Terms of Service</Link>
+        </div>
+      </footer>
     </div>
   );
 }
