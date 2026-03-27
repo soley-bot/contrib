@@ -78,6 +78,7 @@ export default function TeacherGroupDetail() {
       evalSummaries,
       DEFAULT_PDF_THEME,
       'teacher',
+      courseName || undefined,
     );
     setDownloadingPdf(false);
   }

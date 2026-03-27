@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { createServerClient } from '@/lib/supabase-server';
 
@@ -17,7 +18,7 @@ function Logo() {
         <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
         <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
       </svg>
-      <span className="text-lg font-extrabold tracking-tight text-text">Contrib</span>
+      <span className="text-lg font-extrabold tracking-tight text-brand">Contrib</span>
     </div>
   );
 }
@@ -363,6 +364,13 @@ function CTASlide({ active }: { active: boolean }) {
         >
           Get started — it&apos;s free
         </Link>
+        <div className="mt-10 flex items-center gap-4 text-[12px] text-[#94A3B8]">
+          <Link href="/privacy" className="hover:text-[#64748B] transition-colors">Privacy</Link>
+          <span>|</span>
+          <Link href="/terms" className="hover:text-[#64748B] transition-colors">Terms</Link>
+          <span>|</span>
+          <a href="mailto:support@joincontrib.com" className="hover:text-[#64748B] transition-colors">Contact</a>
+        </div>
       </div>
     </div>
   );
@@ -411,11 +419,19 @@ export default function Landing() {
 
   return (
     <div className="min-h-dvh bg-white overflow-hidden">
-      {/* Nav — hidden by default, slides down on hover */}
-      <div className="fixed top-0 left-0 right-0 z-50 group/nav">
-        {/* Invisible hover zone */}
-        <div className="h-16" />
-        <nav className="absolute top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-sm border-b border-border transition-transform duration-300 -translate-y-full group-hover/nav:translate-y-0">
+      <Head>
+        <title>Contrib - Make group contributions visible</title>
+        <meta name="description" content="Track individual contributions in group projects. Students log tasks and review each other. Teachers get a live Contribution Record for every group." />
+        <meta property="og:title" content="Contrib - Make group contributions visible" />
+        <meta property="og:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
+        <meta property="og:url" content="https://joincontrib.com" />
+        <meta name="twitter:title" content="Contrib - Make group contributions visible" />
+        <meta name="twitter:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
+        <link rel="canonical" href="https://joincontrib.com" />
+      </Head>
+      {/* Nav — always visible for branding (Google OAuth verification requires app name on homepage) */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <nav className="h-14 bg-white/95 backdrop-blur-sm border-b border-border">
           <div className="max-w-none px-5 h-full flex items-center justify-between">
             <Logo />
             <div className="flex gap-2">
@@ -464,7 +480,7 @@ export default function Landing() {
               style={{ background: slide.bg }}
             >
               {/* Slide content — 2-col desktop, stacked mobile */}
-              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 py-4 md:py-10 pb-16 md:pb-4 gap-3 md:gap-16">
+              <div className="relative z-10 h-full flex flex-col md:flex-row md:items-center max-w-6xl mx-auto px-5 md:px-10 lg:px-16 pt-16 md:pt-10 pb-16 md:pb-4 gap-3 md:gap-16">
                 {/* Text col */}
                 <div className="md:flex-1 flex flex-col justify-start md:justify-center">
                   <div
@@ -589,6 +605,15 @@ export default function Landing() {
           {activeSlide + 1} / {totalSlides}
         </div>
       </div>
+
+      {/* Footer — always in DOM for search engines and Google OAuth verification */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-1.5 text-[11px] text-[#94A3B8]">
+        <span>&copy; {new Date().getFullYear()} Contrib</span>
+        <div className="flex items-center gap-3">
+          <Link href="/privacy" className="hover:text-[#64748B] transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-[#64748B] transition-colors">Terms of Service</Link>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "Contrib (Next.js)",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev"],
       "cwd": "contrib",
       "port": 3000,
       "autoPort": false

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
@@ -56,6 +57,11 @@ export default function Login() {
   }
 
   return (
+    <>
+    <Head>
+      <title>Log in - Contrib</title>
+      <meta name="description" content="Log in to Contrib. Track your group contributions and export your Contribution Record." />
+    </Head>
     <div className="min-h-dvh bg-bg">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="flex items-center gap-2 mb-8">
@@ -67,7 +73,7 @@ export default function Login() {
             <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
-          <span className="text-xl font-extrabold text-text">Contrib</span>
+          <span className="text-xl font-extrabold text-brand">Contrib</span>
         </div>
         <h1 className="text-[22px] font-bold mb-1">Your work is on record.</h1>
         <p className="text-sm text-muted mb-7">Log in to continue.</p>
@@ -133,6 +139,7 @@ export default function Login() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 

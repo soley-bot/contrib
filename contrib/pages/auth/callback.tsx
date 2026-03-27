@@ -1,50 +1,53 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+import type { GetServerSidePropsContext } from 'next';
+import { createServerClient } from '@/lib/supabase-server';
 
+/**
+ * OAuth callback — exchanges the PKCE code server-side and redirects.
+ * The component below is only a fallback if getServerSideProps doesn't redirect.
+ */
 export default function AuthCallback() {
-  const router = useRouter();
-  const [timedOut, setTimedOut] = useState(false);
-
-  useEffect(() => {
-    async function redirect(session: { user: { id: string } }) {
-      const returnTo = typeof router.query.returnTo === 'string' && router.query.returnTo.startsWith('/') && !router.query.returnTo.startsWith('//')
-        ? router.query.returnTo : null;
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('id', session.user.id)
-        .single();
-      if (!profile) { router.replace('/onboarding'); return; }
-      router.replace(returnTo ?? (profile.role === 'teacher' ? '/teacher' : '/dashboard'));
-    }
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-        subscription.unsubscribe();
-        await redirect(session);
-      } else if (event === 'INITIAL_SESSION' && !session) {
-        // No session yet — PKCE code exchange in progress, wait for SIGNED_IN
-      } else if (!session) {
-        router.replace('/login');
-      }
-    });
-
-    const timeout = setTimeout(() => setTimedOut(true), 10000);
-    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
-  }, [router]);
-
   return (
     <div className="min-h-dvh bg-bg flex flex-col items-center justify-center gap-3">
-      {timedOut ? (
-        <>
-          <p className="text-[15px] text-text font-medium">Sign-in is taking too long</p>
-          <p className="text-sm text-text-secondary">Something may have gone wrong. Please try again.</p>
-          <button onClick={() => router.push('/login')} className="mt-2 text-sm text-brand font-medium">Back to login</button>
-        </>
-      ) : (
-        <p className="text-[15px] text-text-secondary">Signing you in…</p>
-      )}
+      <p className="text-[15px] text-text font-medium">Sign-in failed</p>
+      <p className="text-sm text-text-secondary">Something went wrong. Please try again.</p>
+      <Link href="/login" className="mt-2 text-sm text-brand font-medium">Back to login</Link>
     </div>
   );
+}
+
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const code = ctx.query.code;
+  if (typeof code !== 'string') {
+    return { redirect: { destination: '/login', permanent: false } };
+  }
+
+  const supabase = createServerClient(ctx);
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    return { props: {} }; // render fallback error UI
+  }
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    return { redirect: { destination: '/login', permanent: false } };
+  }
+
+  // Determine redirect destination
+  const returnTo = typeof ctx.query.returnTo === 'string'
+    && ctx.query.returnTo.startsWith('/') && !ctx.query.returnTo.startsWith('//')
+    ? ctx.query.returnTo : null;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, role')
+    .eq('id', session.user.id)
+    .single();
+
+  if (!profile) {
+    return { redirect: { destination: '/onboarding', permanent: false } };
+  }
+
+  const destination = returnTo ?? (profile.role === 'teacher' ? '/teacher' : '/dashboard');
+  return { redirect: { destination, permanent: false } };
 }
