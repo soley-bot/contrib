@@ -22,7 +22,7 @@ import type { Group, GroupMember, Task, ActivityLog } from '@/types';
 type Tab = 'tasks' | 'activity' | 'members' | 'evaluation';
 
 const STATUS_COLS: { status: string; label: string; countClass: string; headerClass: string }[] = [
-  { status: 'todo',       label: 'To Do',       countClass: 'bg-[#E8E5E3] text-[#475569]',  headerClass: 'bg-[#F1F5F9] text-[#475569]' },
+  { status: 'todo',       label: 'To Do',       countClass: 'bg-[#E8E5E3] text-text-secondary',  headerClass: 'bg-bg-hover text-text-secondary' },
   { status: 'inprogress', label: 'In Progress',  countClass: 'bg-[#FDE68A] text-[#92400E]', headerClass: 'bg-[#FEF3C7] text-[#B45309]' },
   { status: 'done',       label: 'Done',         countClass: 'bg-[#BBF7D0] text-[#15803D]', headerClass: 'bg-[#DCFCE7] text-[#15803D]' },
 ];
@@ -90,7 +90,7 @@ export default function TeacherGroupDetail() {
   if (!group || !isOwner) return null;
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <Nav
         profile={profile}
         role="teacher"
@@ -102,36 +102,36 @@ export default function TeacherGroupDetail() {
 
       <div className="md:pl-[220px] pt-14 md:pt-0">
         {/* Desktop topbar */}
-        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
+        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div className="flex items-center gap-1.5 text-sm">
-            <button onClick={() => router.push('/teacher')} className="text-[#94A3B8] hover:text-[#475569] transition-colors">
+            <button onClick={() => router.push('/teacher')} className="text-text-tertiary hover:text-text-secondary transition-colors">
               My Courses
             </button>
             <span className="text-[#CBD5E1]">›</span>
-            <button onClick={() => router.push(`/teacher/course/${courseId}`)} className="text-[#94A3B8] hover:text-[#475569] transition-colors">
+            <button onClick={() => router.push(`/teacher/course/${courseId}`)} className="text-text-tertiary hover:text-text-secondary transition-colors">
               {courseName || '…'}
             </button>
             <span className="text-[#CBD5E1]">›</span>
-            <span className="font-semibold text-[#0F172A]">{group.name}</span>
-            <span className="text-[#94A3B8]">{group.subject}</span>
+            <span className="font-semibold text-text">{group.name}</span>
+            <span className="text-text-tertiary">{group.subject}</span>
           </div>
           <button
             onClick={handleDownloadPdf}
             disabled={downloadingPdf}
-            className="h-8 px-3 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            className="h-8 px-3 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export Contribution Record'}
           </button>
         </div>
 
         {/* Tab bar */}
-        <div className="flex border-b border-[#E2E8F0] bg-white sticky top-14 md:top-0 z-40 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex border-b border-border bg-white sticky top-14 md:top-0 z-40 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {(['tasks', 'activity', 'members', 'evaluation'] as Tab[]).map((t) => {
             const tabLabels: Record<Tab, string> = { tasks: 'Tasks', activity: 'Timeline', members: 'Members', evaluation: 'Peer Review' };
             return (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-shrink-0 px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
-                tab === t ? 'text-brand border-brand' : 'text-[#94A3B8] border-transparent'
+                tab === t ? 'text-brand border-brand' : 'text-text-tertiary border-transparent'
               }`}
             >
               {tabLabels[t]}
@@ -145,7 +145,7 @@ export default function TeacherGroupDetail() {
           <button
             onClick={handleDownloadPdf}
             disabled={downloadingPdf}
-            className="w-full h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium text-[#475569] rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+            className="w-full h-10 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium text-text-secondary rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export Contribution Record'}
           </button>
@@ -155,9 +155,9 @@ export default function TeacherGroupDetail() {
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
             {/* Read-only indicator */}
-            <div className="bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+            <div className="bg-bg-hover border border-border rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <p className="text-[12px] text-[#64748B] font-medium">Read-only view — students manage their own tasks</p>
+              <p className="text-[12px] text-muted font-medium">Read-only view — students manage their own tasks</p>
             </div>
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
@@ -167,9 +167,9 @@ export default function TeacherGroupDetail() {
                 { label: 'In progress', value: tasks.filter(t => t.status === 'inprogress').length, color: '#D97706' },
                 { label: 'To do',       value: tasks.filter(t => t.status === 'todo').length,       color: '#94A3B8' },
               ].map((s) => (
-                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E2E8F0] rounded-xl px-3.5 py-2.5 min-w-[80px] shadow-sm">
+                <div key={s.label} className="flex-shrink-0 bg-white border border-border rounded-xl px-3.5 py-2.5 min-w-[80px] shadow-sm">
                   <p className="text-lg font-bold" style={{ color: s.color || '#0F172A' }}>{s.value}</p>
-                  <p className="text-[12px] text-[#94A3B8] mt-0.5">{s.label}</p>
+                  <p className="text-[12px] text-text-tertiary mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -190,8 +190,8 @@ export default function TeacherGroupDetail() {
                       <circle cx="88" cy="72" r="16" fill="white" stroke="#93B4FF" strokeWidth="1.5"/>
                       <path d="M82 72h12M88 66v12" stroke="#1240C4" strokeWidth="2" strokeLinecap="round" opacity=".4"/>
                     </svg>
-                    <p className="text-[15px] font-semibold text-[#0F172A] mb-1">No tasks yet</p>
-                    <p className="text-sm text-[#94A3B8] max-w-xs">Tasks will appear here as students add them to their board.</p>
+                    <p className="text-[15px] font-semibold text-text mb-1">No tasks yet</p>
+                    <p className="text-sm text-text-tertiary max-w-xs">Tasks will appear here as students add them to their board.</p>
                   </div>
                 )
                 : tasks.map((task) => (
@@ -221,8 +221,8 @@ export default function TeacherGroupDetail() {
                       <circle cx="88" cy="72" r="16" fill="white" stroke="#93B4FF" strokeWidth="1.5"/>
                       <path d="M82 72h12M88 66v12" stroke="#1240C4" strokeWidth="2" strokeLinecap="round" opacity=".4"/>
                     </svg>
-                    <p className="text-[15px] font-semibold text-[#0F172A] mb-1">No tasks yet</p>
-                    <p className="text-sm text-[#94A3B8] max-w-xs">Tasks will appear here as students add them to their board.</p>
+                    <p className="text-[15px] font-semibold text-text mb-1">No tasks yet</p>
+                    <p className="text-sm text-text-tertiary max-w-xs">Tasks will appear here as students add them to their board.</p>
                   </div>
                 )
                 : STATUS_COLS.map((col) => {
@@ -237,7 +237,7 @@ export default function TeacherGroupDetail() {
                           <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
                         </div>
                         {colTasks.length === 0 ? (
-                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-[#E2E8F0] rounded-xl">
+                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-border rounded-xl">
                             <p className="text-[12px] text-[#C4C0BB]">No tasks here</p>
                           </div>
                         ) : colTasks.map((task) => (
@@ -259,7 +259,7 @@ export default function TeacherGroupDetail() {
         {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Recent activity</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">Recent activity</p>
             {activity.length === 0 ? (
               <div className="flex flex-col items-center py-14 text-center">
                 <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
@@ -274,8 +274,8 @@ export default function TeacherGroupDetail() {
                   <line x1="40" y1="42" x2="43" y2="42" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
                   <line x1="77" y1="42" x2="80" y2="42" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
-                <p className="text-[14px] font-semibold text-[#475569] mb-1">No activity yet</p>
-                <p className="text-sm text-[#94A3B8]">Actions will appear here as students work.</p>
+                <p className="text-[14px] font-semibold text-text-secondary mb-1">No activity yet</p>
+                <p className="text-sm text-text-tertiary">Actions will appear here as students work.</p>
               </div>
             ) : activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)}
           </div>
@@ -284,7 +284,7 @@ export default function TeacherGroupDetail() {
         {/* ── MEMBERS TAB ── */}
         {tab === 'members' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
               {members.length} member{members.length !== 1 ? 's' : ''}
             </p>
             {members.map((m) => (
@@ -309,8 +309,8 @@ export default function TeacherGroupDetail() {
                   <path d="M28 40h24M40 28v24" stroke="#1240C4" strokeWidth="2.5" strokeLinecap="round" opacity=".3"/>
                   <circle cx="40" cy="40" r="6" fill="#1240C4" opacity=".4"/>
                 </svg>
-                <p className="text-[15px] font-semibold text-[#0F172A]">Evaluation not started</p>
-                <p className="text-sm text-[#94A3B8] max-w-xs">
+                <p className="text-[15px] font-semibold text-text">Evaluation not started</p>
+                <p className="text-sm text-text-tertiary max-w-xs">
                   Peer evaluation hasn&apos;t been opened yet. The group lead opens it when all tasks are done.
                 </p>
               </div>
@@ -327,7 +327,7 @@ export default function TeacherGroupDetail() {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav aria-label="Mobile navigation" className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] flex"
+      <nav aria-label="Mobile navigation" className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-border flex"
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {([
           { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} /> },
@@ -337,7 +337,7 @@ export default function TeacherGroupDetail() {
         ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((item) => (
           <button key={item.id} onClick={() => setTab(item.id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
-              tab === item.id ? 'text-brand' : 'text-[#94A3B8]'
+              tab === item.id ? 'text-brand' : 'text-text-tertiary'
             }`}
           >
             {item.icon}

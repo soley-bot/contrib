@@ -39,22 +39,22 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
 
   return (
     <div
-      className={`bg-white border border-[#E2E8F0] rounded-xl p-4 shadow-sm ${onClick ? 'cursor-pointer hover:border-[#1240C4] hover:shadow-sm transition-all' : ''}`}
+      className={`bg-white border border-border rounded-xl p-4 shadow-sm ${onClick ? 'cursor-pointer hover:border-brand-dark hover:shadow-sm transition-all' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-10 h-10 rounded-[8px] bg-[#EBF0FF] text-[#1240C4] font-bold text-sm flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-[8px] bg-brand-light text-brand-dark font-bold text-sm flex items-center justify-center flex-shrink-0">
             {group.name.slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <p className="text-[14px] font-semibold text-[#0F172A] truncate">{group.name}</p>
+              <p className="text-[14px] font-semibold text-text truncate">{group.name}</p>
               {isOverdue && (
                 <span className="flex-shrink-0 text-[10px] font-semibold bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full border border-red-100">Overdue</span>
               )}
             </div>
-            <p className="text-[11px] text-[#94A3B8] mt-0.5">
+            <p className="text-[11px] text-text-tertiary mt-0.5">
               {memberCount} {memberCount === 1 ? 'member' : 'members'} · {taskDone}/{taskTotal} tasks done
               {group.due_date && <> · Due {formatDueDate(group.due_date)}</>}
             </p>
@@ -64,7 +64,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           {inviteLink && (
             <button
               onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-              className="h-8 px-3 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+              className="h-8 px-3 border border-border bg-white hover:bg-bg-hover text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
             >
               {copied ? <span className="text-green-600">Copied!</span> : 'Copy link'}
             </button>
@@ -72,14 +72,14 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           <button
             onClick={(e) => { e.stopPropagation(); onDownloadPdf(); }}
             disabled={downloading}
-            className="h-8 px-3 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            className="h-8 px-3 border border-border bg-white hover:bg-bg-hover text-[12px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             {downloading ? 'Exporting…' : 'PDF'}
           </button>
           {onEdit && (
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="h-8 w-8 border border-[#E2E8F0] bg-white hover:bg-[#EBF0FF] hover:border-[#C3D4FD] text-[#94A3B8] hover:text-[#1240C4] rounded-md flex items-center justify-center transition-colors"
+              className="h-8 w-8 border border-border bg-white hover:bg-brand-light hover:border-brand-border text-text-tertiary hover:text-brand-dark rounded-md flex items-center justify-center transition-colors"
               title="Edit group"
             >
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2l2 2-7 7H2V9l7-7z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -88,7 +88,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           {onDelete && (
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
-              className="h-8 w-8 border border-[#E2E8F0] bg-white hover:bg-red-50 hover:border-red-200 text-[#94A3B8] hover:text-red-500 rounded-md flex items-center justify-center transition-colors"
+              className="h-8 w-8 border border-border bg-white hover:bg-red-50 hover:border-red-200 text-text-tertiary hover:text-red-500 rounded-md flex items-center justify-center transition-colors"
               title="Delete group"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M11.5 3.5l-.7 7.7a1 1 0 01-1 .8H4.2a1 1 0 01-1-.8L2.5 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -104,13 +104,13 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           {members.map((m) => (
             <div
               key={m.id}
-              className="flex items-center gap-1.5 bg-[#F1F5F9] rounded-full px-2.5 py-1"
+              className="flex items-center gap-1.5 bg-bg-hover rounded-full px-2.5 py-1"
               title={m.profile?.name ?? ''}
             >
-              <div className="w-5 h-5 rounded-full bg-[#EBF0FF] text-[#1A56E8] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 rounded-full bg-brand-light text-brand text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {(m.profile?.name ?? '?').slice(0, 1).toUpperCase()}
               </div>
-              <span className="text-[11px] text-[#475569] font-medium max-w-[80px] truncate">
+              <span className="text-[11px] text-text-secondary font-medium max-w-[80px] truncate">
                 {m.profile?.name ?? 'Unknown'}
               </span>
             </div>

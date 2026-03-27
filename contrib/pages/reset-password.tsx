@@ -44,19 +44,19 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 
         {!ready && !expired ? (
           <div className="text-center py-14">
             <div className="spinner mx-auto mb-4" />
-            <p className="text-sm text-[#475569]">Verifying your reset link…</p>
+            <p className="text-sm text-text-secondary">Verifying your reset link…</p>
           </div>
         ) : !ready && expired ? (
           <>
             <h1 className="text-[22px] font-bold mb-1">Link invalid or expired</h1>
-            <p className="text-sm text-[#475569] mb-7">
+            <p className="text-sm text-text-secondary mb-7">
               This reset link has expired or already been used. Request a new one.
             </p>
             <Link
@@ -69,21 +69,21 @@ export default function ResetPassword() {
         ) : (
           <>
             <h1 className="text-[22px] font-bold mb-1">Set new password</h1>
-            <p className="text-sm text-[#475569] mb-7">Choose a password that&apos;s at least 8 characters.</p>
+            <p className="text-sm text-text-secondary mb-7">Choose a password that&apos;s at least 8 characters.</p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">New password</label>
+                <label className="text-[13px] font-medium text-text-secondary">New password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                 />
               </div>
 
-              {error && <p className="text-sm text-[#DC2626]">{error}</p>}
+              {error && <p className="text-sm text-red">{error}</p>}
 
               <button
                 type="submit"

@@ -20,7 +20,7 @@ export default function InviteBanner({ token }: InviteBannerProps) {
       <IconUsers size={20} />
       <div className="flex-1 min-w-0" style={{ color: 'var(--brand)' }}>
         <p className="text-[11px] font-semibold text-brand mb-0.5">Invite link</p>
-        <p className="text-xs text-[#475569] truncate">{link}</p>
+        <p className="text-xs text-text-secondary truncate">{link}</p>
       </div>
       <button
         onClick={handleCopy}

@@ -57,10 +57,10 @@ export default function PublicReportPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-dvh bg-[#F8FAFF] flex items-center justify-center">
+      <div className="min-h-dvh bg-bg flex items-center justify-center">
         <div className="text-center">
           <div className="spinner mb-3" />
-          <p className="text-sm text-[#64748B]">Loading report...</p>
+          <p className="text-sm text-muted">Loading report...</p>
         </div>
       </div>
     );
@@ -68,20 +68,20 @@ export default function PublicReportPage() {
 
   if (status === 'not-found') {
     return (
-      <div className="min-h-dvh bg-[#F8FAFF] flex flex-col items-center justify-center gap-3 px-5 text-center">
-        <span className="text-[#94A3B8]"><IconAlertTriangle size={32} /></span>
-        <p className="text-lg font-semibold text-[#0F172A]">Report not found</p>
-        <p className="text-sm text-[#64748B]">This report link is invalid or has expired.</p>
+      <div className="min-h-dvh bg-bg flex flex-col items-center justify-center gap-3 px-5 text-center">
+        <span className="text-text-tertiary"><IconAlertTriangle size={32} /></span>
+        <p className="text-lg font-semibold text-text">Report not found</p>
+        <p className="text-sm text-muted">This report link is invalid or has expired.</p>
       </div>
     );
   }
 
   if (status === 'error' || !data) {
     return (
-      <div className="min-h-dvh bg-[#F8FAFF] flex flex-col items-center justify-center gap-3 px-5 text-center">
-        <span className="text-[#94A3B8]"><IconAlertTriangle size={32} /></span>
-        <p className="text-lg font-semibold text-[#0F172A]">Something went wrong</p>
-        <p className="text-sm text-[#64748B]">Please try again later.</p>
+      <div className="min-h-dvh bg-bg flex flex-col items-center justify-center gap-3 px-5 text-center">
+        <span className="text-text-tertiary"><IconAlertTriangle size={32} /></span>
+        <p className="text-lg font-semibold text-text">Something went wrong</p>
+        <p className="text-sm text-muted">Please try again later.</p>
       </div>
     );
   }
@@ -94,15 +94,15 @@ export default function PublicReportPage() {
   const university = leadMember?.profile?.university ?? null;
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       {/* Header */}
-      <div className="bg-white border-b border-[#E2E8F0]">
+      <div className="bg-white border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-medium text-[#1A56E8] tracking-wider uppercase mb-1">Contribution Record</p>
-              <h1 className="text-xl font-bold text-[#0F172A]">{group.name}</h1>
-              <p className="text-sm text-[#64748B] mt-0.5">
+              <p className="text-[11px] font-medium text-brand tracking-wider uppercase mb-1">Contribution Record</p>
+              <h1 className="text-xl font-bold text-text">{group.name}</h1>
+              <p className="text-sm text-muted mt-0.5">
                 {group.subject}
                 {university && <> &middot; {university}</>}
                 {group.due_date && <> &middot; Due {new Date(group.due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</>}
@@ -111,7 +111,7 @@ export default function PublicReportPage() {
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="flex-shrink-0 h-9 px-4 bg-[#1A56E8] hover:bg-[#1240C4] text-white text-sm font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-60"
+              className="flex-shrink-0 h-9 px-4 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-60"
             >
               <IconExport size={14} />
               {downloading ? 'Downloading...' : 'Download PDF'}
@@ -128,21 +128,21 @@ export default function PublicReportPage() {
             { label: 'Tasks', value: String(totalTasks) },
             { label: 'Completion', value: `${completionPct}%` },
           ].map((s) => (
-            <div key={s.label} className="bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 text-center">
-              <p className="text-lg font-bold text-[#0F172A]">{s.value}</p>
-              <p className="text-[11px] text-[#94A3B8] mt-0.5">{s.label}</p>
+            <div key={s.label} className="bg-white border border-border rounded-xl px-4 py-3 text-center">
+              <p className="text-lg font-bold text-text">{s.value}</p>
+              <p className="text-[11px] text-text-tertiary mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Member Contributions */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#E2E8F0]">
-            <h2 className="text-sm font-semibold text-[#0F172A]">Member Contributions</h2>
+        <div className="bg-white border border-border rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-sm font-semibold text-text">Member Contributions</h2>
           </div>
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#F8FAFF] text-[#64748B] text-[12px]">
+              <tr className="bg-bg text-muted text-[12px]">
                 <th className="text-left px-4 py-2 font-medium">Member</th>
                 <th className="text-right px-4 py-2 font-medium">Assigned</th>
                 <th className="text-right px-4 py-2 font-medium">Done</th>
@@ -156,14 +156,14 @@ export default function PublicReportPage() {
                 const pct = mt.length > 0 ? Math.round((md / mt.length) * 100) : 0;
                 const isLead = m.profile_id === group.lead_id;
                 return (
-                  <tr key={m.id} className="border-t border-[#F1F5F9]">
+                  <tr key={m.id} className="border-t border-bg-hover">
                     <td className="px-4 py-2.5">
                       <span className={isLead ? 'font-semibold' : ''}>{m.profile?.name ?? 'Unknown'}</span>
-                      {isLead && <span className="ml-1.5 text-[10px] text-[#1A56E8] font-medium">Lead</span>}
+                      {isLead && <span className="ml-1.5 text-[10px] text-brand font-medium">Lead</span>}
                     </td>
-                    <td className="text-right px-4 py-2.5 text-[#64748B]">{mt.length}</td>
-                    <td className="text-right px-4 py-2.5 text-[#16A34A] font-medium">{md}</td>
-                    <td className={`text-right px-4 py-2.5 font-medium ${pct === 100 ? 'text-[#1A56E8]' : 'text-[#0F172A]'}`}>{pct}%</td>
+                    <td className="text-right px-4 py-2.5 text-muted">{mt.length}</td>
+                    <td className="text-right px-4 py-2.5 text-green font-medium">{md}</td>
+                    <td className={`text-right px-4 py-2.5 font-medium ${pct === 100 ? 'text-brand' : 'text-text'}`}>{pct}%</td>
                   </tr>
                 );
               })}
@@ -172,29 +172,29 @@ export default function PublicReportPage() {
         </div>
 
         {/* Task List */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#E2E8F0]">
-            <h2 className="text-sm font-semibold text-[#0F172A]">Tasks</h2>
+        <div className="bg-white border border-border rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-sm font-semibold text-text">Tasks</h2>
           </div>
-          <div className="divide-y divide-[#F1F5F9]">
+          <div className="divide-y divide-bg-hover">
             {tasks.map((t) => {
               const hasEvidence = (evidenceByTask[t.id] ?? []).length > 0;
               const assignee = members.find((m) => m.profile_id === t.assignee_id);
               return (
                 <div key={t.id} className="px-4 py-2.5 flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    t.status === 'done' ? 'bg-[#16A34A]' : t.status === 'inprogress' ? 'bg-[#D97706]' : 'bg-[#CBD5E1]'
+                    t.status === 'done' ? 'bg-green' : t.status === 'inprogress' ? 'bg-amber' : 'bg-[#CBD5E1]'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm truncate ${t.status === 'done' ? 'text-[#0F172A]' : 'text-[#64748B]'}`}>{t.title}</p>
-                    <p className="text-[11px] text-[#94A3B8]">
+                    <p className={`text-sm truncate ${t.status === 'done' ? 'text-text' : 'text-muted'}`}>{t.title}</p>
+                    <p className="text-[11px] text-text-tertiary">
                       {assignee?.profile?.name ?? 'Unassigned'}
                       {t.status === 'done' && hasEvidence && ' \u00b7 Evidence attached'}
                       {t.status === 'done' && !hasEvidence && ' \u00b7 No evidence'}
                     </p>
                   </div>
                   <span className={`text-[11px] font-medium flex-shrink-0 ${
-                    t.status === 'done' ? 'text-[#16A34A]' : t.status === 'inprogress' ? 'text-[#D97706]' : 'text-[#94A3B8]'
+                    t.status === 'done' ? 'text-green' : t.status === 'inprogress' ? 'text-amber' : 'text-text-tertiary'
                   }`}>
                     {t.status === 'done' ? 'Done' : t.status === 'inprogress' ? 'In Progress' : 'To Do'}
                   </span>
@@ -202,15 +202,15 @@ export default function PublicReportPage() {
               );
             })}
             {tasks.length === 0 && (
-              <div className="px-4 py-6 text-center text-sm text-[#94A3B8]">No tasks created yet.</div>
+              <div className="px-4 py-6 text-center text-sm text-text-tertiary">No tasks created yet.</div>
             )}
           </div>
         </div>
 
         {/* Activity Summary */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl px-4 py-3">
-          <h2 className="text-sm font-semibold text-[#0F172A] mb-1">Activity</h2>
-          <p className="text-sm text-[#64748B]">
+        <div className="bg-white border border-border rounded-xl px-4 py-3">
+          <h2 className="text-sm font-semibold text-text mb-1">Activity</h2>
+          <p className="text-sm text-muted">
             {activity.length} activities logged
             {activity.length > 0 && (
               <> between {new Date(activity[0].created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
@@ -222,7 +222,7 @@ export default function PublicReportPage() {
 
         {/* Footer */}
         <div className="text-center pb-8">
-          <p className="text-[11px] text-[#94A3B8]">
+          <p className="text-[11px] text-text-tertiary">
             Generated by <span className="font-medium">Contrib</span> &middot; This report contains personal data of group members
           </p>
         </div>

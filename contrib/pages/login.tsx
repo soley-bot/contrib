@@ -62,7 +62,7 @@ export default function Login() {
       <title>Log in - Contrib</title>
       <meta name="description" content="Log in to Contrib. Track your group contributions and export your Contribution Record." />
     </Head>
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="flex items-center gap-2 mb-8">
           <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
@@ -73,52 +73,56 @@ export default function Login() {
             <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
-          <span className="text-xl font-extrabold text-[#1A56E8]">Contrib</span>
+          <span className="text-xl font-extrabold text-brand">Contrib</span>
         </div>
         <h1 className="text-[22px] font-bold mb-1">Your work is on record.</h1>
-        <p className="text-sm text-[#64748B] mb-7">Log in to continue.</p>
+        <p className="text-sm text-muted mb-7">Log in to continue.</p>
 
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="h-12 w-full border border-[#E2E8F0] bg-white hover:bg-[#F8FAFF] text-[15px] font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 mb-1"
+          className="h-12 w-full border border-border bg-white hover:bg-bg text-[15px] font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 mb-1"
         >
           <GoogleIcon /> Continue with Google
         </button>
 
         <div className="flex items-center gap-3 my-1">
-          <hr className="flex-1 border-[#E2E8F0]" />
-          <span className="text-[12px] text-[#64748B]">or</span>
-          <hr className="flex-1 border-[#E2E8F0]" />
+          <hr className="flex-1 border-border" />
+          <span className="text-[12px] text-muted">or</span>
+          <hr className="flex-1 border-border" />
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">Email</label>
+            <label htmlFor="login-email" className="text-[13px] font-medium text-muted">Email</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="sophea@gmail.com"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              aria-describedby="login-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
-              <label className="text-[13px] font-medium text-[#64748B]">Password</label>
+              <label htmlFor="login-password" className="text-[13px] font-medium text-muted">Password</label>
               <Link href="/forgot-password" className="text-[13px] text-brand font-medium">Forgot password?</Link>
             </div>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              aria-describedby="login-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
 
-          {error && <p className="text-sm text-[#DC2626]">{error}</p>}
+          {error && <p id="login-error" role="alert" className="text-sm text-red">{error}</p>}
 
           <button
             type="submit"
@@ -129,7 +133,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="text-[13px] text-[#64748B] text-center mt-4">
+        <p className="text-[13px] text-muted text-center mt-4">
           Don&apos;t have an account?{' '}
           <Link href="/signup" className="text-brand font-medium">Sign up free</Link>
         </p>

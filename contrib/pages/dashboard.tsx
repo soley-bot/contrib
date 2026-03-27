@@ -9,6 +9,7 @@ import { useGroups } from '@/hooks/use-groups';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { formatDueDate } from '@/lib/date';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -28,6 +29,9 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const courseTokenRef = useRef<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeModal = () => { if (!creating) setShowModal(false); };
+  useFocusTrap(modalRef, closeModal);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -83,18 +87,18 @@ export default function Dashboard() {
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <Nav profile={profile} />
 
       {/* Desktop layout */}
       <div className="md:pl-[220px]">
 
         {/* Desktop topbar */}
-        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
+        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div>
-            <span className="text-base font-semibold text-[#0F172A]">My Groups</span>
+            <span className="text-base font-semibold text-text">My Groups</span>
             {profile?.name && (
-              <span className="ml-2 text-sm text-[#94A3B8]">— {getGreeting()}, {profile.name.split(' ')[0]}</span>
+              <span className="ml-2 text-sm text-text-tertiary">— {getGreeting()}, {profile.name.split(' ')[0]}</span>
             )}
           </div>
           <button
@@ -110,11 +114,11 @@ export default function Dashboard() {
           {groupsLoading ? (
             <div className="flex flex-col gap-2.5 mt-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex items-center gap-3.5 animate-pulse">
-                  <div className="w-10 h-10 rounded-xl bg-[#E2E8F0]" />
+                <div key={i} className="bg-white border border-border rounded-xl p-4 flex items-center gap-3.5 animate-pulse">
+                  <div className="w-10 h-10 rounded-xl bg-border" />
                   <div className="flex-1">
-                    <div className="h-4 w-32 bg-[#E2E8F0] rounded mb-2" />
-                    <div className="h-3 w-20 bg-[#F1F5F9] rounded" />
+                    <div className="h-4 w-32 bg-border rounded mb-2" />
+                    <div className="h-3 w-20 bg-bg-hover rounded" />
                   </div>
                 </div>
               ))}
@@ -153,8 +157,8 @@ export default function Dashboard() {
                 <rect x="160" y="39" width="24" height="3" rx="1.5" fill="white" fillOpacity="0.8"/>
                 <rect x="160" y="45" width="16" height="3" rx="1.5" fill="white" fillOpacity="0.6"/>
               </svg>
-              <p className="text-[16px] font-bold text-[#0F172A] mb-1.5">No groups yet</p>
-              <p className="text-sm text-[#94A3B8] mb-6 max-w-xs mx-auto">Create your first group and invite your teammates — every contribution gets tracked.</p>
+              <p className="text-[16px] font-bold text-text mb-1.5">No groups yet</p>
+              <p className="text-sm text-text-tertiary mb-6 max-w-xs mx-auto">Create your first group and invite your teammates — every contribution gets tracked.</p>
               <button
                 onClick={() => setShowModal(true)}
                 className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors"
@@ -168,14 +172,14 @@ export default function Dashboard() {
                 <div
                   key={group.id}
                   onClick={() => router.push(`/group/${group.id}`)}
-                  className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex items-center gap-3.5 cursor-pointer hover:border-brand transition-colors shadow-sm"
+                  className="bg-white border border-border rounded-xl p-4 flex items-center gap-3.5 cursor-pointer hover:border-brand transition-colors shadow-sm"
                 >
                   <div className="w-10 h-10 rounded-xl bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">
                     {group.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-semibold text-[#0F172A] truncate">{group.name}</p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5">
+                    <p className="text-[15px] font-semibold text-text truncate">{group.name}</p>
+                    <p className="text-xs text-text-tertiary mt-0.5">
                       {group.subject}{group.due_date ? ` · Due ${formatDueDate(group.due_date)}` : ''}
                     </p>
                   </div>
@@ -202,32 +206,34 @@ export default function Dashboard() {
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
-          <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
+          <div ref={modalRef} className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-              <h2 className="text-base font-semibold text-[#0F172A]">New Group</h2>
-              <button type="button" onClick={() => { if (!creating) setShowModal(false); }} className="p-1 text-[#475569] hover:text-[#0F172A] transition-colors">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="text-base font-semibold text-text">New Group</h2>
+              <button type="button" onClick={() => { if (!creating) setShowModal(false); }} className="p-1 text-text-secondary hover:text-text transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Group name</label>
-                <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                <label htmlFor="group-name" className="text-[13px] font-medium text-text-secondary">Group name</label>
+                <input id="group-name" type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
+                  aria-describedby="group-form-error"
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Subject code</label>
-                <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                <label htmlFor="group-subject" className="text-[13px] font-medium text-text-secondary">Subject code</label>
+                <input id="group-subject" type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
+                  aria-describedby="group-form-error"
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Due date <span className="font-normal text-[#94A3B8]">(optional)</span></label>
-                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                <label htmlFor="group-due-date" className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
+                <input id="group-due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              {formError && <p className="text-sm text-red-500">{formError}</p>}
-              <div className="pt-1 border-t border-[#E2E8F0]">
+              {formError && <p id="group-form-error" role="alert" className="text-sm text-red-500">{formError}</p>}
+              <div className="pt-1 border-t border-border">
                 <button type="submit" disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}

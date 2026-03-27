@@ -42,32 +42,32 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
     >
       <div role="dialog" aria-modal="true" aria-label="Edit profile" className="w-full md:max-w-[400px] bg-white rounded-t-2xl md:rounded-xl">
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-          <h2 className="text-base font-semibold text-[#0F172A]">Edit Profile</h2>
-          <button onClick={onClose} aria-label="Close" className="text-[#475569] hover:text-[#0F172A] p-1">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h2 className="text-base font-semibold text-text">Edit Profile</h2>
+          <button onClick={onClose} aria-label="Close" className="text-text-secondary hover:text-text p-1">
             <IconClose size={16} />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-3.5">
           <div className="flex flex-col gap-1">
-            <label htmlFor="edit-profile-name" className="text-[13px] font-medium text-[#475569]">Name</label>
+            <label htmlFor="edit-profile-name" className="text-[13px] font-medium text-text-secondary">Name</label>
             <input id="edit-profile-name" type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="edit-profile-university" className="text-[13px] font-medium text-[#475569]">University</label>
+            <label htmlFor="edit-profile-university" className="text-[13px] font-medium text-text-secondary">University</label>
             <input id="edit-profile-university" type="text" value={university} onChange={(e) => setUniversity(e.target.value)}
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="edit-profile-faculty" className="text-[13px] font-medium text-[#475569]">Faculty <span className="font-normal text-[#94A3B8]">(optional)</span></label>
+            <label htmlFor="edit-profile-faculty" className="text-[13px] font-medium text-text-secondary">Faculty <span className="font-normal text-text-tertiary">(optional)</span></label>
             <input id="edit-profile-faculty" type="text" value={faculty} onChange={(e) => setFaculty(e.target.value)} placeholder="e.g. Business"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="edit-profile-year" className="text-[13px] font-medium text-[#475569]">Year of study <span className="font-normal text-[#94A3B8]">(optional)</span></label>
+            <label htmlFor="edit-profile-year" className="text-[13px] font-medium text-text-secondary">Year of study <span className="font-normal text-text-tertiary">(optional)</span></label>
             <select id="edit-profile-year" value={yearOfStudy} onChange={(e) => setYearOfStudy(e.target.value)}
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white">
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white">
               <option value="">Select year…</option>
               <option value="Year 1">Year 1</option>
               <option value="Year 2">Year 2</option>
@@ -78,11 +78,11 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
           </div>
           {!lockLoading && roleLocked ? (
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] font-medium text-[#475569]">Role</label>
-              <div className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] text-[#0F172A] bg-[#F8FAFF]">
+              <label className="text-[13px] font-medium text-text-secondary">Role</label>
+              <div className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] text-text bg-bg">
                 {profile.role === 'teacher' ? 'Teacher' : 'Student'}
               </div>
-              <p className="text-[12px] text-[#64748B] leading-snug">
+              <p className="text-[12px] text-muted leading-snug">
                 Your role is locked because you have active {lockReason === 'courses' ? 'courses' : 'groups'}. Contact support to change it.
               </p>
             </div>
@@ -90,16 +90,16 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
             <div className="flex flex-col gap-0">
               <RoleToggle value={role} onChange={setRole} />
               {role !== profile.role && (
-                <p className="text-[12px] text-[#D97706] bg-[#FEF3C7] rounded px-2 py-1.5 mt-1.5 leading-snug">
+                <p className="text-[12px] text-amber bg-[#FEF3C7] rounded px-2 py-1.5 mt-1.5 leading-snug">
                   Switching to {role === 'teacher' ? 'teacher' : 'student'} will change your dashboard and features. This can be changed until you create your first {role === 'teacher' ? 'course' : 'group'}.
                 </p>
               )}
             </div>
           )}
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <div className="pt-1 border-t border-[#E2E8F0] flex gap-2">
+          <div className="pt-1 border-t border-border flex gap-2">
             <button type="button" onClick={onClose}
-              className="flex-1 h-11 border border-[#E2E8F0] text-[#475569] text-sm font-medium rounded-md hover:bg-[#F1F5F9] transition-colors">
+              className="flex-1 h-11 border border-border text-text-secondary text-sm font-medium rounded-md hover:bg-bg-hover transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={saving}

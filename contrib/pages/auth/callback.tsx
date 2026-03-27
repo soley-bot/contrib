@@ -8,9 +8,9 @@ import { createServerClient } from '@/lib/supabase-server';
  */
 export default function AuthCallback() {
   return (
-    <div className="min-h-dvh bg-[#F8FAFF] flex flex-col items-center justify-center gap-3">
-      <p className="text-[15px] text-[#0F172A] font-medium">Sign-in failed</p>
-      <p className="text-sm text-[#475569]">Something went wrong. Please try again.</p>
+    <div className="min-h-dvh bg-bg flex flex-col items-center justify-center gap-3">
+      <p className="text-[15px] text-text font-medium">Sign-in failed</p>
+      <p className="text-sm text-text-secondary">Something went wrong. Please try again.</p>
       <Link href="/login" className="mt-2 text-sm text-brand font-medium">Back to login</Link>
     </div>
   );

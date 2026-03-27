@@ -152,7 +152,7 @@ export default function CourseDetail() {
   if (!course) return null;
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <Nav
         profile={profile}
         role="teacher"
@@ -163,11 +163,11 @@ export default function CourseDetail() {
       />
 
       <div className="md:pl-[220px]">
-        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-[#E2E8F0]">
+        <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div className="flex items-center gap-2">
-            <button onClick={() => router.push('/teacher')} className="text-[#94A3B8] hover:text-brand text-sm transition-colors">My Courses</button>
-            <span className="text-[#94A3B8] text-sm">/</span>
-            <span className="text-base font-semibold text-[#0F172A]">{course.name}</span>
+            <button onClick={() => router.push('/teacher')} className="text-text-tertiary hover:text-brand text-sm transition-colors">My Courses</button>
+            <span className="text-text-tertiary text-sm">/</span>
+            <span className="text-base font-semibold text-text">{course.name}</span>
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -179,13 +179,13 @@ export default function CourseDetail() {
 
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {/* Course invite link for students */}
-          <div className="mb-4 p-3 bg-[#EBF0FF] rounded-[8px] border border-[#93B4FF]">
-            <p className="text-[11px] font-semibold text-[#1240C4] uppercase tracking-wide mb-1">Student invite link</p>
+          <div className="mb-4 p-3 bg-brand-light rounded-[8px] border border-[#93B4FF]">
+            <p className="text-[11px] font-semibold text-brand-dark uppercase tracking-wide mb-1">Student invite link</p>
             <p className="text-[12px] text-[#0E3AAF] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#C5D5FF] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
             {inviteBase && (
               <button
                 onClick={() => navigator.clipboard.writeText(courseInviteLink)}
-                className="mt-1.5 text-[11px] text-[#1240C4] font-medium hover:underline"
+                className="mt-1.5 text-[11px] text-brand-dark font-medium hover:underline"
               >
                 Copy link
               </button>
@@ -200,9 +200,9 @@ export default function CourseDetail() {
                 { label: 'Completion', value: `${completionPct}%`, color: completionPct === 100 ? '#16A34A' : '' },
                 ...(overdueCount > 0 ? [{ label: 'Overdue', value: overdueCount, color: '#DC2626' }] : []),
               ].map((s) => (
-                <div key={s.label} className="flex-shrink-0 bg-white border border-[#E2E8F0] rounded-xl px-3.5 py-2.5 min-w-[76px] shadow-sm">
+                <div key={s.label} className="flex-shrink-0 bg-white border border-border rounded-xl px-3.5 py-2.5 min-w-[76px] shadow-sm">
                   <p className="text-lg font-bold" style={{ color: s.color || '#0F172A' }}>{s.value}</p>
-                  <p className="text-[11px] text-[#94A3B8] mt-0.5">{s.label}</p>
+                  <p className="text-[11px] text-text-tertiary mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -221,8 +221,8 @@ export default function CourseDetail() {
                 <circle cx="80" cy="18" r="10" fill="#1240C4"/>
                 <path d="M80 13v10M75 18h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              <p className="text-[15px] font-bold text-[#0F172A] mb-1">No groups yet</p>
-              <p className="text-sm text-[#94A3B8] mb-4 max-w-xs mx-auto">Share the invite link above or create groups manually.</p>
+              <p className="text-[15px] font-bold text-text mb-1">No groups yet</p>
+              <p className="text-sm text-text-tertiary mb-4 max-w-xs mx-auto">Share the invite link above or create groups manually.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
@@ -262,30 +262,30 @@ export default function CourseDetail() {
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-              <h2 className="text-base font-semibold text-[#0F172A]">Edit Group</h2>
-              <button onClick={() => setEditingGroup(null)} className="text-[#475569] hover:text-[#0F172A] p-1">✕</button>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="text-base font-semibold text-text">Edit Group</h2>
+              <button onClick={() => setEditingGroup(null)} className="text-text-secondary hover:text-text p-1">✕</button>
             </div>
             <form onSubmit={handleEditGroupSave} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Group name</label>
+                <label className="text-[13px] font-medium text-text-secondary">Group name</label>
                 <input type="text" value={editGroupName} onChange={(e) => setEditGroupName(e.target.value)} placeholder="e.g. Group A"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Subject code</label>
+                <label className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input type="text" value={editGroupSubject} onChange={(e) => setEditGroupSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Due date <span className="font-normal text-[#94A3B8]">(optional)</span></label>
+                <label className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
                 <input type="date" value={editGroupDueDate} onChange={(e) => setEditGroupDueDate(e.target.value)}
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {editGroupError && <p className="text-sm text-red-500">{editGroupError}</p>}
-              <div className="pt-1 border-t border-[#E2E8F0]">
+              <div className="pt-1 border-t border-border">
                 <button type="submit" disabled={savingGroup}
-                  className="w-full h-11 bg-[#1240C4] hover:bg-[#0E3AAF] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
+                  className="w-full h-11 bg-brand-dark hover:bg-[#0E3AAF] text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {savingGroup ? 'Saving…' : 'Save changes'}
                 </button>
               </div>
@@ -297,12 +297,12 @@ export default function CourseDetail() {
       {confirmDeleteGroupId && (
         <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4">
           <div className="w-full max-w-[360px] bg-white rounded-xl p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
-            <h2 className="text-[15px] font-semibold text-[#0F172A] mb-1">Delete group?</h2>
-            <p className="text-sm text-[#475569] mb-5">This will permanently delete the group and all its tasks, members, and activity. This cannot be undone.</p>
+            <h2 className="text-[15px] font-semibold text-text mb-1">Delete group?</h2>
+            <p className="text-sm text-text-secondary mb-5">This will permanently delete the group and all its tasks, members, and activity. This cannot be undone.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDeleteGroupId(null)}
-                className="flex-1 h-10 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium text-[#475569] rounded-md transition-colors"
+                className="flex-1 h-10 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium text-text-secondary rounded-md transition-colors"
               >
                 Cancel
               </button>
@@ -325,30 +325,30 @@ export default function CourseDetail() {
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
-              <h2 className="text-base font-semibold text-[#0F172A]">New Group</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 text-[#475569] hover:text-[#0F172A] transition-colors">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="text-base font-semibold text-text">New Group</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 text-text-secondary hover:text-text transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Group name</label>
+                <label className="text-[13px] font-medium text-text-secondary">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Group A"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Subject code</label>
+                <label className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Due date <span className="font-normal text-[#94A3B8]">(optional)</span></label>
+                <label className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
-              <div className="pt-1 border-t border-[#E2E8F0]">
+              <div className="pt-1 border-t border-border">
                 <button onClick={handleCreateGroup} disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create group'}
