@@ -175,22 +175,8 @@ export default function Signup() {
               aria-label="Confirm password"
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
-          </div>
-          <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-[#0F172A] mb-1">
-              Confirm password
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your password"
-              required
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A56E8] focus:border-transparent"
-            />
             {confirmPassword && password !== confirmPassword && (
-              <p className="text-sm text-red-500 mt-1">Passwords do not match.</p>
+              <p className="text-sm text-[#DC2626] mt-1">Passwords do not match.</p>
             )}
           </div>
 
