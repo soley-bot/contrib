@@ -46,7 +46,7 @@ export default function FeedItem({ entry }: FeedItemProps) {
   const Icon = meta.icon;
 
   return (
-    <div className="flex items-start gap-2.5 py-3 border-b border-[#E2E8F0] last:border-none">
+    <div className="flex items-start gap-2.5 py-3 border-b border-border last:border-none">
       <div
         className="w-[30px] h-[30px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
         style={{ background: `${meta.color}18`, color: meta.color }}
@@ -54,11 +54,11 @@ export default function FeedItem({ entry }: FeedItemProps) {
         <Icon size={14} />
       </div>
       <div className="flex-1">
-        <p className="text-[13px] text-[#0F172A] leading-snug">
+        <p className="text-[13px] text-text leading-snug">
           <span className="font-semibold">{actorName}</span>{' '}
           {meta.label(entry.meta as Record<string, unknown> | null)}
         </p>
-        <p className="text-[11px] text-[#94A3B8] mt-0.5">{formatTime(entry.created_at)}</p>
+        <p className="text-[11px] text-text-tertiary mt-0.5">{formatTime(entry.created_at)}</p>
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { IconClose } from '@/components/icons';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface ConfirmModalProps {
   title: string;
@@ -19,24 +21,27 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, onCancel);
+
   return (
     <div
       className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
     >
-      <div className="w-full max-w-[400px] bg-white rounded-xl p-5" role="dialog" aria-labelledby="confirm-modal-title">
+      <div ref={modalRef} className="w-full max-w-[400px] bg-white rounded-xl p-5" role="dialog" aria-labelledby="confirm-modal-title">
         <div className="flex items-start justify-between mb-3">
-          <h3 id="confirm-modal-title" className="text-[15px] font-semibold text-[#0F172A]">{title}</h3>
-          <button onClick={onCancel} aria-label="Close dialog" className="text-[#94A3B8] hover:text-[#475569] ml-2 p-0.5">
+          <h3 id="confirm-modal-title" className="text-[15px] font-semibold text-text">{title}</h3>
+          <button onClick={onCancel} aria-label="Close dialog" className="text-text-tertiary hover:text-text-secondary ml-2 p-0.5">
             <IconClose size={15} />
           </button>
         </div>
-        <p className="text-sm text-[#475569] mb-5 leading-relaxed">{message}</p>
+        <p className="text-sm text-text-secondary mb-5 leading-relaxed">{message}</p>
         <div className="flex gap-2 justify-end">
           {cancelLabel && (
             <button
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-[#475569] border border-[#E2E8F0] rounded-md hover:bg-[#F1F5F9] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-text-secondary border border-border rounded-md hover:bg-bg-hover transition-colors"
             >
               {cancelLabel}
             </button>

@@ -35,15 +35,15 @@ export default function AuthCallback() {
   }, [router]);
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF] flex flex-col items-center justify-center gap-3">
+    <div className="min-h-dvh bg-bg flex flex-col items-center justify-center gap-3">
       {timedOut ? (
         <>
-          <p className="text-[15px] text-[#0F172A] font-medium">Sign-in is taking too long</p>
-          <p className="text-sm text-[#475569]">Something may have gone wrong. Please try again.</p>
+          <p className="text-[15px] text-text font-medium">Sign-in is taking too long</p>
+          <p className="text-sm text-text-secondary">Something may have gone wrong. Please try again.</p>
           <button onClick={() => router.push('/login')} className="mt-2 text-sm text-brand font-medium">Back to login</button>
         </>
       ) : (
-        <p className="text-[15px] text-[#475569]">Signing you in…</p>
+        <p className="text-[15px] text-text-secondary">Signing you in…</p>
       )}
     </div>
   );

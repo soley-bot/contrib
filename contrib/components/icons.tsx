@@ -174,3 +174,15 @@ export function IconClip({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
+export function Logo({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
+      <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
+      <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
+      <circle cx="58" cy="100" r="7" fill="#1A56E8" opacity="0.2"/>
+      <circle cx="58" cy="46" r="12" fill="#1A56E8"/>
+      <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
+    </svg>
+  );
+}

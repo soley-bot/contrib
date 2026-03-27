@@ -28,18 +28,18 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 
         {sent ? (
           <>
             <h1 className="text-[22px] font-bold mb-1">Check your email</h1>
-            <p className="text-sm text-[#475569] mb-7">
+            <p className="text-sm text-text-secondary mb-7">
               We sent a password reset link to <span className="font-medium text-[#111827]">{email}</span>.
               Click the link in the email to set a new password.
             </p>
-            <p className="text-[13px] text-[#475569] text-center mt-4">
+            <p className="text-[13px] text-text-secondary text-center mt-4">
               Back to{' '}
               <Link href="/login" className="text-brand font-medium">Log in</Link>
             </p>
@@ -47,21 +47,21 @@ export default function ForgotPassword() {
         ) : (
           <>
             <h1 className="text-[22px] font-bold mb-1">Forgot password?</h1>
-            <p className="text-sm text-[#475569] mb-7">Enter your email and we&apos;ll send you a reset link.</p>
+            <p className="text-sm text-text-secondary mb-7">Enter your email and we&apos;ll send you a reset link.</p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] font-medium text-[#475569]">Email</label>
+                <label className="text-[13px] font-medium text-text-secondary">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@university.edu.kh"
-                  className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                 />
               </div>
 
-              {error && <p className="text-sm text-[#DC2626]">{error}</p>}
+              {error && <p className="text-sm text-red">{error}</p>}
 
               <button
                 type="submit"
@@ -72,7 +72,7 @@ export default function ForgotPassword() {
               </button>
             </form>
 
-            <p className="text-[13px] text-[#475569] text-center mt-4">
+            <p className="text-[13px] text-text-secondary text-center mt-4">
               Back to{' '}
               <Link href="/login" className="text-brand font-medium">Log in</Link>
             </p>

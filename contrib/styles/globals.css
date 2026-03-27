@@ -5,9 +5,18 @@
   --color-brand-hover: var(--brand-hover);
   --color-brand-light: var(--brand-light);
   --color-brand-border: var(--brand-border);
+  --color-brand-dark: var(--brand-dark);
+  --color-text: var(--text);
   --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
+  --color-muted: var(--muted);
+  --color-bg: var(--bg);
   --color-bg-hover: var(--bg-hover);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-green: var(--green);
+  --color-amber: var(--amber);
+  --color-red: var(--red);
 }
 
 :root {

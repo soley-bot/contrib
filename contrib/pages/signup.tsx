@@ -87,7 +87,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFF]">
+    <div className="min-h-dvh bg-bg">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="flex items-center gap-2 mb-8">
           <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
@@ -98,103 +98,97 @@ export default function Signup() {
             <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
-          <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
+          <span className="text-xl font-extrabold text-text">Contrib</span>
         </div>
         <h1 className="text-[22px] font-bold mb-1">Put your work on the record.</h1>
-        <p className="text-sm text-[#64748B] mb-7">Now in early access.</p>
+        <p className="text-sm text-muted mb-7">Now in early access.</p>
 
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="h-12 w-full border border-[#E2E8F0] bg-white hover:bg-[#F8FAFF] text-[15px] font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 mb-1"
+          className="h-12 w-full border border-border bg-white hover:bg-bg text-[15px] font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 mb-1"
         >
           <GoogleIcon /> Continue with Google
         </button>
 
         <div className="flex items-center gap-3 my-1">
-          <hr className="flex-1 border-[#E2E8F0]" />
-          <span className="text-[12px] text-[#64748B]">or</span>
-          <hr className="flex-1 border-[#E2E8F0]" />
+          <hr className="flex-1 border-border" />
+          <span className="text-[12px] text-muted">or</span>
+          <hr className="flex-1 border-border" />
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">Full name</label>
+            <label htmlFor="signup-name" className="text-[13px] font-medium text-muted">Full name</label>
             <input
+              id="signup-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              aria-describedby="signup-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">School</label>
+            <label htmlFor="signup-school" className="text-[13px] font-medium text-muted">School</label>
             <input
+              id="signup-school"
               type="text"
               value={university}
               onChange={(e) => setUniversity(e.target.value)}
               placeholder="Royal University of Phnom Penh"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              aria-describedby="signup-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-0">
             <RoleToggle value={role} onChange={setRole} />
-            <p className="text-[12px] text-[#64748B] mt-1.5 leading-snug">
+            <p className="text-[12px] text-muted mt-1.5 leading-snug">
               This determines your experience. You can change it later in your profile -- until you create your first group or course.
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">Email</label>
+            <label htmlFor="signup-email" className="text-[13px] font-medium text-muted">Email</label>
             <input
+              id="signup-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="sophea@gmail.com"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              aria-describedby="signup-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">Password</label>
+            <label htmlFor="signup-password" className="text-[13px] font-medium text-muted">Password</label>
             <input
+              id="signup-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min. 8 characters"
-              aria-label="Password"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+              aria-describedby="signup-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">Confirm password</label>
+            <label htmlFor="signup-confirm-password" className="text-[13px] font-medium text-muted">Confirm password</label>
             <input
+              id="signup-confirm-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter your password"
-              aria-label="Confirm password"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
-            />
-          </div>
-          <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-[#0F172A] mb-1">
-              Confirm password
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your password"
-              required
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A56E8] focus:border-transparent"
+              aria-describedby="signup-confirm-error signup-error"
+              className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
             {confirmPassword && password !== confirmPassword && (
-              <p className="text-sm text-red-500 mt-1">Passwords do not match.</p>
+              <p id="signup-confirm-error" role="alert" className="text-sm text-red-500 mt-1">Passwords do not match.</p>
             )}
           </div>
 
-          {error && <p className="text-sm text-[#DC2626]">{error}</p>}
+          {error && <p id="signup-error" role="alert" className="text-sm text-red">{error}</p>}
 
           <button
             type="submit"
@@ -205,7 +199,7 @@ export default function Signup() {
           </button>
         </form>
 
-        <p className="text-[13px] text-[#64748B] text-center mt-4">
+        <p className="text-[13px] text-muted text-center mt-4">
           Already have an account?{' '}
           <Link href="/login" className="text-brand font-medium">Log in</Link>
         </p>

@@ -17,7 +17,7 @@ function Logo() {
         <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
         <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
       </svg>
-      <span className="text-lg font-extrabold tracking-tight text-[#0F172A]">Contrib</span>
+      <span className="text-lg font-extrabold tracking-tight text-text">Contrib</span>
     </div>
   );
 }
@@ -27,13 +27,13 @@ function Logo() {
 function Slide1Visual({ active }: { active: boolean }) {
   return (
     <div className="w-full max-w-[420px] mx-auto">
-      <div className="rounded-2xl bg-white border border-[#E2E8F0] overflow-hidden shadow-lg">
+      <div className="rounded-2xl bg-white border border-border overflow-hidden shadow-lg">
         {/* chat header */}
-        <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center gap-2">
+        <div className="px-4 py-3 border-b border-border flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#EF4444]"/>
           <div className="w-2 h-2 rounded-full bg-[#F59E0B]"/>
           <div className="w-2 h-2 rounded-full bg-[#22C55E]"/>
-          <span className="ml-2 text-[12px] text-[#64748B] font-medium">Group Project — Mobile App</span>
+          <span className="ml-2 text-[12px] text-muted font-medium">Group Project — Mobile App</span>
         </div>
         {/* chat messages */}
         <div className="px-4 py-4 flex flex-col gap-3 min-h-[200px]">
@@ -57,8 +57,8 @@ function Slide1Visual({ active }: { active: boolean }) {
                 {m.name.slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <div className="text-[10px] text-[#94A3B8] mb-0.5">{m.name}</div>
-                <div className="text-[13px] text-[#0F172A] bg-[#F1F5F9] rounded-lg px-3 py-2 inline-block">
+                <div className="text-[10px] text-text-tertiary mb-0.5">{m.name}</div>
+                <div className="text-[13px] text-text bg-bg-hover rounded-lg px-3 py-2 inline-block">
                   {m.msg}
                 </div>
               </div>
@@ -71,8 +71,8 @@ function Slide1Visual({ active }: { active: boolean }) {
           style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.8s' : '0s' }}
         >
           <div className="text-[11px] font-bold text-[#EF4444] uppercase tracking-widest mb-1">Final Grade</div>
-          <div className="text-[18px] font-extrabold text-[#0F172A]">Everyone gets B+.</div>
-          <div className="text-[12px] text-[#64748B] mt-0.5">Same grade. Different effort.</div>
+          <div className="text-[18px] font-extrabold text-text">Everyone gets B+.</div>
+          <div className="text-[12px] text-muted mt-0.5">Same grade. Different effort.</div>
         </div>
       </div>
     </div>
@@ -84,29 +84,29 @@ function Slide2Visual({ active }: { active: boolean }) {
   return (
     <div className="w-full max-w-[420px] mx-auto relative">
       <div
-        className="rounded-2xl bg-white border border-[#E2E8F0] overflow-hidden shadow-lg transition-all duration-500"
+        className="rounded-2xl bg-white border border-border overflow-hidden shadow-lg transition-all duration-500"
         style={{ opacity: active ? 1 : 0, transform: active ? 'translateX(0)' : 'translateX(24px)', transitionDelay: active ? '0.3s' : '0s' }}
       >
-        <div className="bg-[#F8FAFF] border-b border-[#E2E8F0] px-5 py-3">
-          <div className="text-[13px] font-bold text-[#0F172A]">Peer Evaluation Form</div>
-          <div className="text-[11px] text-[#64748B]">Group Project — Semester 2</div>
+        <div className="bg-bg border-b border-border px-5 py-3">
+          <div className="text-[13px] font-bold text-text">Peer Evaluation Form</div>
+          <div className="text-[11px] text-muted">Group Project — Semester 2</div>
         </div>
         <div className="px-5 py-4">
           <table className="w-full text-[12px]">
             <thead>
-              <tr className="text-[#94A3B8]">
+              <tr className="text-text-tertiary">
                 <th className="text-left pb-2 font-medium">Member</th>
                 <th className="text-center pb-2 font-medium">Score</th>
               </tr>
             </thead>
             <tbody>
               {['Dara', 'Sokha', 'Rith', 'Maly'].map((name, i) => (
-                <tr key={name} className="border-t border-[#F1F5F9]">
-                  <td className="py-2 text-[#0F172A] font-medium">{name}</td>
+                <tr key={name} className="border-t border-bg-hover">
+                  <td className="py-2 text-text font-medium">{name}</td>
                   <td className="py-2 text-center">
                     <div className="flex justify-center gap-0.5">
                       {[1,2,3,4,5].map(star => (
-                        <div key={star} className={`w-3 h-3 rounded-sm ${star <= scores[i] ? 'bg-[#F59E0B]' : 'bg-[#E2E8F0]'}`}/>
+                        <div key={star} className={`w-3 h-3 rounded-sm ${star <= scores[i] ? 'bg-[#F59E0B]' : 'bg-border'}`}/>
                       ))}
                     </div>
                   </td>
@@ -138,14 +138,14 @@ function Slide3Visual({ active }: { active: boolean }) {
   ];
   return (
     <div className="w-full max-w-[420px] mx-auto">
-      <div className="rounded-2xl bg-white border border-[#E2E8F0] shadow-lg overflow-hidden">
-        <div className="bg-[#F8FAFF] border-b border-[#E2E8F0] px-4 py-3 flex items-center justify-between">
-          <span className="text-[13px] font-bold text-[#0F172A]">Group Contributions</span>
-          <span className="text-[10px] font-semibold text-[#1A56E8] bg-[#EBF0FF] px-2 py-0.5 rounded-full">Live</span>
+      <div className="rounded-2xl bg-white border border-border shadow-lg overflow-hidden">
+        <div className="bg-bg border-b border-border px-4 py-3 flex items-center justify-between">
+          <span className="text-[13px] font-bold text-text">Group Contributions</span>
+          <span className="text-[10px] font-semibold text-brand bg-brand-light px-2 py-0.5 rounded-full">Live</span>
         </div>
         {/* tasks */}
         <div className="px-4 pt-3 pb-2">
-          <div className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-2">Recent Tasks</div>
+          <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-2">Recent Tasks</div>
           {[
             { task: 'Wireframes', assignee: 'DA', done: true, delay: 0.3 },
             { task: 'Login bug fix', assignee: 'DA', done: true, delay: 0.5 },
@@ -156,25 +156,25 @@ function Slide3Visual({ active }: { active: boolean }) {
               className="flex items-center gap-2.5 py-1.5 transition-all duration-500"
               style={{ opacity: active ? 1 : 0, transform: active ? 'translateX(0)' : 'translateX(-12px)', transitionDelay: active ? `${t.delay}s` : '0s' }}
             >
-              <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${t.done ? 'bg-[#16A34A]' : 'bg-[#EBF0FF] border border-[#93B4FF]'}`}>
+              <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${t.done ? 'bg-green' : 'bg-brand-light border border-[#93B4FF]'}`}>
                 {t.done && (
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
                     <path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 )}
               </div>
-              <span className="text-[13px] text-[#0F172A] flex-1">{t.task}</span>
-              <div className="w-6 h-6 rounded-full bg-[#EBF0FF] flex items-center justify-center text-[9px] font-bold text-[#1A56E8]">{t.assignee}</div>
+              <span className="text-[13px] text-text flex-1">{t.task}</span>
+              <div className="w-6 h-6 rounded-full bg-brand-light flex items-center justify-center text-[9px] font-bold text-brand">{t.assignee}</div>
             </div>
           ))}
         </div>
         {/* contribution bars */}
-        <div className="px-4 py-3 border-t border-[#F1F5F9]">
-          <div className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-3">Contribution</div>
+        <div className="px-4 py-3 border-t border-bg-hover">
+          <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-3">Contribution</div>
           {members.map((m, i) => (
             <div key={m.name} className="flex items-center gap-2.5 mb-2">
-              <div className="w-16 text-[12px] font-medium text-[#0F172A]">{m.name}</div>
-              <div className="flex-1 h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+              <div className="w-16 text-[12px] font-medium text-text">{m.name}</div>
+              <div className="flex-1 h-2 bg-bg-hover rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{
@@ -184,7 +184,7 @@ function Slide3Visual({ active }: { active: boolean }) {
                   }}
                 />
               </div>
-              <div className="w-8 text-right text-[11px] font-semibold text-[#64748B]"
+              <div className="w-8 text-right text-[11px] font-semibold text-muted"
                 style={{ opacity: active ? 1 : 0, transition: 'opacity 0.3s', transitionDelay: active ? `${1.3 + i * 0.15}s` : '0s' }}>
                 {m.pct}%
               </div>
@@ -218,13 +218,13 @@ function Slide4Visual({ active }: { active: boolean }) {
               transitionDelay: active ? `${g.delay}s` : '0s',
             }}
           >
-            <div className="text-[11px] font-bold text-[#64748B] mb-2">{g.name}</div>
+            <div className="text-[11px] font-bold text-muted mb-2">{g.name}</div>
             <div className="text-[40px] font-extrabold leading-none" style={{ color: g.color }}>{g.grade}</div>
           </div>
         ))}
       </div>
       <div
-        className="mt-3 text-center text-[12px] text-[#64748B] transition-all duration-500"
+        className="mt-3 text-center text-[12px] text-muted transition-all duration-500"
         style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.4s' : '0s' }}
       >
         Grades based on evidence, not memory.
@@ -244,15 +244,15 @@ function Slide5Visual({ active }: { active: boolean }) {
       {stats.map((s) => (
         <div
           key={s.label}
-          className="rounded-2xl border border-[#E2E8F0] bg-white px-6 py-5 flex items-center gap-4 transition-all duration-600 shadow-sm"
+          className="rounded-2xl border border-border bg-white px-6 py-5 flex items-center gap-4 transition-all duration-600 shadow-sm"
           style={{
             opacity: active ? 1 : 0,
             transform: active ? 'translateY(0)' : 'translateY(20px)',
             transitionDelay: active ? `${s.delay}s` : '0s',
           }}
         >
-          <div className="text-[42px] font-extrabold text-[#0F172A] leading-none w-24 flex-shrink-0">{s.value}</div>
-          <div className="text-[14px] text-[#64748B]">{s.label}</div>
+          <div className="text-[42px] font-extrabold text-text leading-none w-24 flex-shrink-0">{s.value}</div>
+          <div className="text-[14px] text-muted">{s.label}</div>
         </div>
       ))}
     </div>
@@ -353,13 +353,13 @@ function CTASlide({ active }: { active: boolean }) {
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
         </div>
-        <h2 className="font-extrabold text-[#0F172A] mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
+        <h2 className="font-extrabold text-text mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
           Your work.<br />On record.
         </h2>
-        <p className="text-[16px] text-[#64748B] mb-8">Now in early access.</p>
+        <p className="text-[16px] text-muted mb-8">Now in early access.</p>
         <Link
           href="/signup"
-          className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-[#1A56E8] hover:bg-[#1240C4]"
+          className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-brand hover:bg-brand-dark"
         >
           Get started — it&apos;s free
         </Link>
@@ -415,14 +415,14 @@ export default function Landing() {
       <div className="fixed top-0 left-0 right-0 z-50 group/nav">
         {/* Invisible hover zone */}
         <div className="h-16" />
-        <nav className="absolute top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-sm border-b border-[#E2E8F0] transition-transform duration-300 -translate-y-full group-hover/nav:translate-y-0">
+        <nav className="absolute top-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-sm border-b border-border transition-transform duration-300 -translate-y-full group-hover/nav:translate-y-0">
           <div className="max-w-none px-5 h-full flex items-center justify-between">
             <Logo />
             <div className="flex gap-2">
               <Link href="/login" className="h-8 px-3 flex items-center text-sm text-[#6B7280] hover:text-[#111827] font-medium rounded-md transition-colors">
                 Log in
               </Link>
-              <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-[#1A56E8] hover:bg-[#1240C4]">
+              <Link href="/signup" className="h-8 px-3 flex items-center text-sm text-white font-semibold rounded-md transition-colors bg-brand hover:bg-brand-dark">
                 Sign up free
               </Link>
             </div>
@@ -530,7 +530,7 @@ export default function Landing() {
       <div className="fixed bottom-6 left-0 right-0 z-50 flex flex-col items-center gap-3 pointer-events-none">
         {/* Swipe hint — first slide only */}
         {hintVisible && activeSlide === 0 && (
-          <div className="pointer-events-none flex items-center gap-1.5 text-[12px] text-[#94A3B8] animate-pulse">
+          <div className="pointer-events-none flex items-center gap-1.5 text-[12px] text-text-tertiary animate-pulse">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M3 7h8M8 4l3 3-3 3" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -585,7 +585,7 @@ export default function Landing() {
         </div>
 
         {/* Slide counter */}
-        <div className="text-[11px] font-medium tabular-nums text-[#94A3B8]">
+        <div className="text-[11px] font-medium tabular-nums text-text-tertiary">
           {activeSlide + 1} / {totalSlides}
         </div>
       </div>
