@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
@@ -87,6 +88,11 @@ export default function Signup() {
   }
 
   return (
+    <>
+    <Head>
+      <title>Sign up - Contrib</title>
+      <meta name="description" content="Create your free Contrib account. Track individual contributions in group projects." />
+    </Head>
     <div className="min-h-dvh bg-[#F8FAFF]">
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="flex items-center gap-2 mb-8">
@@ -98,7 +104,7 @@ export default function Signup() {
             <line x1="70" y1="46" x2="118" y2="46" stroke="#1A56E8" strokeWidth="3" strokeLinecap="round"/>
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
-          <span className="text-xl font-extrabold text-[#0F172A]">Contrib</span>
+          <span className="text-xl font-extrabold text-[#1A56E8]">Contrib</span>
         </div>
         <h1 className="text-[22px] font-bold mb-1">Put your work on the record.</h1>
         <p className="text-sm text-[#64748B] mb-7">Now in early access.</p>
@@ -165,17 +171,6 @@ export default function Signup() {
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-[#64748B]">Confirm password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your password"
-              aria-label="Confirm password"
-              className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
-            />
-          </div>
           <div>
             <label htmlFor="confirm-password" className="block text-sm font-medium text-[#0F172A] mb-1">
               Confirm password
@@ -211,6 +206,7 @@ export default function Signup() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 
