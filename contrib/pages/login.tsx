@@ -23,12 +23,17 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   async function handleGoogleSignIn() {
     setLoading(true);
+    const returnTo = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+    const callbackUrl = returnTo
+      ? `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
+      : `${window.location.origin}/auth/callback`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     });
   }
 
@@ -48,6 +53,7 @@ export default function Login() {
       setLoading(false);
       return;
     }
+    setRedirecting(true);
     const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
     const hasReturnTo = raw.startsWith('/') && !raw.startsWith('//');
     if (hasReturnTo) { router.push(raw); return; }
@@ -63,7 +69,7 @@ export default function Login() {
       <meta name="description" content="Log in to Contrib. Track your group contributions and export your Contribution Record." />
     </Head>
     <div className="min-h-dvh bg-[#F8FAFF]">
-      <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
+      <div className={`max-w-[440px] mx-auto px-5 pt-8 pb-20 transition-opacity ${redirecting ? 'opacity-60 pointer-events-none' : ''}`}>
         <div className="flex items-center gap-2 mb-8">
           <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
             <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
