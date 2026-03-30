@@ -103,6 +103,20 @@ export default function ProfilePage() {
     if (data?.verified) setTgStatus('connected');
   }
 
+  // Auto-poll while pending — updates UI as soon as Telegram verifies
+  useEffect(() => {
+    if (tgStatus !== 'pending' || !user?.id) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from('telegram_subscriptions')
+        .select('verified')
+        .eq('profile_id', user.id)
+        .maybeSingle();
+      if (data?.verified) setTgStatus('connected');
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [tgStatus, user?.id]);
+
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -275,19 +289,25 @@ export default function ProfilePage() {
             <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#EBF0FF] flex items-center justify-center flex-shrink-0">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M22 2L11 13" stroke="#1A56E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#1A56E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${tgStatus === 'connected' ? 'bg-[#F0FDF4]' : 'bg-[#EBF0FF]'}`}>
+                    {tgStatus === 'connected' ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 6L9 17L4 12" stroke="#15803D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13" stroke="#1A56E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#1A56E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
                   </div>
                   <div>
                     <p className="text-[14px] font-semibold text-[#0F172A]">Telegram</p>
-                    <p className="text-[12px] text-[#64748B] mt-0.5">
+                    <p className={`text-[12px] mt-0.5 ${tgStatus === 'connected' ? 'text-[#15803D]' : 'text-[#64748B]'}`}>
                       {tgStatus === 'loading' && 'Checking…'}
                       {tgStatus === 'disconnected' && 'Get notified when teammates log work or declare blockers'}
-                      {tgStatus === 'pending' && 'Waiting for verification…'}
-                      {tgStatus === 'connected' && 'Connected — you will receive group notifications'}
+                      {tgStatus === 'pending' && 'Waiting for you to send the code…'}
+                      {tgStatus === 'connected' && 'Connected'}
                     </p>
                   </div>
                 </div>
@@ -295,7 +315,7 @@ export default function ProfilePage() {
                   <button
                     onClick={handleTgDisconnect}
                     disabled={tgDisconnecting}
-                    className="text-[12px] text-[#64748B] hover:text-red-500 transition-colors whitespace-nowrap disabled:opacity-60"
+                    className="text-[12px] text-[#94A3B8] hover:text-red-500 transition-colors whitespace-nowrap disabled:opacity-60"
                   >
                     {tgDisconnecting ? 'Disconnecting…' : 'Disconnect'}
                   </button>
@@ -318,44 +338,36 @@ export default function ProfilePage() {
                     <p className="text-[12px] text-[#475569] mb-2">
                       Open Telegram and message <span className="font-semibold text-[#0F172A]">@{tgBotUsername}</span> with this code:
                     </p>
-                    <p className="text-2xl font-bold tracking-[0.2em] text-[#0F172A] text-center py-1">{tgCode}</p>
-                    <p className="text-[11px] text-[#94A3B8] text-center mt-1">Expires in 10 minutes</p>
+                    <p className="text-2xl font-bold tracking-[0.2em] text-[#0F172A] text-center py-2">{tgCode}</p>
+                    <p className="text-[11px] text-[#94A3B8] text-center">Expires in 10 minutes · Checking automatically…</p>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleTgCheckStatus}
-                      className="flex-1 h-10 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors"
-                    >
-                      I sent it — check status
-                    </button>
-                    <button
-                      onClick={handleTgDisconnect}
-                      className="h-10 px-4 border border-[#E2E8F0] text-[#475569] text-sm rounded-md hover:bg-[#F1F5F9] transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleTgDisconnect}
+                    className="w-full h-10 border border-[#E2E8F0] text-[#94A3B8] text-sm rounded-md hover:bg-[#F1F5F9] hover:text-red-500 transition-colors"
+                  >
+                    Reset
+                  </button>
                 </div>
               )}
 
               {tgStatus === 'pending' && !tgCode && (
                 <div className="mt-4 space-y-3">
                   <p className="text-[13px] text-[#475569]">
-                    A verification code was already sent. Message <span className="font-semibold">@{tgBotUsername || 'ContribBot'}</span> with your code, then check status below.
+                    A code was already generated. Message <span className="font-semibold">@{tgBotUsername || 'Contribsbot'}</span> with your code — the page will update automatically.
                   </p>
                   <div className="flex gap-2">
                     <button
-                      onClick={handleTgCheckStatus}
-                      className="flex-1 h-10 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors"
-                    >
-                      Check status
-                    </button>
-                    <button
                       onClick={handleTgConnect}
                       disabled={tgConnecting}
-                      className="h-10 px-4 border border-[#E2E8F0] text-[#475569] text-sm rounded-md hover:bg-[#F1F5F9] transition-colors disabled:opacity-60"
+                      className="flex-1 h-10 border border-[#E2E8F0] text-[#475569] text-sm rounded-md hover:bg-[#F1F5F9] transition-colors disabled:opacity-60"
                     >
                       {tgConnecting ? '…' : 'New code'}
+                    </button>
+                    <button
+                      onClick={handleTgDisconnect}
+                      className="flex-1 h-10 border border-[#E2E8F0] text-[#94A3B8] text-sm rounded-md hover:bg-[#F1F5F9] hover:text-red-500 transition-colors"
+                    >
+                      Reset
                     </button>
                   </div>
                 </div>
