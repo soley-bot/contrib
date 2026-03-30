@@ -37,6 +37,7 @@ export default function CourseDetail() {
   const [editGroupError, setEditGroupError] = useState('');
   const [savingGroup, setSavingGroup] = useState(false);
   const [filterMode, setFilterMode] = useState<'all' | 'attention'>('all');
+  const [courseResetState, setCourseResetState] = useState<'idle' | 'confirm' | 'resetting' | 'done'>('idle');
 
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
@@ -255,12 +256,36 @@ export default function CourseDetail() {
             <p className="text-[11px] text-[#3B5BCC] mb-1.5">Share with each group&apos;s lead. They&apos;ll use it to connect their group to this course.</p>
             <p className="text-[12px] text-[#0E3AAF] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#C5D5FF] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
             {inviteBase && (
-              <button
-                onClick={() => navigator.clipboard.writeText(courseInviteLink)}
-                className="mt-1.5 text-[11px] text-brand-dark font-medium hover:underline"
-              >
-                Copy link
-              </button>
+              <div className="flex items-center gap-3 mt-1.5">
+                <button
+                  onClick={() => navigator.clipboard.writeText(courseInviteLink)}
+                  className="text-[11px] text-brand-dark font-medium hover:underline"
+                >
+                  Copy link
+                </button>
+                {courseResetState === 'idle' && (
+                  <button onClick={() => setCourseResetState('confirm')} className="text-[11px] text-text-tertiary hover:text-text-secondary transition-colors">
+                    Reset link
+                  </button>
+                )}
+                {courseResetState === 'confirm' && (
+                  <span className="text-[11px] text-text-secondary flex items-center gap-2">
+                    Break current link?
+                    <button
+                      onClick={async () => {
+                        setCourseResetState('resetting');
+                        const res = await fetch(`/api/courses/${courseId}/reset-invite`, { method: 'POST' });
+                        if (res.ok) { refresh(); setCourseResetState('done'); setTimeout(() => setCourseResetState('idle'), 2000); }
+                        else setCourseResetState('idle');
+                      }}
+                      className="text-red font-medium hover:underline"
+                    >Confirm</button>
+                    <button onClick={() => setCourseResetState('idle')} className="text-text-tertiary hover:underline">Cancel</button>
+                  </span>
+                )}
+                {courseResetState === 'resetting' && <span className="text-[11px] text-text-tertiary">Resetting…</span>}
+                {courseResetState === 'done' && <span className="text-[11px] text-green font-medium">Link reset</span>}
+              </div>
             )}
           </div>
 

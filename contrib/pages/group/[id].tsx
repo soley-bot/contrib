@@ -541,7 +541,15 @@ export default function GroupPage() {
         {/* ── MEMBERS TAB ── */}
         {tab === 'members' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            {members.length < 6 && <InviteBanner token={group.invite_token} />}
+            {members.length < 6 && (
+              <InviteBanner
+                token={group.invite_token}
+                onReset={isLead ? async () => {
+                  const res = await fetch(`/api/groups/${group.id}/reset-invite`, { method: 'POST' });
+                  if (res.ok) refreshGroup();
+                } : undefined}
+              />
+            )}
 
             <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
               {members.length} member{members.length !== 1 ? 's' : ''}
