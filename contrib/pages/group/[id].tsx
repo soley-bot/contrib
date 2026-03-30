@@ -17,6 +17,7 @@ import InviteBanner from '@/components/invite-banner';
 import EvaluationForm from '@/components/evaluation-form';
 import EvaluationResults from '@/components/evaluation-results';
 import TaskBoardSkeleton from '@/components/task-skeleton';
+import BlockerModal from '@/components/blocker-modal';
 import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck, IconLink, IconCopy } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
@@ -27,6 +28,7 @@ import { useEvaluationSession } from '@/hooks/use-evaluation-session';
 import { useEvaluation } from '@/hooks/use-evaluation';
 import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
 import { generateReport, DEFAULT_PDF_THEME } from '@/lib/pdf';
+import { useToast } from '@/components/toast-provider';
 import type { Task, TaskStatus, GroupMember, Evaluation } from '@/types';
 
 const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
@@ -64,7 +66,7 @@ export default function GroupPage() {
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
   const [pdfTheme, setPdfTheme] = useState<[number, number, number]>(DEFAULT_PDF_THEME);
-  const [toast, setToast] = useState<{ msg: string; type: 'error' | 'success' } | null>(null);
+  const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -77,6 +79,7 @@ export default function GroupPage() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null);
   const [showResetEval, setShowResetEval] = useState(false);
+  const [showBlockerModal, setShowBlockerModal] = useState(false);
 
   useEffect(() => {
     if (!userLoading && !user) router.replace('/signup');
@@ -86,10 +89,6 @@ export default function GroupPage() {
     setTaskToDelete(task);
   }
 
-  function showToast(msg: string, type: 'error' | 'success' = 'error') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 4000);
-  }
 
   async function executeDeleteTask() {
     if (!taskToDelete || !user) return;
@@ -225,6 +224,16 @@ export default function GroupPage() {
         task_id: null,
         meta: null,
       });
+      // Notify all group members except the opener (fire-and-forget)
+      members.filter((m) => m.profile_id !== user.id).forEach((m) => {
+        supabase.from('notifications').insert({
+          recipient_id: m.profile_id,
+          group_id: groupId,
+          type: 'evaluation_opened',
+          title: 'Peer review is now open',
+          meta: { groupName: group?.name },
+        }).then(null, () => {});
+      });
       refreshActivity();
     } catch { showToast('Failed to open peer review. Please try again.'); }
   }
@@ -261,7 +270,7 @@ export default function GroupPage() {
   // ── Swipe navigation between tabs ──
   const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
   const touchRef = useRef({ x: 0, y: 0, active: false });
-  const anyModalOpen = !!(selectedTask || showNewTask || editingTask || taskToDelete || showEditGroup || showDeleteGroup || showTransferLead || showLeaveConfirm || memberToRemove || showResetEval);
+  const anyModalOpen = !!(selectedTask || showNewTask || editingTask || taskToDelete || showEditGroup || showDeleteGroup || showTransferLead || showLeaveConfirm || memberToRemove || showResetEval || showBlockerModal);
 
   useEffect(() => {
     function onStart(e: TouchEvent) {
@@ -305,15 +314,6 @@ export default function GroupPage() {
   return (
     <div className="min-h-dvh bg-bg">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
-
-      {/* Toast notification */}
-      {toast && (
-        <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-[110] px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium animate-[fadeIn_0.2s_ease-out] ${
-          toast.type === 'error' ? 'bg-red text-white' : 'bg-green text-white'
-        }`}>
-          {toast.msg}
-        </div>
-      )}
 
       <div className="pt-14 md:pt-0 md:pl-[220px]">
 
@@ -504,7 +504,15 @@ export default function GroupPage() {
         {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">Recent activity</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Recent activity</p>
+              <button
+                onClick={() => setShowBlockerModal(true)}
+                className="h-7 px-3 border border-border bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[12px] font-medium text-muted hover:text-[#DC2626] rounded-md flex items-center gap-1.5 transition-colors"
+              >
+                Heads Up
+              </button>
+            </div>
             {activity.length === 0 ? (
               <div className="flex flex-col items-center py-14 text-center">
                 <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
@@ -673,13 +681,13 @@ export default function GroupPage() {
         />
       )}
       {showNewTask && groupId && (
-        <TaskForm groupId={groupId} members={members} userId={user!.id}
+        <TaskForm groupId={groupId} groupName={group?.name} members={members} userId={user!.id}
           onCreated={() => { refreshTasks(); refreshActivity(); }}
           onClose={() => setShowNewTask(false)}
         />
       )}
       {editingTask && (
-        <EditTaskModal task={editingTask} members={members} userId={user!.id}
+        <EditTaskModal task={editingTask} members={members} userId={user!.id} groupName={group?.name}
           onClose={() => setEditingTask(null)}
           onUpdated={() => { refreshTasks(); refreshActivity(); setEditingTask(null); }}
         />
@@ -739,6 +747,13 @@ export default function GroupPage() {
           confirmLabel="Reset" destructive
           onConfirm={executeResetEvaluation}
           onCancel={() => setShowResetEval(false)}
+        />
+      )}
+      {showBlockerModal && groupId && (
+        <BlockerModal
+          groupId={groupId}
+          onClose={() => setShowBlockerModal(false)}
+          onCreated={() => { refreshActivity(); showToast('Heads up sent to your group.', 'success'); }}
         />
       )}
     </div>

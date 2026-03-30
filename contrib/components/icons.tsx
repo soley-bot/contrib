@@ -167,6 +167,14 @@ export function IconBan({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
+export function IconBell({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 6.667a5 5 0 00-10 0c0 5.833-2.5 7.5-2.5 7.5h15S15 12.5 15 6.667z" />
+      <path d="M11.442 16.667a1.667 1.667 0 01-2.884 0" />
+    </svg>
+  );
+}
 export function IconClip({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none">

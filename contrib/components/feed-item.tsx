@@ -18,6 +18,7 @@ const ACTION_META: Record<string, { icon: IconComponent; color: string; label: (
   member_joined:        { icon: IconUserPlus, color: 'var(--brand)', label: () => 'joined the group' },
   member_left:          { icon: IconUsers,    color: '#94A3B8', label: () => 'left the group' },
   member_removed:       { icon: IconBan,      color: '#94A3B8', label: (m) => `removed ${m?.removed_name ?? 'a member'} from the group` },
+  blocker_declared:     { icon: IconBan,      color: '#EF4444', label: (m) => `sent a heads up: ${m?.reason ?? ''}` },
   group_updated:        { icon: IconSettings, color: '#475569', label: () => 'updated group details' },
   lead_transferred:     { icon: IconCrown,    color: 'var(--brand)', label: (m) => `transferred lead to ${m?.to_name ?? ''}` },
 };

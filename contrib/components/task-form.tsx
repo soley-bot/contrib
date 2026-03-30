@@ -2,23 +2,33 @@ import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose } from '@/components/icons';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
-import type { GroupMember } from '@/types';
+import type { GroupMember, ContributionType } from '@/types';
+
+const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
+  { value: 'task',         label: 'Task' },
+  { value: 'research',     label: 'Research' },
+  { value: 'meeting',      label: 'Meeting' },
+  { value: 'discussion',   label: 'Discussion' },
+  { value: 'coordination', label: 'Coordination' },
+];
 
 interface TaskFormProps {
   groupId: string;
+  groupName?: string;
   members: GroupMember[];
   userId: string;
   onCreated: () => void;
   onClose: () => void;
 }
 
-export default function TaskForm({ groupId, members, userId, onCreated, onClose }: TaskFormProps) {
+export default function TaskForm({ groupId, groupName, members, userId, onCreated, onClose }: TaskFormProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, onClose);
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [assignee, setAssignee] = useState('');
   const [due, setDue] = useState('');
+  const [contributionType, setContributionType] = useState<ContributionType>('task');
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
 
@@ -30,13 +40,13 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
 
     const { data: task, error: taskError } = await supabase
       .from('tasks')
-      .insert({ group_id: groupId, title: title.trim(), description: desc.trim() || null, assignee_id: assignee, due_date: due || null, status: 'todo' })
+      .insert({ group_id: groupId, title: title.trim(), description: desc.trim() || null, assignee_id: assignee, due_date: due || null, status: 'todo', contribution_type: contributionType })
       .select().single();
 
     if (taskError || !task) { setError(taskError?.message ?? 'Failed to create task.'); setCreating(false); return; }
 
     const assigneeMember = members.find((m) => m.profile_id === assignee);
-    await supabase.from('activity_log').insert([
+    supabase.from('activity_log').insert([
       {
         group_id: groupId, actor_id: userId, action: 'task_created',
         task_id: task.id, meta: { task_title: title.trim(), assignee_name: assigneeMember?.profile?.name ?? null },
@@ -45,7 +55,18 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
         group_id: groupId, actor_id: assignee, action: 'task_assigned',
         task_id: task.id, meta: { task_title: title.trim() },
       },
-    ]);
+    ]).then(null, () => {});
+
+    // Notify assignee (fire-and-forget)
+    if (assignee && assignee !== userId) {
+      supabase.from('notifications').insert({
+        recipient_id: assignee,
+        group_id: groupId,
+        type: 'task_assigned',
+        title: `You were assigned "${title.trim()}"`,
+        meta: { taskId: task.id, groupName: groupName ?? null },
+      }).then(null, () => {});
+    }
 
     onCreated();
     onClose();
@@ -75,6 +96,25 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
             <label htmlFor="task-description" className="text-[13px] font-medium text-text-secondary">Description <span className="font-normal text-text-tertiary">(optional)</span></label>
             <textarea id="task-description" value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} placeholder="Add details…"
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none resize-none" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[13px] font-medium text-text-secondary">Type</label>
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {CONTRIBUTION_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setContributionType(t.value)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-colors ${
+                    contributionType === t.value
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-white text-text-secondary border-border hover:border-brand/40'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-text-secondary">Assign to</label>

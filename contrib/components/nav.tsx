@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import EditProfileModal from '@/components/edit-profile-modal';
+import NotificationBell from '@/components/notification-bell';
 import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers, IconCheck, Logo } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
 import type { Profile, Group, UserRole } from '@/types';
@@ -72,15 +73,21 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
           </span>
         )}
         <div className="relative flex items-center gap-2" ref={menuRef}>
+          <NotificationBell userId={profile?.id} />
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 active:opacity-80"
+            className="w-11 h-11 flex items-center justify-center flex-shrink-0 active:opacity-80"
+            aria-label="Open profile menu"
           >
-            {initials}
+            <span className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center">
+              {initials}
+            </span>
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-9 w-44 bg-white border border-border rounded-xl shadow-lg py-1 z-50"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}>
+            <div
+              className="fixed right-4 w-44 bg-white border border-border rounded-xl py-1 z-[200]"
+              style={{ top: 56, boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}
+            >
               {profile && (
                 <div className="px-3 py-2 border-b border-[#F3F4F6]">
                   <p className="text-[13px] font-semibold text-text truncate">{profile.name}</p>
@@ -153,6 +160,10 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
         )}
 
         <div className="mt-auto">
+          <div className="flex items-center gap-2 px-2 py-2">
+            <NotificationBell userId={profile?.id} />
+            <span className="text-[13px] font-medium text-[#64748B]">Notifications</span>
+          </div>
           <button
             onClick={() => router.push('/profile')}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${

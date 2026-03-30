@@ -2,54 +2,82 @@ import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
-import type { Task, GroupMember } from '@/types';
+import { useToast } from '@/components/toast-provider';
+import type { Task, GroupMember, ContributionType } from '@/types';
+
+const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
+  { value: 'task',         label: 'Task' },
+  { value: 'research',     label: 'Research' },
+  { value: 'meeting',      label: 'Meeting' },
+  { value: 'discussion',   label: 'Discussion' },
+  { value: 'coordination', label: 'Coordination' },
+];
 
 interface EditTaskModalProps {
   task: Task;
   members: GroupMember[];
   userId: string;
+  groupName?: string;
   onClose: () => void;
   onUpdated: () => void;
 }
 
-export default function EditTaskModal({ task, members, userId, onClose, onUpdated }: EditTaskModalProps) {
+export default function EditTaskModal({ task, members, userId, groupName, onClose, onUpdated }: EditTaskModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, onClose);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? '');
   const [assigneeId, setAssigneeId] = useState(task.assignee_id);
   const [dueDate, setDueDate] = useState(task.due_date ?? '');
+  const [contributionType, setContributionType] = useState<ContributionType>(task.contribution_type ?? 'task');
   const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
 
   async function handleSave() {
+    if (saving) return;
     if (!title.trim()) return;
     setSaving(true);
     const assigneeChanged = assigneeId !== task.assignee_id;
 
-    await supabase.from('tasks').update({
+    const { error: updateError } = await supabase.from('tasks').update({
       title: title.trim(),
       description: description.trim() || null,
       assignee_id: assigneeId,
       due_date: dueDate || null,
+      contribution_type: contributionType,
     }).eq('id', task.id);
+    if (updateError) { setSaving(false); showToast('Failed to save changes.'); return; }
 
-    await supabase.from('activity_log').insert({
+    const { error: logError } = await supabase.from('activity_log').insert({
       group_id: task.group_id,
       actor_id: userId,
       action: 'task_edited',
       task_id: task.id,
       meta: { task_title: title.trim() },
     });
+    if (logError) { setSaving(false); showToast('Failed to save changes.'); return; }
 
     if (assigneeChanged) {
       const newAssignee = members.find((m) => m.profile_id === assigneeId);
-      await supabase.from('activity_log').insert({
+      const { error: reassignError } = await supabase.from('activity_log').insert({
         group_id: task.group_id,
         actor_id: userId,
         action: 'task_reassigned',
         task_id: task.id,
         meta: { task_title: title.trim(), to_name: newAssignee?.profile?.name ?? '' },
       });
+      if (reassignError) { setSaving(false); showToast('Failed to save changes.'); return; }
+
+      // Notify new assignee (fire-and-forget)
+      if (assigneeId !== userId) {
+        supabase.from('notifications').insert({
+          recipient_id: assigneeId,
+          group_id: task.group_id,
+          type: 'task_assigned',
+          title: `You were assigned "${title.trim()}"`,
+          meta: { taskId: task.id, groupName: groupName ?? null },
+        }).then(null, () => {});
+      }
     }
 
     setSaving(false);
@@ -59,7 +87,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
   return (
     <div
       className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}
     >
       <div
         ref={modalRef}
@@ -74,6 +102,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             <IconClose size={16} />
           </button>
         </div>
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="p-5 flex flex-col gap-4">
           <div>
             <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Title</label>
@@ -93,6 +122,25 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
               rows={3}
               className="w-full border border-border rounded-md px-3 py-2 text-sm focus:border-brand outline-none resize-none"
             />
+          </div>
+          <div>
+            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Type</label>
+            <div className="flex flex-wrap gap-1.5">
+              {CONTRIBUTION_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setContributionType(t.value)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-colors ${
+                    contributionType === t.value
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-white text-text-secondary border-border hover:border-brand/40'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div>
             <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Assignee</label>
@@ -120,13 +168,14 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
         </div>
         <div className="px-5 py-3 border-t border-border">
           <button
-            onClick={handleSave}
+            type="submit"
             disabled={saving || !title.trim()}
             className="w-full h-11 bg-brand hover:bg-brand-hover text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {saving ? 'Saving…' : <><IconCheck size={14} /> Save changes</>}
           </button>
         </div>
+        </form>
         <style jsx>{`
           @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
         `}</style>

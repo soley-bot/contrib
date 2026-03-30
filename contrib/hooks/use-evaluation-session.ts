@@ -5,6 +5,7 @@ import type { EvaluationSession } from '@/types';
 interface UseEvaluationSessionResult {
   session: EvaluationSession | null;
   loading: boolean;
+  error: string | null;
   openEvaluation: (groupId: string, userId: string) => Promise<void>;
   resetEvaluation: (groupId: string) => Promise<void>;
   refresh: () => void;
@@ -13,20 +14,37 @@ interface UseEvaluationSessionResult {
 export function useEvaluationSession(groupId: string | undefined): UseEvaluationSessionResult {
   const [session, setSession] = useState<EvaluationSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!groupId) return;
     setLoading(true);
     fetchSession(groupId).finally(() => setLoading(false));
+
+    const channel = supabase
+      .channel(`eval-sessions:${groupId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'evaluation_sessions',
+        filter: `group_id=eq.${groupId}`,
+      }, () => {
+        fetchSession(groupId);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [groupId, tick]);
 
   async function fetchSession(id: string) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('evaluation_sessions')
       .select('*')
       .eq('group_id', id)
       .maybeSingle();
+    if (error) { console.error('Failed to load session:', error); setError('Failed to load data.'); return; }
+    setError(null);
     setSession(data ?? null);
   }
 
@@ -48,5 +66,5 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
     setTick((t) => t + 1);
   }
 
-  return { session, loading, openEvaluation, resetEvaluation, refresh: () => setTick((t) => t + 1) };
+  return { session, loading, error, openEvaluation, resetEvaluation, refresh: () => setTick((t) => t + 1) };
 }

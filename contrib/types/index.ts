@@ -32,6 +32,8 @@ export interface GroupMember {
 
 export type TaskStatus = 'todo' | 'inprogress' | 'done';
 
+export type ContributionType = 'task' | 'coordination' | 'meeting' | 'discussion' | 'research';
+
 export interface Task {
   id: string;
   group_id: string;
@@ -42,6 +44,7 @@ export interface Task {
   due_date: string | null;
   evidence_url: string | null;
   completed_at: string | null;
+  contribution_type: ContributionType;
   deleted_at: string | null;
   created_at: string;
   assignee?: Profile;
@@ -79,7 +82,8 @@ export type ActivityAction =
   | 'evaluation_opened'
   | 'evaluation_submitted'
   | 'report_shared'
-  | 'report_exported';
+  | 'report_exported'
+  | 'blocker_declared';
 
 export interface ActivityLog {
   id: string;
@@ -135,6 +139,15 @@ export interface EvaluationSummary {
   comments: string[] | null;
 }
 
+export interface BlockerDeclaration {
+  id: string;
+  group_id: string;
+  profile_id: string;
+  reason: string;
+  created_at: string;
+  profile?: Profile;
+}
+
 export interface ReportShare {
   id: string;
   group_id: string;
@@ -142,4 +155,18 @@ export interface ReportShare {
   created_by: string;
   created_at: string;
   expires_at: string | null;
+}
+
+export type NotificationType = 'task_assigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added';
+
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  group_id: string | null;
+  type: NotificationType;
+  title: string;
+  body: string | null;
+  meta: Record<string, unknown> | null;
+  read_at: string | null;
+  created_at: string;
 }
