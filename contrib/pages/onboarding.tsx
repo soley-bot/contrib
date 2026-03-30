@@ -58,13 +58,21 @@ export default function Onboarding() {
     setError('');
     if (!name.trim()) { setError('Name is required.'); return; }
     const ok = await saveProfile(name, university, faculty, yearOfStudy);
-    if (ok) router.push(role === 'teacher' ? '/teacher' : '/dashboard');
+    if (ok) {
+      const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+      const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
+      router.push(dest);
+    }
   }
 
   async function handleSkip() {
     setError('');
     const ok = await saveProfile(name, '', '', '');
-    if (ok) router.push(role === 'teacher' ? '/teacher' : '/dashboard');
+    if (ok) {
+      const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+      const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
+      router.push(dest);
+    }
   }
 
   return (

@@ -45,7 +45,10 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     .single();
 
   if (!profile) {
-    return { redirect: { destination: '/onboarding', permanent: false } };
+    const dest = returnTo
+      ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
+      : '/onboarding';
+    return { redirect: { destination: dest, permanent: false } };
   }
 
   const destination = returnTo ?? (profile.role === 'teacher' ? '/teacher' : '/dashboard');

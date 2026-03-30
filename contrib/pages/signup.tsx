@@ -219,14 +219,20 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const serverClient = createServerClient(ctx);
   const { data: { session } } = await serverClient.auth.getSession();
   if (session) {
+    const returnTo = typeof ctx.query.returnTo === 'string'
+      && ctx.query.returnTo.startsWith('/') && !ctx.query.returnTo.startsWith('//')
+      ? ctx.query.returnTo : null;
     const { data: profile } = await serverClient
       .from('profiles').select('role').eq('id', session.user.id).single();
     if (!profile) {
-      return { redirect: { destination: '/onboarding', permanent: false } };
+      const dest = returnTo
+        ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
+        : '/onboarding';
+      return { redirect: { destination: dest, permanent: false } };
     }
     return {
       redirect: {
-        destination: profile.role === 'teacher' ? '/teacher' : '/dashboard',
+        destination: returnTo ?? (profile.role === 'teacher' ? '/teacher' : '/dashboard'),
         permanent: false,
       },
     };
