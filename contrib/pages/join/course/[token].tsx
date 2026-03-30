@@ -42,7 +42,7 @@ export default function JoinCoursePage() {
       .eq('lead_id', user!.id);
     if (error) { setErrorMsg(error.message); setStatus('error'); return; }
     setStatus('linked');
-    setTimeout(() => router.push('/dashboard'), 1500);
+    setTimeout(() => router.push(`/group/${selectedGroupId}`), 1500);
   }
 
   const leadGroups = groups.filter((g) => g.lead_id === user?.id && !g.course_id);
