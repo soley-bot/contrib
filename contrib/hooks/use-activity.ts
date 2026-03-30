@@ -5,12 +5,14 @@ import type { ActivityLog } from '@/types';
 interface UseActivityResult {
   activity: ActivityLog[];
   loading: boolean;
+  error: string | null;
   refresh: () => void;
 }
 
 export function useActivity(groupId: string | undefined): UseActivityResult {
   const [activity, setActivity] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -35,13 +37,19 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
   }, [groupId, tick]);
 
   async function fetchActivity(id: string) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('activity_log')
       .select('*, actor:profiles!activity_log_actor_id_fkey(*)')
       .eq('group_id', id)
       .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load activity:', error);
+      setError('Failed to load data.');
+      return;
+    }
+    setError(null);
     setActivity((data as ActivityLog[]) ?? []);
   }
 
-  return { activity, loading, refresh: () => setTick((t) => t + 1) };
+  return { activity, loading, error, refresh: () => setTick((t) => t + 1) };
 }

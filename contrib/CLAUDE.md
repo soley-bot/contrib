@@ -100,8 +100,15 @@ Profile, Group, Task, Evidence, ActivityLog, Course, EvaluationSession, Evaluati
 
 ## What's Built
 
-- **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), timeline (realtime), peer review, PDF export (6 themes), task board skeletons, shareable contribution record links, role lock, blocker declarations ("Heads Up"), Telegram notifications
-- **Teacher:** courses, group list + progress, group drill-down (read-only), teacher-mode PDF with executive summary, role-based PDF export (student vs teacher sections)
+- **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), timeline (realtime), peer review, PDF export (6 themes), task board skeletons, shareable contribution record links, role lock, blocker declarations ("Heads Up"), in-app notifications, Telegram notifications
+- **Teacher:** courses, group list + progress, group drill-down (read-only), teacher-mode PDF with executive summary, role-based PDF export, course analytics (health status, peer review rates, "needs attention" filter)
+- **Real-time:** tasks, activity_log, group_members, evaluation_sessions, evaluations, evidence, courses, notifications — all via Supabase `postgres_changes`
+- **Notifications:** bell icon in nav, task assignment / peer review opened / member joined triggers
+
+## Supabase Realtime
+
+These tables must have Realtime enabled in the Supabase dashboard (Database > Replication):
+`tasks`, `activity_log`, `group_members`, `evaluation_sessions`, `evaluations`, `evidence`, `courses`, `notifications`
 
 ## Z-Index Hierarchy
 

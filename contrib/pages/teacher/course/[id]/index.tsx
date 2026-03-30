@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import Nav from '@/components/nav';
 import CourseGroupRow from '@/components/course-group-row';
+import type { GroupHealthStatus } from '@/components/course-group-row';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { requireTeacher } from '@/lib/supabase-server';
 import { useCourse } from '@/hooks/use-course';
+import { useCourseAnalytics } from '@/hooks/use-course-analytics';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { generateReport } from '@/lib/pdf';
@@ -34,6 +36,7 @@ export default function CourseDetail() {
   const [editGroupDueDate, setEditGroupDueDate] = useState('');
   const [editGroupError, setEditGroupError] = useState('');
   const [savingGroup, setSavingGroup] = useState(false);
+  const [filterMode, setFilterMode] = useState<'all' | 'attention'>('all');
 
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
@@ -126,6 +129,7 @@ export default function CourseDetail() {
   }
 
   async function handleCreateGroup() {
+    if (creating) return;
     setFormError('');
     if (!groupName.trim() || !subject.trim()) { setFormError('Group name and subject are required.'); return; }
     setCreating(true);
@@ -139,6 +143,9 @@ export default function CourseDetail() {
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
+  const groupIds = useMemo(() => groups.map(({ group }) => group.id), [groups]);
+  const { evalSessions, evalCounts, evalScores, latestActivity, loading: analyticsLoading } = useCourseAnalytics(groupIds);
+
   const totalMembers = groups.reduce((s, g) => s + g.memberCount, 0);
   const totalTasks = groups.reduce((s, g) => s + g.taskTotal, 0);
   const totalDone = groups.reduce((s, g) => s + g.taskDone, 0);
@@ -146,6 +153,70 @@ export default function CourseDetail() {
   const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
   const overdueCount = groups.filter(({ group, taskDone: done, taskTotal: total }) =>
     group.due_date && new Date(group.due_date + 'T00:00:00') < todayDate && done < total
+  ).length;
+
+  // Peer review rate: total distinct evaluators across all groups vs total members
+  const totalEvaluators = Object.values(evalCounts).reduce((s, ids) => s + ids.length, 0);
+  const peerReviewRate = totalMembers > 0 ? `${totalEvaluators} of ${totalMembers}` : '0 of 0';
+
+  // Average peer score across all evaluations
+  const avgPeerScore = useMemo(() => {
+    if (evalScores.length === 0) return null;
+    const total = evalScores.reduce((s, r) => s + r.contribution_score + r.collaboration_score, 0);
+    return (total / (evalScores.length * 2)).toFixed(1);
+  }, [evalScores]);
+
+  // Session lookup by group_id
+  const sessionByGroup = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    evalSessions.forEach((s) => { map[s.group_id] = true; });
+    return map;
+  }, [evalSessions]);
+
+  // Compute health status per group
+  function getHealthStatus(group: Group, taskDone: number, taskTotal: number): GroupHealthStatus {
+    const completionPct = taskTotal > 0 ? (taskDone / taskTotal) * 100 : 100;
+    if (!group.due_date) return 'green';
+    const due = new Date(group.due_date + 'T00:00:00');
+    if (due < todayDate && completionPct < 100) return 'red';
+    const daysLeft = Math.ceil((due.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (completionPct < 50 && daysLeft < 7) return 'amber';
+    return 'green';
+  }
+
+  // Compute peer review label per group
+  function getPeerReviewInfo(groupId: string, memberCount: number): { label: string; color: string } {
+    const hasSession = sessionByGroup[groupId];
+    const evaluators = evalCounts[groupId] ?? [];
+    if (!hasSession) return { label: 'Not started', color: '#94A3B8' };
+    if (evaluators.length === 0) return { label: 'Open', color: '#1A56E8' };
+    return { label: `${evaluators.length}/${memberCount} submitted`, color: '#1A56E8' };
+  }
+
+  // Needs attention filter logic
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+  function needsAttention(groupId: string, group: Group, taskDone: number, taskTotal: number, memberCount: number): boolean {
+    // Overdue
+    if (group.due_date && new Date(group.due_date + 'T00:00:00') < todayDate && taskDone < taskTotal) return true;
+    // No activity in 3+ days
+    const lastAct = latestActivity[groupId];
+    if (lastAct && (todayDate.getTime() - new Date(lastAct).getTime()) >= THREE_DAYS_MS) return true;
+    if (!lastAct && groups.length > 0) return true; // No activity at all
+    // Peer review opened but <50% submitted
+    const hasSession = sessionByGroup[groupId];
+    const evaluators = evalCounts[groupId] ?? [];
+    if (hasSession && memberCount > 0 && evaluators.length < memberCount * 0.5) return true;
+    return false;
+  }
+
+  const filteredGroups = filterMode === 'all'
+    ? groups
+    : groups.filter(({ group, taskDone, taskTotal, memberCount }) =>
+        needsAttention(group.id, group, taskDone, taskTotal, memberCount)
+      );
+
+  const attentionCount = groups.filter(({ group, taskDone, taskTotal, memberCount }) =>
+    needsAttention(group.id, group, taskDone, taskTotal, memberCount)
   ).length;
 
   if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
@@ -199,12 +270,31 @@ export default function CourseDetail() {
                 { label: 'Students',   value: totalMembers,   color: '' },
                 { label: 'Completion', value: `${completionPct}%`, color: completionPct === 100 ? '#16A34A' : '' },
                 ...(overdueCount > 0 ? [{ label: 'Overdue', value: overdueCount, color: '#DC2626' }] : []),
+                { label: 'Peer Review', value: peerReviewRate, color: '' },
+                ...(avgPeerScore !== null ? [{ label: 'Avg Score', value: avgPeerScore, color: '' }] : []),
               ].map((s) => (
                 <div key={s.label} className="flex-shrink-0 bg-white border border-[#E2E8F0] rounded-xl px-3.5 py-2.5 min-w-[76px] shadow-sm">
                   <p className="text-lg font-bold" style={{ color: s.color || '#0F172A' }}>{s.value}</p>
                   <p className="text-[11px] text-[#94A3B8] mt-0.5">{s.label}</p>
                 </div>
               ))}
+            </div>
+          )}
+
+          {groups.length > 0 && (
+            <div className="flex items-center gap-3 mb-3">
+              <button
+                onClick={() => setFilterMode('all')}
+                className={`text-[13px] font-medium px-2.5 py-1 rounded-md transition-colors ${filterMode === 'all' ? 'bg-[#EBF0FF] text-[#1A56E8]' : 'text-[#94A3B8] hover:text-[#0F172A]'}`}
+              >
+                Show all
+              </button>
+              <button
+                onClick={() => setFilterMode('attention')}
+                className={`text-[13px] font-medium px-2.5 py-1 rounded-md transition-colors ${filterMode === 'attention' ? 'bg-[#EBF0FF] text-[#1A56E8]' : 'text-[#94A3B8] hover:text-[#0F172A]'}`}
+              >
+                Needs attention{attentionCount > 0 ? ` (${attentionCount})` : ''}
+              </button>
             </div>
           )}
 
@@ -226,22 +316,33 @@ export default function CourseDetail() {
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
-              {groups.map(({ group, taskTotal, taskDone, memberCount }) => (
-                <CourseGroupRow
-                  key={group.id}
-                  group={group}
-                  taskTotal={taskTotal}
-                  taskDone={taskDone}
-                  memberCount={memberCount}
-                  members={groupMembers[group.id]}
-                  inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
-                  onDownloadPdf={() => handleDownloadPdf(group)}
-                  downloading={downloadingId === group.id}
-                  onClick={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
-                  onEdit={() => openEditGroup(group)}
-                  onDelete={() => setConfirmDeleteGroupId(group.id)}
-                />
-              ))}
+              {filteredGroups.length === 0 && filterMode === 'attention' ? (
+                <p className="text-sm text-[#94A3B8] text-center py-6">All groups are on track.</p>
+              ) : (
+                filteredGroups.map(({ group, taskTotal, taskDone, memberCount }) => {
+                  const health = getHealthStatus(group, taskDone, taskTotal);
+                  const prInfo = getPeerReviewInfo(group.id, memberCount);
+                  return (
+                    <CourseGroupRow
+                      key={group.id}
+                      group={group}
+                      taskTotal={taskTotal}
+                      taskDone={taskDone}
+                      memberCount={memberCount}
+                      members={groupMembers[group.id]}
+                      inviteLink={inviteBase ? `${inviteBase}${group.invite_token}` : ''}
+                      onDownloadPdf={() => handleDownloadPdf(group)}
+                      downloading={downloadingId === group.id}
+                      onClick={() => router.push(`/teacher/course/${courseId}/group/${group.id}`)}
+                      onEdit={() => openEditGroup(group)}
+                      onDelete={() => setConfirmDeleteGroupId(group.id)}
+                      healthStatus={health}
+                      peerReviewLabel={prInfo.label}
+                      peerReviewColor={prInfo.color}
+                    />
+                  );
+                })
+              )}
             </div>
           )}
         </div>
@@ -258,7 +359,7 @@ export default function CourseDetail() {
       {editingGroup && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setEditingGroup(null); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !savingGroup) setEditingGroup(null); }}
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
@@ -321,7 +422,7 @@ export default function CourseDetail() {
       {showModal && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !creating) setShowModal(false); }}
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
