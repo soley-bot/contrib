@@ -69,12 +69,18 @@ export default function ProfilePage() {
 
   async function handleTgConnect() {
     setTgConnecting(true);
-    const res = await fetch('/api/telegram/connect', { method: 'POST' });
-    if (res.ok) {
-      const data = await res.json() as { code: string; botUsername: string };
-      setTgCode(data.code);
-      setTgBotUsername(data.botUsername);
-      setTgStatus('pending');
+    try {
+      const res = await fetch('/api/telegram/connect', { method: 'POST' });
+      const data = await res.json() as { code?: string; botUsername?: string; error?: string };
+      if (res.ok && data.code) {
+        setTgCode(data.code);
+        setTgBotUsername(data.botUsername ?? '');
+        setTgStatus('pending');
+      } else {
+        setError(data.error ?? 'Failed to generate code. Try again.');
+      }
+    } catch {
+      setError('Network error. Check your connection and try again.');
     }
     setTgConnecting(false);
   }

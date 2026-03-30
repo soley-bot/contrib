@@ -22,9 +22,10 @@ function formatRelativeTime(dateStr: string): string {
 
 interface NotificationBellProps {
   userId: string | undefined;
+  sidebar?: boolean;
 }
 
-export default function NotificationBell({ userId }: NotificationBellProps) {
+export default function NotificationBell({ userId, sidebar }: NotificationBellProps) {
   if (!userId) return null;
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -48,6 +49,56 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
       router.push(`/group/${n.group_id}`);
     }
     setShowDropdown(false);
+  }
+
+  if (sidebar) {
+    return (
+      <div className="relative" ref={ref}>
+        <button
+          onClick={() => setShowDropdown((o) => !o)}
+          className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium text-muted hover:bg-brand-light transition-colors"
+          aria-label="Notifications"
+        >
+          <span className="relative flex-shrink-0">
+            <IconBell size={16} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#DC2626] text-white rounded-full flex items-center justify-center" style={{ fontSize: '9px', lineHeight: 1 }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </span>
+          Notifications
+        </button>
+        {showDropdown && (
+          <div
+            className="absolute left-full top-0 ml-1 w-80 bg-white border border-[#E2E8F0] rounded-xl shadow-lg z-[100] overflow-hidden"
+            style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#E2E8F0]">
+              <span className="text-[13px] font-semibold text-[#0F172A]">Notifications</span>
+              {unreadCount > 0 && (
+                <button onClick={() => markAllAsRead()} className="text-[12px] font-medium text-[#1A56E8] hover:text-[#1240C4] transition-colors">
+                  Mark all as read
+                </button>
+              )}
+            </div>
+            <div className="max-h-[400px] overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="px-4 py-8 text-center text-[13px] text-[#94A3B8]">No notifications</div>
+              ) : (
+                notifications.map((n) => (
+                  <button key={n.id} onClick={() => handleNotificationClick(n)}
+                    className={`w-full text-left px-4 py-3 border-b border-[#F1F5F9] hover:bg-[#F8FAFF] transition-colors ${!n.read_at ? 'bg-[#EBF0FF]' : 'bg-white'}`}>
+                    <p className="text-[13px] font-medium text-[#0F172A] leading-snug">{n.title}</p>
+                    <p className="text-[11px] text-[#94A3B8] mt-0.5">{formatRelativeTime(n.created_at)}</p>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (

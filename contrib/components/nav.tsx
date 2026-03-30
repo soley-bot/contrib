@@ -160,10 +160,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
         )}
 
         <div className="mt-auto">
-          <div className="flex items-center gap-2 px-2 py-2">
-            <NotificationBell userId={profile?.id} />
-            <span className="text-[13px] font-medium text-[#64748B]">Notifications</span>
-          </div>
+          <NotificationBell userId={profile?.id} sidebar />
           <button
             onClick={() => router.push('/profile')}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
