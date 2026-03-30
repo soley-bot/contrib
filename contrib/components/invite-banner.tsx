@@ -27,7 +27,7 @@ export default function InviteBanner({ token, onReset }: InviteBannerProps) {
 
   return (
     <div className="border-[1.5px] border-dashed border-brand-border rounded-xl bg-brand-light p-3.5 flex items-start gap-2.5 mb-4">
-      <IconUsers size={20} className="mt-0.5 flex-shrink-0" />
+      <span className="mt-0.5 flex-shrink-0"><IconUsers size={20} /></span>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] font-semibold text-brand mb-0.5">Invite link</p>
         <p className="text-xs text-text-secondary truncate">{link}</p>
