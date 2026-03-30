@@ -5,13 +5,14 @@ import type { GroupMember } from '@/types';
 
 interface TaskFormProps {
   groupId: string;
+  groupName?: string;
   members: GroupMember[];
   userId: string;
   onCreated: () => void;
   onClose: () => void;
 }
 
-export default function TaskForm({ groupId, members, userId, onCreated, onClose }: TaskFormProps) {
+export default function TaskForm({ groupId, groupName, members, userId, onCreated, onClose }: TaskFormProps) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [assignee, setAssignee] = useState('');
@@ -33,7 +34,7 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
     if (taskError || !task) { setError(taskError?.message ?? 'Failed to create task.'); setCreating(false); return; }
 
     const assigneeMember = members.find((m) => m.profile_id === assignee);
-    await supabase.from('activity_log').insert([
+    supabase.from('activity_log').insert([
       {
         group_id: groupId, actor_id: userId, action: 'task_created',
         task_id: task.id, meta: { task_title: title.trim(), assignee_name: assigneeMember?.profile?.name ?? null },
@@ -42,7 +43,18 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
         group_id: groupId, actor_id: assignee, action: 'task_assigned',
         task_id: task.id, meta: { task_title: title.trim() },
       },
-    ]);
+    ]).then(null, () => {});
+
+    // Notify assignee (fire-and-forget)
+    if (assignee && assignee !== userId) {
+      supabase.from('notifications').insert({
+        recipient_id: assignee,
+        group_id: groupId,
+        type: 'task_assigned',
+        title: `You were assigned "${title.trim()}"`,
+        meta: { taskId: task.id, groupName: groupName ?? null },
+      }).then(null, () => {});
+    }
 
     onCreated();
     onClose();

@@ -27,6 +27,7 @@ import { useEvaluationSession } from '@/hooks/use-evaluation-session';
 import { useEvaluation } from '@/hooks/use-evaluation';
 import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
 import { generateReport, DEFAULT_PDF_THEME } from '@/lib/pdf';
+import { useToast } from '@/components/toast-provider';
 import type { Task, TaskStatus, GroupMember, Evaluation } from '@/types';
 
 const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
@@ -64,7 +65,7 @@ export default function GroupPage() {
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
   const [pdfTheme, setPdfTheme] = useState<[number, number, number]>(DEFAULT_PDF_THEME);
-  const [toast, setToast] = useState<{ msg: string; type: 'error' | 'success' } | null>(null);
+  const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('tasks');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -86,10 +87,6 @@ export default function GroupPage() {
     setTaskToDelete(task);
   }
 
-  function showToast(msg: string, type: 'error' | 'success' = 'error') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 4000);
-  }
 
   async function executeDeleteTask() {
     if (!taskToDelete || !user) return;
@@ -225,6 +222,16 @@ export default function GroupPage() {
         task_id: null,
         meta: null,
       });
+      // Notify all group members except the opener (fire-and-forget)
+      members.filter((m) => m.profile_id !== user.id).forEach((m) => {
+        supabase.from('notifications').insert({
+          recipient_id: m.profile_id,
+          group_id: groupId,
+          type: 'evaluation_opened',
+          title: 'Peer review is now open',
+          meta: { groupName: group?.name },
+        }).then(null, () => {});
+      });
       refreshActivity();
     } catch { showToast('Failed to open peer review. Please try again.'); }
   }
@@ -305,15 +312,6 @@ export default function GroupPage() {
   return (
     <div className="min-h-dvh bg-[#F8FAFF]">
       <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
-
-      {/* Toast notification */}
-      {toast && (
-        <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-[110] px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium animate-[fadeIn_0.2s_ease-out] ${
-          toast.type === 'error' ? 'bg-[#DC2626] text-white' : 'bg-[#16A34A] text-white'
-        }`}>
-          {toast.msg}
-        </div>
-      )}
 
       <div className="pt-14 md:pt-0 md:pl-[220px]">
 
@@ -673,13 +671,13 @@ export default function GroupPage() {
         />
       )}
       {showNewTask && groupId && (
-        <TaskForm groupId={groupId} members={members} userId={user!.id}
+        <TaskForm groupId={groupId} groupName={group?.name} members={members} userId={user!.id}
           onCreated={() => { refreshTasks(); refreshActivity(); }}
           onClose={() => setShowNewTask(false)}
         />
       )}
       {editingTask && (
-        <EditTaskModal task={editingTask} members={members} userId={user!.id}
+        <EditTaskModal task={editingTask} members={members} userId={user!.id} groupName={group?.name}
           onClose={() => setEditingTask(null)}
           onUpdated={() => { refreshTasks(); refreshActivity(); setEditingTask(null); }}
         />

@@ -7,6 +7,7 @@ interface UseCourseResult {
   groups: GroupWithStats[];
   isOwner: boolean;
   loading: boolean;
+  error: string | null;
   refresh: () => void;
 }
 
@@ -14,6 +15,7 @@ export function useCourse(courseId: string | undefined, userId: string | undefin
   const [course, setCourse] = useState<Course | null>(null);
   const [groups, setGroups] = useState<GroupWithStats[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -23,18 +25,39 @@ export function useCourse(courseId: string | undefined, userId: string | undefin
   }, [courseId, userId, tick]);
 
   async function fetchAll(id: string) {
-    const [{ data: courseData }, { data: groupData }] = await Promise.all([
+    const [{ data: courseData, error: courseError }, { data: groupData, error: groupError }] = await Promise.all([
       supabase.from('courses').select('*').eq('id', id).single(),
       supabase.from('groups').select('*').eq('course_id', id).order('created_at', { ascending: false }),
     ]);
+    if (courseError) {
+      console.error('Failed to load course:', courseError);
+      setError('Failed to load data.');
+      return;
+    }
+    if (groupError) {
+      console.error('Failed to load course groups:', groupError);
+      setError('Failed to load data.');
+      return;
+    }
+    setError(null);
     setCourse((courseData as Course) ?? null);
     if (!groupData || groupData.length === 0) { setGroups([]); return; }
 
     const groupIds = (groupData as Group[]).map((g) => g.id);
-    const [{ data: membersData }, { data: tasksData }] = await Promise.all([
+    const [{ data: membersData, error: membersError }, { data: tasksData, error: tasksError }] = await Promise.all([
       supabase.from('group_members').select('group_id').in('group_id', groupIds),
       supabase.from('tasks').select('group_id, status').in('group_id', groupIds),
     ]);
+    if (membersError) {
+      console.error('Failed to load course members:', membersError);
+      setError('Failed to load data.');
+      return;
+    }
+    if (tasksError) {
+      console.error('Failed to load course tasks:', tasksError);
+      setError('Failed to load data.');
+      return;
+    }
 
     const memberCounts: Record<string, number> = {};
     const taskTotal: Record<string, number> = {};
@@ -60,5 +83,5 @@ export function useCourse(courseId: string | undefined, userId: string | undefin
   }
 
   const isOwner = !!course && course.teacher_id === userId;
-  return { course, groups, isOwner, loading, refresh: () => setTick((t) => t + 1) };
+  return { course, groups, isOwner, loading, error, refresh: () => setTick((t) => t + 1) };
 }

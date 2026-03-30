@@ -32,6 +32,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
   }
 
   async function handleSubmit() {
+    if (submitting) return;
     if (!allScored) return;
     setSubmitting(true);
     await onSubmit(
@@ -53,6 +54,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
   }
 
   return (
+    <form onSubmit={(e) => { e.preventDefault(); if (showConfirm) { handleSubmit(); } else { setShowConfirm(true); } }}>
     <div className="max-w-2xl mx-auto px-4 py-4 pb-36 md:pb-8">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Review your teammates</p>
 
@@ -80,7 +82,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
                 </p>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((v) => (
-                    <button key={v} onClick={() => setScore(idx, field, v)}
+                    <button type="button" key={v} onClick={() => setScore(idx, field, v)}
                       className={`w-9 h-9 rounded-full text-sm font-semibold transition-colors ${
                         r[field] === v
                           ? 'bg-[#1A56E8] text-white'
@@ -114,7 +116,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
         style={{ bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))', paddingBottom: '0.5rem' }}>
         {!showConfirm ? (
           <div>
-            <button onClick={() => setShowConfirm(true)} disabled={!allScored}
+            <button type="submit" disabled={!allScored}
               className="w-full h-11 bg-[#1A56E8] hover:bg-[#1240C4] disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] text-white text-[14px] font-semibold rounded-md transition-colors">
               Submit Peer Review
             </button>
@@ -127,11 +129,11 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
             <p className="text-sm font-medium text-[#0F172A] mb-0.5">Submit peer review?</p>
             <p className="text-[12px] text-[#475569] mb-3">Your ratings cannot be changed after submitting.</p>
             <div className="flex gap-2">
-              <button onClick={() => setShowConfirm(false)}
+              <button type="button" onClick={() => setShowConfirm(false)}
                 className="flex-1 h-9 border border-[#E2E8F0] bg-white text-sm font-medium rounded-md text-[#475569] hover:bg-[#F1F5F9] transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSubmit} disabled={submitting}
+              <button type="submit" disabled={submitting}
                 className="flex-1 h-9 bg-[#1A56E8] hover:bg-[#1240C4] text-white text-sm font-semibold rounded-md transition-colors disabled:opacity-60">
                 {submitting ? 'Submitting…' : 'Confirm'}
               </button>
@@ -140,5 +142,6 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
         )}
       </div>
     </div>
+    </form>
   );
 }

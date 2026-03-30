@@ -2,6 +2,8 @@ import { useState } from 'react';
 import ProgressBar from '@/components/progress-bar';
 import type { Group, GroupMember } from '@/types';
 
+export type GroupHealthStatus = 'green' | 'amber' | 'red' | null;
+
 interface CourseGroupRowProps {
   group: Group;
   taskTotal: number;
@@ -14,6 +16,9 @@ interface CourseGroupRowProps {
   onClick?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  healthStatus?: GroupHealthStatus;
+  peerReviewLabel?: string;
+  peerReviewColor?: string;
 }
 
 function formatDueDate(dateStr: string): string {
@@ -23,7 +28,13 @@ function formatDueDate(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + yearSuffix;
 }
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onEdit, onDelete }: CourseGroupRowProps) {
+const HEALTH_COLORS: Record<string, string> = {
+  green: '#16A34A',
+  amber: '#D97706',
+  red: '#DC2626',
+};
+
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onEdit, onDelete, healthStatus, peerReviewLabel, peerReviewColor }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
 
   const today = new Date();
@@ -40,6 +51,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
   return (
     <div
       className={`bg-white border border-[#E2E8F0] rounded-xl p-4 shadow-sm ${onClick ? 'cursor-pointer hover:border-[#1240C4] hover:shadow-sm transition-all' : ''}`}
+      style={healthStatus && HEALTH_COLORS[healthStatus] ? { borderLeftWidth: 3, borderLeftColor: HEALTH_COLORS[healthStatus] } : undefined}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3">
@@ -57,6 +69,9 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
             <p className="text-[11px] text-[#94A3B8] mt-0.5">
               {memberCount} {memberCount === 1 ? 'member' : 'members'} · {taskDone}/{taskTotal} tasks done
               {group.due_date && <> · Due {formatDueDate(group.due_date)}</>}
+              {peerReviewLabel && (
+                <> · <span style={{ color: peerReviewColor || '#94A3B8' }}>{peerReviewLabel}</span></>
+              )}
             </p>
           </div>
         </div>

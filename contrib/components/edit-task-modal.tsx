@@ -1,52 +1,70 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
+import { useToast } from '@/components/toast-provider';
 import type { Task, GroupMember } from '@/types';
 
 interface EditTaskModalProps {
   task: Task;
   members: GroupMember[];
   userId: string;
+  groupName?: string;
   onClose: () => void;
   onUpdated: () => void;
 }
 
-export default function EditTaskModal({ task, members, userId, onClose, onUpdated }: EditTaskModalProps) {
+export default function EditTaskModal({ task, members, userId, groupName, onClose, onUpdated }: EditTaskModalProps) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? '');
   const [assigneeId, setAssigneeId] = useState(task.assignee_id);
   const [dueDate, setDueDate] = useState(task.due_date ?? '');
   const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
 
   async function handleSave() {
+    if (saving) return;
     if (!title.trim()) return;
     setSaving(true);
     const assigneeChanged = assigneeId !== task.assignee_id;
 
-    await supabase.from('tasks').update({
+    const { error: updateError } = await supabase.from('tasks').update({
       title: title.trim(),
       description: description.trim() || null,
       assignee_id: assigneeId,
       due_date: dueDate || null,
     }).eq('id', task.id);
+    if (updateError) { setSaving(false); showToast('Failed to save changes.'); return; }
 
-    await supabase.from('activity_log').insert({
+    const { error: logError } = await supabase.from('activity_log').insert({
       group_id: task.group_id,
       actor_id: userId,
       action: 'task_edited',
       task_id: task.id,
       meta: { task_title: title.trim() },
     });
+    if (logError) { setSaving(false); showToast('Failed to save changes.'); return; }
 
     if (assigneeChanged) {
       const newAssignee = members.find((m) => m.profile_id === assigneeId);
-      await supabase.from('activity_log').insert({
+      const { error: reassignError } = await supabase.from('activity_log').insert({
         group_id: task.group_id,
         actor_id: userId,
         action: 'task_reassigned',
         task_id: task.id,
         meta: { task_title: title.trim(), to_name: newAssignee?.profile?.name ?? '' },
       });
+      if (reassignError) { setSaving(false); showToast('Failed to save changes.'); return; }
+
+      // Notify new assignee (fire-and-forget)
+      if (assigneeId !== userId) {
+        supabase.from('notifications').insert({
+          recipient_id: assigneeId,
+          group_id: task.group_id,
+          type: 'task_assigned',
+          title: `You were assigned "${title.trim()}"`,
+          meta: { taskId: task.id, groupName: groupName ?? null },
+        }).then(null, () => {});
+      }
     }
 
     setSaving(false);
@@ -56,7 +74,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
   return (
     <div
       className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}
     >
       <div
         className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
@@ -70,6 +88,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
             <IconClose size={16} />
           </button>
         </div>
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="p-5 flex flex-col gap-4">
           <div>
             <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Title</label>
@@ -116,13 +135,14 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
         </div>
         <div className="px-5 py-3 border-t border-[#E2E8F0]">
           <button
-            onClick={handleSave}
+            type="submit"
             disabled={saving || !title.trim()}
             className="w-full h-11 bg-brand hover:bg-brand-hover text-white rounded-md text-sm font-medium transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {saving ? 'Saving…' : <><IconCheck size={14} /> Save changes</>}
           </button>
         </div>
+        </form>
         <style jsx>{`
           @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
         `}</style>

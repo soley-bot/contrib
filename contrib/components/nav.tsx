@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import EditProfileModal from '@/components/edit-profile-modal';
+import NotificationBell from '@/components/notification-bell';
 import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers, IconCheck } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
 import type { Profile, Group, UserRole } from '@/types';
@@ -78,6 +79,7 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
           </span>
         )}
         <div className="relative flex items-center gap-2" ref={menuRef}>
+          <NotificationBell userId={profile?.id} />
           <button
             onClick={() => setMenuOpen((o) => !o)}
             className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 active:opacity-80"
@@ -166,6 +168,10 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
         )}
 
         <div className="mt-auto">
+          <div className="flex items-center gap-2 px-2 py-2">
+            <NotificationBell userId={profile?.id} />
+            <span className="text-[13px] font-medium text-[#64748B]">Notifications</span>
+          </div>
           <button
             onClick={() => router.push('/profile')}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
