@@ -26,8 +26,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
 
   const activeType = TYPES.find((t) => t.value === type)!;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit() {
     setError('');
     if (!content.trim()) { setError('Content is required.'); return; }
     setSaving(true);
@@ -47,7 +46,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-label="Log your work" className="flex flex-col gap-3 bg-bg border border-border rounded-md p-3">
+    <div aria-label="Log your work" className="flex flex-col gap-3 bg-bg border border-border rounded-md p-3">
       <div className="flex gap-1.5">
         {TYPES.map((t) => (
           <button key={t.value} type="button"
@@ -77,11 +76,11 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
           className="flex-1 h-9 border border-border text-[13px] font-medium text-text-secondary rounded-md hover:bg-bg-hover transition-colors">
           Cancel
         </button>
-        <button type="submit" disabled={saving}
+        <button type="button" onClick={handleSubmit} disabled={saving}
           className="flex-1 h-9 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60">
           {saving ? 'Saving…' : nextVersion === 1 ? 'Add evidence' : 'Upload version'}
         </button>
       </div>
-    </form>
+    </div>
   );
 }
