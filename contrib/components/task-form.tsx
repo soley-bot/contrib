@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose } from '@/components/icons';
-import type { GroupMember } from '@/types';
+import type { GroupMember, ContributionType } from '@/types';
+
+const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
+  { value: 'task',         label: 'Task' },
+  { value: 'research',     label: 'Research' },
+  { value: 'meeting',      label: 'Meeting' },
+  { value: 'discussion',   label: 'Discussion' },
+  { value: 'coordination', label: 'Coordination' },
+];
 
 interface TaskFormProps {
   groupId: string;
@@ -16,6 +24,7 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
   const [desc, setDesc] = useState('');
   const [assignee, setAssignee] = useState('');
   const [due, setDue] = useState('');
+  const [contributionType, setContributionType] = useState<ContributionType>('task');
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
 
@@ -27,7 +36,7 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
 
     const { data: task, error: taskError } = await supabase
       .from('tasks')
-      .insert({ group_id: groupId, title: title.trim(), description: desc.trim() || null, assignee_id: assignee, due_date: due || null, status: 'todo' })
+      .insert({ group_id: groupId, title: title.trim(), description: desc.trim() || null, assignee_id: assignee, due_date: due || null, status: 'todo', contribution_type: contributionType })
       .select().single();
 
     if (taskError || !task) { setError(taskError?.message ?? 'Failed to create task.'); setCreating(false); return; }
@@ -71,6 +80,25 @@ export default function TaskForm({ groupId, members, userId, onCreated, onClose 
             <label className="text-[13px] font-medium text-[#475569]">Description <span className="font-normal text-[#94A3B8]">(optional)</span></label>
             <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} placeholder="Add details…"
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none resize-none" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[13px] font-medium text-[#475569]">Type</label>
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {CONTRIBUTION_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setContributionType(t.value)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-colors ${
+                    contributionType === t.value
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-brand/40'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-[#475569]">Assign to</label>

@@ -77,16 +77,21 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
             {group?.name ?? title}
           </span>
         )}
-        <div className="relative flex items-center gap-2" ref={menuRef}>
+        <div className="relative flex items-center" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 active:opacity-80"
+            className="w-11 h-11 flex items-center justify-center flex-shrink-0 active:opacity-80"
+            aria-label="Open profile menu"
           >
-            {initials}
+            <span className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center">
+              {initials}
+            </span>
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-9 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 z-50"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}>
+            <div
+              className="fixed right-4 w-44 bg-white border border-[#E2E8F0] rounded-xl py-1 z-[200]"
+              style={{ top: 56, boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}
+            >
               {profile && (
                 <div className="px-3 py-2 border-b border-[#F3F4F6]">
                   <p className="text-[13px] font-semibold text-[#0F172A] truncate">{profile.name}</p>

@@ -49,8 +49,8 @@ const mockMembers: GroupMember[] = [
 const mockTasks: Task[] = [
   {
     id: 't1', group_id: 'g1', title: 'Wireframes', assignee_id: 'u1', status: 'done',
-    deleted_at: null, created_at: '2026-01-02', description: null, due_date: null,
-    evidence_url: null, completed_at: null,
+    contribution_type: 'task', deleted_at: null, created_at: '2026-01-02', description: null,
+    due_date: null, evidence_url: null, completed_at: null,
   },
 ];
 
