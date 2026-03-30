@@ -46,6 +46,7 @@ export default function JoinCoursePage() {
   }
 
   const leadGroups = groups.filter((g) => g.lead_id === user?.id && !g.course_id);
+  const isMemberOnly = groups.length > 0 && groups.every((g) => g.lead_id !== user?.id);
 
   if (status === 'loading' || userLoading) {
     return <div className="flex items-center justify-center min-h-dvh text-text-secondary">Loading…</div>;
@@ -89,22 +90,39 @@ export default function JoinCoursePage() {
           {course?.name.slice(0, 2).toUpperCase()}
         </div>
         <h1 className="text-lg font-bold text-text mb-0.5 text-center">{course?.name}</h1>
-        <p className="text-sm text-text-tertiary mb-6 text-center">{course?.subject}</p>
+        <p className="text-sm text-text-tertiary mb-2 text-center">{course?.subject}</p>
+        <p className="text-[12px] text-text-secondary text-center mb-6 leading-snug">Your teacher shared this link so you can connect your group to this course.</p>
 
         {leadGroups.length === 0 ? (
           <div className="text-center">
-            <p className="text-sm text-text-secondary mb-4">
-              You need to be the lead of an unlinked group to connect it to this course.
-            </p>
-            <button
-              onClick={() => router.push(`/dashboard?newGroup=1&courseToken=${token}`)}
-              className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors mb-2"
-            >
-              Create a new group
-            </button>
-            <button onClick={() => router.push('/dashboard')} className="w-full h-11 border border-border text-text-secondary text-sm font-medium rounded-md hover:bg-bg-hover transition-colors">
-              Go to dashboard
-            </button>
+            {isMemberOnly ? (
+              <>
+                <p className="text-sm text-text-secondary mb-1">
+                  Only your group lead can connect a group to this course.
+                </p>
+                <p className="text-sm text-text-tertiary mb-4">
+                  Share this link with your group lead and ask them to open it.
+                </p>
+                <button onClick={() => router.push('/dashboard')} className="w-full h-11 border border-border text-text-secondary text-sm font-medium rounded-md hover:bg-bg-hover transition-colors">
+                  Go to dashboard
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-text-secondary mb-4">
+                  You need to be the lead of a group to connect it to this course.
+                </p>
+                <button
+                  onClick={() => router.push(`/dashboard?newGroup=1&courseToken=${token}`)}
+                  className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors mb-2"
+                >
+                  Create a new group
+                </button>
+                <button onClick={() => router.push('/dashboard')} className="w-full h-11 border border-border text-text-secondary text-sm font-medium rounded-md hover:bg-bg-hover transition-colors">
+                  Go to dashboard
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <>

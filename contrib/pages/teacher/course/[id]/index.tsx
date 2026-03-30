@@ -251,7 +251,8 @@ export default function CourseDetail() {
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {/* Course invite link for students */}
           <div className="mb-4 p-3 bg-brand-light rounded-[8px] border border-[#93B4FF]">
-            <p className="text-[11px] font-semibold text-brand-dark uppercase tracking-wide mb-1">Student invite link</p>
+            <p className="text-[11px] font-semibold text-brand-dark uppercase tracking-wide mb-0.5">Course invite link</p>
+            <p className="text-[11px] text-[#3B5BCC] mb-1.5">Share with each group&apos;s lead. They&apos;ll use it to connect their group to this course.</p>
             <p className="text-[12px] text-[#0E3AAF] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#C5D5FF] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
             {inviteBase && (
               <button
