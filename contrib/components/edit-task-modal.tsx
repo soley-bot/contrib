@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
-import type { Task, GroupMember } from '@/types';
+import type { Task, GroupMember, ContributionType } from '@/types';
+
+const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
+  { value: 'task',         label: 'Task' },
+  { value: 'research',     label: 'Research' },
+  { value: 'meeting',      label: 'Meeting' },
+  { value: 'discussion',   label: 'Discussion' },
+  { value: 'coordination', label: 'Coordination' },
+];
 
 interface EditTaskModalProps {
   task: Task;
@@ -16,6 +24,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
   const [description, setDescription] = useState(task.description ?? '');
   const [assigneeId, setAssigneeId] = useState(task.assignee_id);
   const [dueDate, setDueDate] = useState(task.due_date ?? '');
+  const [contributionType, setContributionType] = useState<ContributionType>(task.contribution_type ?? 'task');
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -28,6 +37,7 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
       description: description.trim() || null,
       assignee_id: assigneeId,
       due_date: dueDate || null,
+      contribution_type: contributionType,
     }).eq('id', task.id);
 
     await supabase.from('activity_log').insert({
@@ -89,6 +99,25 @@ export default function EditTaskModal({ task, members, userId, onClose, onUpdate
               rows={3}
               className="w-full border border-[#E2E8F0] rounded-md px-3 py-2 text-sm focus:border-brand outline-none resize-none"
             />
+          </div>
+          <div>
+            <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Type</label>
+            <div className="flex flex-wrap gap-1.5">
+              {CONTRIBUTION_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setContributionType(t.value)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-colors ${
+                    contributionType === t.value
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-brand/40'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div>
             <label className="text-[13px] font-medium text-[#475569] mb-1.5 block">Assignee</label>

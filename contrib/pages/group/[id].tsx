@@ -17,6 +17,7 @@ import InviteBanner from '@/components/invite-banner';
 import EvaluationForm from '@/components/evaluation-form';
 import EvaluationResults from '@/components/evaluation-results';
 import TaskBoardSkeleton from '@/components/task-skeleton';
+import BlockerModal from '@/components/blocker-modal';
 import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck, IconLink, IconCopy } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
@@ -77,6 +78,7 @@ export default function GroupPage() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null);
   const [showResetEval, setShowResetEval] = useState(false);
+  const [showBlockerModal, setShowBlockerModal] = useState(false);
 
   useEffect(() => {
     if (!userLoading && !user) router.replace('/signup');
@@ -261,7 +263,7 @@ export default function GroupPage() {
   // ── Swipe navigation between tabs ──
   const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
   const touchRef = useRef({ x: 0, y: 0, active: false });
-  const anyModalOpen = !!(selectedTask || showNewTask || editingTask || taskToDelete || showEditGroup || showDeleteGroup || showTransferLead || showLeaveConfirm || memberToRemove || showResetEval);
+  const anyModalOpen = !!(selectedTask || showNewTask || editingTask || taskToDelete || showEditGroup || showDeleteGroup || showTransferLead || showLeaveConfirm || memberToRemove || showResetEval || showBlockerModal);
 
   useEffect(() => {
     function onStart(e: TouchEvent) {
@@ -504,7 +506,15 @@ export default function GroupPage() {
         {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Recent activity</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">Recent activity</p>
+              <button
+                onClick={() => setShowBlockerModal(true)}
+                className="h-7 px-3 border border-[#E2E8F0] bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[12px] font-medium text-[#475569] hover:text-[#DC2626] rounded-md flex items-center gap-1.5 transition-colors"
+              >
+                Heads Up
+              </button>
+            </div>
             {activity.length === 0 ? (
               <div className="flex flex-col items-center py-14 text-center">
                 <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
@@ -739,6 +749,13 @@ export default function GroupPage() {
           confirmLabel="Reset" destructive
           onConfirm={executeResetEvaluation}
           onCancel={() => setShowResetEval(false)}
+        />
+      )}
+      {showBlockerModal && groupId && (
+        <BlockerModal
+          groupId={groupId}
+          onClose={() => setShowBlockerModal(false)}
+          onCreated={() => { refreshActivity(); showToast('Heads up sent to your group.', 'success'); }}
         />
       )}
     </div>

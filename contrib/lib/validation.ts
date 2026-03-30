@@ -63,6 +63,12 @@ export const createCourseSchema = z.object({
   subject: z.string().trim().min(1, 'Subject code is required.').max(100, 'Subject code must be 100 characters or less.'),
 });
 
+// ── Blocker declaration ─────────────────────────────────────────
+
+export const createBlockerSchema = z.object({
+  reason: z.string().trim().min(3, 'Please describe your situation briefly.').max(500, 'Reason must be 500 characters or less.'),
+});
+
 // ── Report sharing ─────────────────────────────────────────────────────────
 
 export const reportLookupSchema = z.object({
