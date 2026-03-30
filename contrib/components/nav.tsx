@@ -94,6 +94,12 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
                 </div>
               )}
               <button
+                onClick={() => { setMenuOpen(false); router.push('/profile'); }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted hover:bg-brand-light transition-colors"
+              >
+                Profile
+              </button>
+              <button
                 onClick={() => { setMenuOpen(false); setShowEdit(true); }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted hover:bg-brand-light transition-colors"
               >
