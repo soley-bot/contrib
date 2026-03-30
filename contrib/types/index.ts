@@ -143,3 +143,17 @@ export interface ReportShare {
   created_at: string;
   expires_at: string | null;
 }
+
+export type NotificationType = 'task_assigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added';
+
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  group_id: string | null;
+  type: NotificationType;
+  title: string;
+  body: string | null;
+  meta: Record<string, unknown> | null;
+  read_at: string | null;
+  created_at: string;
+}

@@ -5,12 +5,14 @@ import type { Task } from '@/types';
 interface UseTasksResult {
   tasks: Task[];
   loading: boolean;
+  error: string | null;
   refresh: () => void;
 }
 
 export function useTasks(groupId: string | undefined): UseTasksResult {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -35,14 +37,20 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
   }, [groupId, tick]);
 
   async function fetchTasks(id: string) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('tasks')
       .select('*, assignee:profiles!tasks_assignee_id_fkey(*)')
       .eq('group_id', id)
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load tasks:', error);
+      setError('Failed to load data.');
+      return;
+    }
+    setError(null);
     setTasks((data as Task[]) ?? []);
   }
 
-  return { tasks, loading, refresh: () => setTick((t) => t + 1) };
+  return { tasks, loading, error, refresh: () => setTick((t) => t + 1) };
 }

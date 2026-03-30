@@ -60,14 +60,33 @@ export default function JoinPage() {
 
     if (insertError) { setJoinError(insertError.message); setStatus('error'); return; }
 
-    await supabase.from('activity_log').insert({
+    supabase.from('activity_log').insert({
       group_id: group.id,
       actor_id: user.id,
       action: 'member_joined',
       meta: {},
-    });
+    }).then(null, () => {});
 
     setStatus('joined');
+
+    // Fire-and-forget notification
+    if (group.lead_id && group.lead_id !== user.id) {
+      (async () => {
+        const { data: joinerProfile } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', user.id)
+          .single();
+        const name = joinerProfile?.name || 'Someone';
+        supabase.from('notifications').insert({
+          recipient_id: group.lead_id!,
+          group_id: group.id,
+          type: 'member_joined',
+          title: `${name} joined your group`,
+          meta: { memberName: joinerProfile?.name ?? null, groupName: group.name },
+        }).then(null, () => {});
+      })();
+    }
     setTimeout(() => router.push(`/group/${group.id}`), 1200);
   }
 
