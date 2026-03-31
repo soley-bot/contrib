@@ -129,7 +129,7 @@ export default function Onboarding() {
               type="text"
               value={faculty}
               onChange={(e) => setFaculty(e.target.value)}
-              placeholder="Computer Science"
+              placeholder="e.g. Business Administration"
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>

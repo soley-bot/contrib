@@ -461,7 +461,7 @@ export default function CourseDetail() {
             <form onSubmit={handleEditGroupSave} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-text-secondary">Group name</label>
-                <input type="text" value={editGroupName} onChange={(e) => setEditGroupName(e.target.value)} placeholder="e.g. Group A"
+                <input type="text" value={editGroupName} onChange={(e) => setEditGroupName(e.target.value)} placeholder="e.g. Team Alpha"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">
@@ -526,7 +526,7 @@ export default function CourseDetail() {
             <div className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-text-secondary">Group name</label>
-                <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Group A"
+                <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Team Alpha"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <div className="flex flex-col gap-1">

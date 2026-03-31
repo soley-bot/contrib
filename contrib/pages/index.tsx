@@ -34,14 +34,14 @@ function Slide1Visual({ active }: { active: boolean }) {
           <div className="w-2 h-2 rounded-full bg-[#EF4444]"/>
           <div className="w-2 h-2 rounded-full bg-[#F59E0B]"/>
           <div className="w-2 h-2 rounded-full bg-[#22C55E]"/>
-          <span className="ml-2 text-[12px] text-muted font-medium">Group Project — Mobile App</span>
+          <span className="ml-2 text-[12px] text-muted font-medium">Group Project — Marketing Plan</span>
         </div>
         {/* chat messages */}
         <div className="px-4 py-4 flex flex-col gap-3 min-h-[200px]">
           {[
-            { name: 'Dara', msg: 'I finished the wireframes', done: true, delay: 0 },
-            { name: 'Dara', msg: 'Also fixed the login bug', done: true, delay: 0.3 },
-            { name: 'Dara', msg: 'Starting the API docs now', done: true, delay: 0.6 },
+            { name: 'Dara', msg: 'I finished the market research', done: true, delay: 0 },
+            { name: 'Dara', msg: 'Also drafted the executive summary', done: true, delay: 0.3 },
+            { name: 'Dara', msg: 'Starting the slide deck now', done: true, delay: 0.6 },
             { name: 'Sokha', msg: '...', done: false, delay: 0.9 },
           ].map((m, i) => (
             <div
@@ -90,7 +90,7 @@ function Slide2Visual({ active }: { active: boolean }) {
       >
         <div className="bg-bg border-b border-border px-5 py-3">
           <div className="text-[13px] font-bold text-text">Peer Review Form</div>
-          <div className="text-[11px] text-muted">Group Project — Semester 2</div>
+          <div className="text-[11px] text-muted">Group Project — Marketing Plan</div>
         </div>
         <div className="px-5 py-4">
           <table className="w-full text-[12px]">
@@ -148,9 +148,9 @@ function Slide3Visual({ active }: { active: boolean }) {
         <div className="px-4 pt-3 pb-2">
           <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-2">Recent Tasks</div>
           {[
-            { task: 'Wireframes', assignee: 'DA', done: true, delay: 0.3 },
-            { task: 'Login bug fix', assignee: 'DA', done: true, delay: 0.5 },
-            { task: 'API documentation', assignee: 'SK', done: false, delay: 0.7 },
+            { task: 'Market research', assignee: 'DA', done: true, delay: 0.3 },
+            { task: 'Executive summary', assignee: 'DA', done: true, delay: 0.5 },
+            { task: 'Slide deck', assignee: 'SK', done: false, delay: 0.7 },
           ].map((t, i) => (
             <div
               key={i}
@@ -236,9 +236,9 @@ function Slide4Visual({ active }: { active: boolean }) {
 
 function Slide5Visual({ active }: { active: boolean }) {
   const stats = [
-    { value: '237K', label: 'university students', delay: 0.3 },
-    { value: '189', label: 'institutions', delay: 0.6 },
-    { value: '0', label: 'tools built for this', delay: 0.9 },
+    { value: '237K', label: 'university students in Cambodia', delay: 0.3 },
+    { value: '189', label: 'higher education institutions', delay: 0.6 },
+    { value: '0', label: 'tools built for fair group work', delay: 0.9 },
   ];
   return (
     <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4">
@@ -289,7 +289,7 @@ const SLIDES: Slide[] = [
     id: 2,
     label: 'The real problem',
     title: "Teachers know. They just can\u2019t see.",
-    body: "Peer evaluation forms exist \u2014 but they\u2019re filled out at the end, from memory, under social pressure. The form becomes a formality.",
+    body: "Peer review forms exist \u2014 but they\u2019re filled out at the end, from memory, under social pressure. The form becomes a formality.",
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -300,7 +300,7 @@ const SLIDES: Slide[] = [
     id: 3,
     label: 'The shift',
     title: "Make effort visible \u2014 while it\u2019s happening.",
-    body: 'Students log tasks and review each other inside Contrib. Teachers get a live Contribution Record for every group.',
+    body: 'Students log tasks and review each other inside Contrib. Teachers see exactly who did what.',
     bg: '#FFFFFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -311,7 +311,7 @@ const SLIDES: Slide[] = [
     id: 4,
     label: 'The result',
     title: 'The grade reflects the work.',
-    body: 'The student who carried the group gets recognized. The teacher grades with evidence, not instinct.',
+    body: 'The student who carried the group gets a better grade. The teacher grades with proof, not instinct.',
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -320,9 +320,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: 5,
-    label: 'Why now. Why Cambodia.',
+    label: 'Why this matters.',
     title: 'No tool was built for this.',
-    body: "Cambodia\u2019s higher education is growing fast \u2014 but fair group assessment hasn\u2019t kept up. Contrib gives universities the tool to do what they always intended.",
+    body: "Cambodia\u2019s higher education is growing fast \u2014 but fair group assessment hasn\u2019t kept up. Contrib makes fair group grading possible.",
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -357,7 +357,7 @@ function CTASlide({ active }: { active: boolean }) {
         <h2 className="font-extrabold text-text mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
           Your work.<br />On record.
         </h2>
-        <p className="text-[16px] text-muted mb-8">Now in early access.</p>
+        <p className="text-[16px] text-muted mb-8">Free for students and teachers.</p>
         <Link
           href="/signup"
           className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-brand hover:bg-brand-dark"
