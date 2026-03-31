@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import EditProfileModal from '@/components/edit-profile-modal';
 import NotificationBell from '@/components/notification-bell';
+import WhatsNew from '@/components/whats-new';
 import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers, IconCheck, Logo } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
 import type { Profile, Group } from '@/types';
@@ -80,6 +81,7 @@ export default function NavShell({ profile, homeRoute, sectionLabel, defaultBack
           </span>
         )}
         <div className="relative flex items-center gap-2" ref={menuRef}>
+          <WhatsNew />
           <NotificationBell userId={profile?.id} />
           <button
             onClick={() => setMenuOpen((o) => !o)}
@@ -185,6 +187,7 @@ export default function NavShell({ profile, homeRoute, sectionLabel, defaultBack
         )}
 
         <div className="mt-auto">
+          <WhatsNew sidebar />
           <NotificationBell userId={profile?.id} sidebar />
           <button
             onClick={() => router.push('/profile')}
