@@ -128,6 +128,82 @@ One-way notification bot (`@contrib_notify_bot`). Setup guide: `database/TELEGRA
 - `pages/api/notify.ts` — client-callable endpoint for Telegram notifications (auth + group membership verified)
 - Webhook registered at `joincontrib.com/api/telegram/webhook`
 
+## Writing API Routes
+
+Every API route follows this structure. **Never** copy-paste boilerplate — use the shared helpers.
+
+```ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import * as Sentry from '@sentry/nextjs';
+import { adminClient } from '@/lib/supabase-admin';           // server-side Supabase (bypasses RLS)
+import { getUserFromApiRoute } from '@/lib/supabase-server';   // auth from cookie
+import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') return res.status(405).end();
+
+  // Rate limit
+  const ip = getClientIp(req.headers);
+  if (!rateLimit(`route:${ip}`, RATE_LIMITS.DEFAULT.limit, RATE_LIMITS.DEFAULT.window)) {
+    return res.status(429).json({ error: 'Too many requests.' });
+  }
+
+  // Auth
+  const user = await getUserFromApiRoute(req, res);
+  if (!user) return res.status(401).json({ error: 'Not authenticated.' });
+
+  // Validate input (Zod)
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+
+  // DB operation (use adminClient)
+  const { data, error } = await adminClient.from('table').insert({ ... });
+  if (error) {
+    Sentry.captureMessage(`[route] error: ${error.message}`, { level: 'error', tags: { route: 'name' } });
+    return res.status(500).json({ error: 'Failed.' });
+  }
+
+  // Respond LAST — never res.end() before async work (Vercel kills the function)
+  return res.status(200).json({ ok: true });
+}
+```
+
+### Shared modules
+
+| Module | Export | Purpose |
+|---|---|---|
+| `lib/supabase-admin.ts` | `adminClient` | Service-role Supabase client (bypasses RLS) |
+| `lib/supabase-server.ts` | `getUserFromApiRoute(req, res)` | Extract authenticated user from API route cookies |
+| `lib/supabase-server.ts` | `createServerClient(ctx)` | Supabase client for `getServerSideProps` |
+| `lib/supabase.ts` | `supabase` | Client-side Supabase (respects RLS) |
+| `lib/rate-limit.ts` | `rateLimit(key, limit, window)` | In-memory rate limiter |
+| `lib/rate-limit.ts` | `RATE_LIMITS` | Named constants (`SIGNUP`, `JOIN_LOOKUP`, `REPORT_LOOKUP`, `REPORT_SHARE`, `DEFAULT`) |
+| `lib/rate-limit.ts` | `getClientIp(headers)` | Extract client IP from request headers |
+| `lib/validation.ts` | Zod schemas | Input validation for all user inputs |
+| `lib/notify.ts` | `notifyGroupMembers(groupId, text, type, excludeId)` | Send Telegram to group members |
+| `lib/telegram.ts` | `sendTelegramMessage(chatId, text)` | Send a single Telegram message |
+
+### Rules for API routes
+- **Never** create a local `adminClient` — import from `lib/supabase-admin`
+- **Never** create a local `getUser()` function — import `getUserFromApiRoute` from `lib/supabase-server`
+- **Never** hardcode rate limit numbers — use `RATE_LIMITS` constants
+- **Never** use `console.error` — use `Sentry.captureException` or `Sentry.captureMessage`
+- **Never** call `res.end()` before all async work completes
+- **Always** validate inputs with Zod before DB operations
+- **Always** check Supabase `error` and return appropriate HTTP status
+
+### Client-side Telegram notifications
+
+Client components can't call `notifyGroupMembers` directly (needs server-side secrets). Use the `/api/notify` endpoint:
+
+```ts
+fetch('/api/notify', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ groupId, message: 'Your message', type: 'contributions' }),
+}).catch(() => {});
+```
+
 ## Coding Standards
 
 ### Always
@@ -137,7 +213,9 @@ One-way notification bot (`@contrib_notify_bot`). Setup guide: `database/TELEGRA
 - Double-submit prevention on every async handler
 - Validate inputs with Zod before Supabase
 - Type check: `npx tsc --noEmit` after multi-file changes
-- Use `getUser()` not `getSession()` in API routes
+- Use shared helpers (`adminClient`, `getUserFromApiRoute`, `RATE_LIMITS`)
+- Log errors to Sentry, not console
+- Use CSS classes from `globals.css` for animations (`animate-slide-up`, `shadow-dropdown`)
 
 ### Never
 - Teal, coral, warm stone colors
@@ -145,6 +223,9 @@ One-way notification bot (`@contrib_notify_bot`). Setup guide: `database/TELEGRA
 - Hard delete on tasks or evidence
 - App Router conventions in this Pages Router project
 - `res.end()` before async work in API routes (Vercel kills the function)
+- Copy-paste `adminClient`, `getUser()`, or rate limit numbers into new files
+- `console.error` in API routes (use Sentry)
+- Inline `style={{ animation }}` or `style={{ boxShadow }}` (use CSS classes)
 
 ## Role-Based Architecture
 
