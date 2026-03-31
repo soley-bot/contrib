@@ -13,7 +13,7 @@ interface EvidenceFormProps {
 }
 
 const TYPES: { value: EvidenceType; label: string; placeholder: string; isText: boolean }[] = [
-  { value: 'file',  label: 'File link', placeholder: 'https://drive.google.com/…', isText: false },
+  { value: 'file',  label: 'Shared file', placeholder: 'https://drive.google.com/…', isText: false },
   { value: 'link',  label: 'Link',      placeholder: 'https://…',                  isText: false },
   { value: 'note',  label: 'Note',      placeholder: 'Describe what you did…',     isText: true  },
 ];
@@ -78,7 +78,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
         </button>
         <button type="button" onClick={handleSubmit} disabled={saving}
           className="flex-1 h-9 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60">
-          {saving ? 'Saving…' : nextVersion === 1 ? 'Add evidence' : 'Upload version'}
+          {saving ? 'Saving…' : nextVersion === 1 ? 'Log your work' : 'Add version'}
         </button>
       </div>
     </div>

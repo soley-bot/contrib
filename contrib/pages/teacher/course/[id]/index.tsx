@@ -13,7 +13,7 @@ import { useCourseAnalytics } from '@/hooks/use-course-analytics';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { generateReport } from '@/lib/pdf';
-import type { Group, GroupMember, Task, ActivityLog, Evidence, EvaluationSummary } from '@/types';
+import type { Group, GroupMember, Profile, Task, ActivityLog, Evidence, EvaluationSummary } from '@/types';
 
 export default function CourseDetail() {
   const router = useRouter();
@@ -39,6 +39,7 @@ export default function CourseDetail() {
   const [savingGroup, setSavingGroup] = useState(false);
   const [filterMode, setFilterMode] = useState<'all' | 'attention'>('all');
   const [courseResetState, setCourseResetState] = useState<'idle' | 'confirm' | 'resetting' | 'done'>('idle');
+  const [ungroupedStudents, setUngroupedStudents] = useState<Profile[]>([]);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -69,6 +70,41 @@ export default function CourseDetail() {
         setGroupMembers(map);
       });
   }, [groups]);
+
+  // Fetch enrolled students who haven't joined a group in this course
+  useEffect(() => {
+    if (!courseId || courseLoading || !course) return;
+    (async () => {
+      // Get all course members
+      const { data: members } = await supabase
+        .from('course_members')
+        .select('profile_id')
+        .eq('course_id', courseId);
+      if (!members || members.length === 0) { setUngroupedStudents([]); return; }
+
+      const memberIds = members.map((m: { profile_id: string }) => m.profile_id);
+
+      // Get all group member profile_ids in this course
+      const groupIds = groups.map(({ group }) => group.id);
+      let groupedIds: Set<string> = new Set();
+      if (groupIds.length > 0) {
+        const { data: gm } = await supabase
+          .from('group_members')
+          .select('profile_id')
+          .in('group_id', groupIds);
+        if (gm) groupedIds = new Set(gm.map((r: { profile_id: string }) => r.profile_id));
+      }
+
+      const ungroupedIds = memberIds.filter((id: string) => !groupedIds.has(id));
+      if (ungroupedIds.length === 0) { setUngroupedStudents([]); return; }
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', ungroupedIds);
+      setUngroupedStudents((profiles as Profile[]) ?? []);
+    })();
+  }, [courseId, courseLoading, course, groups]);
 
   const courseInviteLink = course ? `${inviteBase}course/${course.invite_token}` : '';
 
@@ -260,7 +296,7 @@ export default function CourseDetail() {
           {/* Course invite link for students */}
           <div className="mb-4 p-3 bg-brand-light rounded-[8px] border border-[#93B4FF]">
             <p className="text-[11px] font-semibold text-brand-dark uppercase tracking-wide mb-0.5">Course invite link</p>
-            <p className="text-[11px] text-[#3B5BCC] mb-1.5">Share with each group&apos;s lead. They&apos;ll use it to connect their group to this course.</p>
+            <p className="text-[11px] text-[#3B5BCC] mb-1.5">Share with students to enroll them in this course, or with group leads to connect their group.</p>
             <p className="text-[12px] text-[#0E3AAF] break-all font-mono bg-white px-2 py-1.5 rounded-md border border-[#C5D5FF] mt-1">{inviteBase ? courseInviteLink : 'Loading…'}</p>
             {inviteBase && (
               <div className="flex items-center gap-3 mt-1.5">
@@ -277,7 +313,7 @@ export default function CourseDetail() {
                 )}
                 {courseResetState === 'confirm' && (
                   <span className="text-[11px] text-text-secondary flex items-center gap-2">
-                    Break current link?
+                    Revoke current link?
                     <button
                       onClick={async () => {
                         setCourseResetState('resetting');
@@ -296,11 +332,29 @@ export default function CourseDetail() {
             )}
           </div>
 
+          {ungroupedStudents.length > 0 && (
+            <div className="mb-4 p-3 bg-white border border-border rounded-xl">
+              <p className="text-[13px] font-semibold text-text mb-0.5">Students without a group ({ungroupedStudents.length})</p>
+              <p className="text-[11px] text-text-tertiary mb-2.5">These students have joined the course but haven&apos;t been added to a group yet.</p>
+              <div className="flex flex-wrap gap-2">
+                {ungroupedStudents.map((s) => (
+                  <div key={s.id} className="flex items-center gap-2 bg-bg rounded-lg px-2.5 py-1.5">
+                    <div className="w-6 h-6 rounded-full bg-brand-light text-brand text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                      {s.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <span className="text-[13px] text-text">{s.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {groups.length > 0 && (
             <div className="flex gap-2.5 mb-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
               {[
                 { label: 'Groups',     value: groups.length,  color: '' },
-                { label: 'Students',   value: totalMembers,   color: '' },
+                ...(ungroupedStudents.length > 0 ? [{ label: 'Enrolled', value: totalMembers + ungroupedStudents.length, color: '' }] : []),
+                { label: 'In Groups',  value: totalMembers,   color: '' },
                 { label: 'Completion', value: `${completionPct}%`, color: completionPct === 100 ? '#16A34A' : '' },
                 ...(overdueCount > 0 ? [{ label: 'Overdue', value: overdueCount, color: '#DC2626' }] : []),
                 { label: 'Peer Review', value: peerReviewRate, color: '' },
@@ -338,7 +392,7 @@ export default function CourseDetail() {
               <div className="flex flex-col gap-3 max-w-sm mx-auto">
                 {[
                   { step: '1', title: 'Share the invite link', desc: 'Copy the course invite link above and send it to your students.' },
-                  { step: '2', title: 'Students create & link groups', desc: 'Group leads use the link to connect their group to your course.' },
+                  { step: '2', title: 'Students join and form groups', desc: 'Students enroll in the course, then create or join groups. You can also create groups and share group invite links.' },
                   { step: '3', title: 'Monitor & download records', desc: 'Track progress in real-time and export Contribution Records for grading.' },
                 ].map((item) => (
                   <div key={item.step} className="flex gap-3 items-start bg-white border border-border rounded-xl px-4 py-3">

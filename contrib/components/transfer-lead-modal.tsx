@@ -63,7 +63,7 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
     >
       <div role="dialog" aria-modal="true" aria-label="Transfer group lead" className="w-full max-w-[400px] bg-white rounded-xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="text-base font-semibold text-text">Transfer lead</h2>
+          <h2 className="text-base font-semibold text-text">Transfer Lead</h2>
           <button onClick={onClose} aria-label="Close" className="text-text-secondary hover:text-text p-1">
             <IconClose size={16} />
           </button>

@@ -90,7 +90,7 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
       >
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 id="edit-task-title" className="text-base font-semibold text-text">Edit task</h2>
+          <h2 id="edit-task-title" className="text-base font-semibold text-text">Edit Task</h2>
           <button onClick={onClose} className="text-text-secondary hover:text-text p-1">
             <IconClose size={16} />
           </button>

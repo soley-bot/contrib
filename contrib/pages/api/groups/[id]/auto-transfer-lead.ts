@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient as createSSRClient } from '@supabase/ssr';
-import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const adminClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,26 +36,66 @@ async function getUser(req: NextApiRequest, res: NextApiResponse) {
   return user ?? null;
 }
 
+/**
+ * POST /api/groups/[id]/auto-transfer-lead
+ * When a student joins a group created by a teacher (Flow 2),
+ * automatically transfer leadership from the teacher to the student.
+ * Only works if the current lead is a teacher.
+ */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
-
-  const ip = getClientIp(req.headers);
-  if (!rateLimit(`tg-disconnect:${ip}`, 10, 60_000)) {
-    return res.status(429).json({ error: 'Too many requests.' });
-  }
 
   const user = await getUser(req, res);
   if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
-  const { error } = await adminClient
-    .from('telegram_subscriptions')
-    .update({ chat_id: null, verified: false, verification_code: null })
-    .eq('profile_id', user.id);
+  const groupId = req.query.id;
+  if (typeof groupId !== 'string') return res.status(400).json({ error: 'Invalid group ID.' });
 
-  if (error) {
-    console.error('[telegram/disconnect] update error:', error);
-    return res.status(500).json({ error: 'Failed to disconnect. Try again.' });
+  // Verify the group exists and the current lead is a teacher
+  const { data: group } = await adminClient
+    .from('groups')
+    .select('id, lead_id')
+    .eq('id', groupId)
+    .single();
+
+  if (!group) return res.status(404).json({ error: 'Group not found.' });
+
+  const { data: leadProfile } = await adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', group.lead_id)
+    .single();
+
+  if (!leadProfile || leadProfile.role !== 'teacher') {
+    return res.status(200).json({ transferred: false, reason: 'Lead is not a teacher.' });
   }
 
-  return res.status(200).json({ ok: true });
+  // Verify the caller is a member of this group
+  const { data: membership } = await adminClient
+    .from('group_members')
+    .select('id')
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id)
+    .single();
+
+  if (!membership) {
+    return res.status(403).json({ error: 'You must be a member of this group.' });
+  }
+
+  // Transfer leadership to the joining student
+  const { error: updateError } = await adminClient
+    .from('groups')
+    .update({ lead_id: user.id })
+    .eq('id', groupId);
+
+  if (updateError) return res.status(500).json({ error: 'Failed to transfer leadership.' });
+
+  // Remove the teacher from group_members
+  await adminClient
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('profile_id', group.lead_id);
+
+  return res.status(200).json({ transferred: true });
 }

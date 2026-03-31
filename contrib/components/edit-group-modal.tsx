@@ -45,7 +45,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
     >
       <div className="w-full max-w-[440px] bg-white rounded-xl" role="dialog" aria-labelledby="edit-group-title">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 id="edit-group-title" className="text-base font-semibold text-text">Edit group</h2>
+          <h2 id="edit-group-title" className="text-base font-semibold text-text">Edit Group</h2>
           <button onClick={onClose} aria-label="Close dialog" className="text-text-secondary hover:text-text p-1">
             <IconClose size={16} />
           </button>

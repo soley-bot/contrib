@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/use-user';
 import { requireStudent } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
 import { useDashboardSummary } from '@/hooks/use-dashboard-summary';
+import { useCourseMemberships } from '@/hooks/use-course-memberships';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { formatDueDate } from '@/lib/date';
@@ -25,10 +26,12 @@ export default function Dashboard() {
   const { groups, loading: groupsLoading, refresh: refreshGroups } = useGroups(user?.id);
   const groupIds = groups.map((g) => g.id);
   const { summaries } = useDashboardSummary(groupIds, user?.id);
+  const { courses: enrolledCourses, loading: coursesLoading } = useCourseMemberships(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [subject, setSubject] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('');
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const courseTokenRef = useRef<string | null>(null);
@@ -58,9 +61,10 @@ export default function Dashboard() {
     }
     setCreating(true);
     const token = generateInviteToken();
+    const courseId = selectedCourseId || null;
     const { data: group, error } = await supabase
       .from('groups')
-      .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token })
+      .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token, course_id: courseId })
       .select().single();
 
     if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
@@ -70,7 +74,7 @@ export default function Dashboard() {
 
     await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
 
-    if (courseTokenRef.current) {
+    if (!courseId && courseTokenRef.current) {
       const { data: course } = await supabase
         .from('courses')
         .select('id')
@@ -83,7 +87,7 @@ export default function Dashboard() {
     }
 
     refreshGroups();
-    setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
+    setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setSelectedCourseId(''); setCreating(false);
     router.push(`/group/${group.id}`);
   }
 
@@ -114,6 +118,36 @@ export default function Dashboard() {
 
         {/* Content */}
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
+          {/* Enrolled courses without a group yet */}
+          {(() => {
+            const groupCourseIds = new Set(groups.filter((g) => g.course_id).map((g) => g.course_id));
+            const ungroupedCourses = enrolledCourses.filter((c) => !groupCourseIds.has(c.id));
+            if (coursesLoading || ungroupedCourses.length === 0) return null;
+            return (
+              <div className="mb-4">
+                <p className="text-[13px] font-semibold text-text-secondary mb-2">Your courses</p>
+                <div className="flex flex-col gap-2">
+                  {ungroupedCourses.map((c) => (
+                    <div key={c.id} className="bg-brand-light border border-[#93B4FF] rounded-xl p-3.5 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-brand text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
+                        {c.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] font-semibold text-text truncate">{c.name}</p>
+                        <p className="text-[12px] text-text-secondary">{c.subject} — No group yet</p>
+                      </div>
+                      <button
+                        onClick={() => { setSelectedCourseId(c.id); setShowModal(true); }}
+                        className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[12px] font-medium rounded-md transition-colors flex-shrink-0"
+                      >
+                        Create group
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
           {groupsLoading ? (
             <div className="flex flex-col gap-2.5 mt-2">
               {[1, 2, 3].map((i) => (
@@ -261,6 +295,22 @@ export default function Dashboard() {
                 <input id="group-due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
+              {enrolledCourses.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="group-course" className="text-[13px] font-medium text-text-secondary">Link to course <span className="font-normal text-text-tertiary">(optional)</span></label>
+                  <select
+                    id="group-course"
+                    value={selectedCourseId}
+                    onChange={(e) => setSelectedCourseId(e.target.value)}
+                    className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                  >
+                    <option value="">No course</option>
+                    {enrolledCourses.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name} — {c.subject}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               {formError && <p id="group-form-error" role="alert" className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-border">
                 <button type="submit" disabled={creating}

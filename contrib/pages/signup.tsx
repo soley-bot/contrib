@@ -137,7 +137,7 @@ export default function Signup() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="signup-school" className="text-[13px] font-medium text-muted">School</label>
+            <label htmlFor="signup-school" className="text-[13px] font-medium text-muted">University</label>
             <input
               id="signup-school"
               type="text"
@@ -151,7 +151,7 @@ export default function Signup() {
           <div className="flex flex-col gap-0">
             <RoleToggle value={role} onChange={setRole} />
             <p className="text-[12px] text-muted mt-1.5 leading-snug">
-              This determines your experience. You can change it later in your profile -- until you create your first group or course.
+              This determines your experience. You can change it later in your profile — until you create your first group or course.
             </p>
           </div>
           <div className="flex flex-col gap-1">

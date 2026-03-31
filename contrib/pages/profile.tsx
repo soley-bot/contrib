@@ -56,13 +56,18 @@ export default function ProfilePage() {
     if (!user?.id) return;
     supabase
       .from('telegram_subscriptions')
-      .select('verified, chat_id, verification_code')
+      .select('verified, chat_id, verification_code, verification_expires_at')
       .eq('profile_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (!data) { setTgStatus('disconnected'); return; }
         if (data.verified) { setTgStatus('connected'); return; }
-        if (data.verification_code) { setTgStatus('pending'); return; }
+        if (data.verification_code) {
+          const expired = data.verification_expires_at && new Date(data.verification_expires_at) < new Date();
+          if (expired) { setTgStatus('disconnected'); return; }
+          setTgStatus('pending');
+          return;
+        }
         setTgStatus('disconnected');
       });
   }, [user?.id]);
@@ -87,9 +92,18 @@ export default function ProfilePage() {
 
   async function handleTgDisconnect() {
     setTgDisconnecting(true);
-    await fetch('/api/telegram/disconnect', { method: 'POST' });
-    setTgStatus('disconnected');
-    setTgCode('');
+    try {
+      const res = await fetch('/api/telegram/disconnect', { method: 'POST' });
+      if (!res.ok) {
+        setError('Failed to disconnect Telegram. Try again.');
+        setTgDisconnecting(false);
+        return;
+      }
+      setTgStatus('disconnected');
+      setTgCode('');
+    } catch {
+      setError('Network error. Check your connection and try again.');
+    }
     setTgDisconnecting(false);
   }
 
@@ -114,7 +128,12 @@ export default function ProfilePage() {
         .maybeSingle();
       if (data?.verified) setTgStatus('connected');
     }, 3000);
-    return () => clearInterval(interval);
+    // Stop polling after 5 minutes (code expired)
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      setTgStatus('disconnected');
+    }, 5 * 60 * 1000);
+    return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [tgStatus, user?.id]);
 
   useEffect(() => {
@@ -213,7 +232,7 @@ export default function ProfilePage() {
                     <option value="Year 2">Year 2</option>
                     <option value="Year 3">Year 3</option>
                     <option value="Year 4">Year 4</option>
-                    <option value="Year 5+">Year 5+</option>
+                    <option value="Year 5 or above">Year 5 or above</option>
                   </select>
                 </div>
                 {!lockLoading && roleLocked ? (

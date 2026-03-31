@@ -8,7 +8,7 @@ import { IconAlertTriangle, IconLink, IconCheck } from '@/components/icons';
 import type { Group } from '@/types';
 
 interface PageProps {
-  group: (Pick<Group, 'id' | 'name' | 'subject' | 'lead_id'> & { memberCount: number }) | null;
+  group: (Pick<Group, 'id' | 'name' | 'subject' | 'lead_id'> & { memberCount: number; leadIsTeacher: boolean }) | null;
 }
 
 export default function JoinPage({ group }: PageProps) {
@@ -54,6 +54,11 @@ export default function JoinPage({ group }: PageProps) {
       action: 'member_joined',
       meta: {},
     }).then(null, () => {});
+
+    // Auto-transfer leadership if the current lead is a teacher (Flow 2)
+    if (group.leadIsTeacher) {
+      fetch(`/api/groups/${group.id}/auto-transfer-lead`, { method: 'POST' }).then(null, () => {});
+    }
 
     setStatus('joined');
 
@@ -208,14 +213,21 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   if (!group) return { props: { group: null } };
 
-  const { count: memberCount } = await admin
-    .from('group_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('group_id', group.id);
+  const [{ count: memberCount }, { data: leadProfile }] = await Promise.all([
+    admin
+      .from('group_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', group.id),
+    admin
+      .from('profiles')
+      .select('role')
+      .eq('id', group.lead_id)
+      .single(),
+  ]);
 
   return {
     props: {
-      group: { ...group, memberCount: memberCount ?? 0 },
+      group: { ...group, memberCount: memberCount ?? 0, leadIsTeacher: leadProfile?.role === 'teacher' },
     },
   };
 }

@@ -7,7 +7,7 @@ import RoleToggle from '@/components/role-toggle';
 import type { User } from '@supabase/supabase-js';
 import type { UserRole } from '@/types';
 
-const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Graduate'];
+const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5 or above'];
 
 export default function Onboarding() {
   const router = useRouter();
@@ -136,7 +136,7 @@ export default function Onboarding() {
           <div className="flex flex-col gap-0">
             <RoleToggle value={role} onChange={setRole} />
             <p className="text-[12px] text-muted mt-1.5 leading-snug">
-              This determines your experience. You can change it later in your profile -- until you create your first group or course.
+              This determines your experience. You can change it later in your profile — until you create your first group or course.
             </p>
           </div>
 

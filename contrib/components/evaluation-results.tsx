@@ -88,8 +88,8 @@ export default function EvaluationResults({ summaries, members, currentUserId, m
               <span className="text-sm text-text flex-1 min-w-0 truncate">{nameFor(m.profile_id)}</span>
               {s ? (
                 <div className="flex gap-3 text-[12px] flex-shrink-0">
-                  <span className="text-text-secondary">C: <span className="font-semibold text-text">{s.avg_contribution}</span></span>
-                  <span className="text-text-secondary">Col: <span className="font-semibold text-text">{s.avg_collaboration}</span></span>
+                  <span className="text-text-secondary">Contrib: <span className="font-semibold text-text">{s.avg_contribution}</span></span>
+                  <span className="text-text-secondary">Collab: <span className="font-semibold text-text">{s.avg_collaboration}</span></span>
                 </div>
               ) : (
                 <span className="text-[11px] text-text-tertiary">No data yet</span>

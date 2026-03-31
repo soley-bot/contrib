@@ -73,7 +73,7 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
               <option value="Year 2">Year 2</option>
               <option value="Year 3">Year 3</option>
               <option value="Year 4">Year 4</option>
-              <option value="Year 5+">Year 5+</option>
+              <option value="Year 5 or above">Year 5 or above</option>
             </select>
           </div>
           {!lockLoading && roleLocked ? (

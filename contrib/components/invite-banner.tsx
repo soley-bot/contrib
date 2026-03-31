@@ -49,7 +49,7 @@ export default function InviteBanner({ token, onReset }: InviteBannerProps) {
           )}
           {onReset && resetState === 'confirm' && (
             <span className="text-[11px] text-text-secondary flex items-center gap-2">
-              Break current link?
+              Revoke current link?
               <button onClick={handleConfirmReset} className="text-red font-medium hover:underline">Confirm</button>
               <button onClick={() => setResetState('idle')} className="text-text-tertiary hover:underline">Cancel</button>
             </span>

@@ -113,6 +113,15 @@ export interface Course {
   created_at: string;
 }
 
+export interface CourseMember {
+  id: string;
+  course_id: string;
+  profile_id: string;
+  joined_at: string;
+  course?: Course;
+  profile?: Profile;
+}
+
 export interface GroupWithStats {
   group: Group;
   memberCount: number;

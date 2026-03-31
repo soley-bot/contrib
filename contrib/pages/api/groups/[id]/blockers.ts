@@ -108,6 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   notifyGroupMembers(
     groupId,
     `${actor?.name ?? 'A teammate'} sent a heads up: ${reason}`,
+    'blockers',
     user.id,
   ).catch((err) => console.error('[blockers] notify error:', err));
 

@@ -89,7 +89,7 @@ function Slide2Visual({ active }: { active: boolean }) {
         style={{ opacity: active ? 1 : 0, transform: active ? 'translateX(0)' : 'translateX(24px)', transitionDelay: active ? '0.3s' : '0s' }}
       >
         <div className="bg-bg border-b border-border px-5 py-3">
-          <div className="text-[13px] font-bold text-text">Peer Evaluation Form</div>
+          <div className="text-[13px] font-bold text-text">Peer Review Form</div>
           <div className="text-[11px] text-muted">Group Project — Semester 2</div>
         </div>
         <div className="px-5 py-4">

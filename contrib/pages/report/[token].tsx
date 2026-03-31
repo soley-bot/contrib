@@ -60,7 +60,7 @@ export default function PublicReportPage() {
       <div className="min-h-dvh bg-bg flex items-center justify-center">
         <div className="text-center">
           <div className="spinner mb-3" />
-          <p className="text-sm text-muted">Loading report...</p>
+          <p className="text-sm text-muted">Loading report…</p>
         </div>
       </div>
     );

@@ -48,7 +48,7 @@ export default function EvaluationForm({ groupId, currentUserId, members, onSubm
   }
 
   if (peers.length === 0) {
-    return <p className="text-sm text-text-tertiary text-center py-10">No teammates to evaluate.</p>;
+    return <p className="text-sm text-text-tertiary text-center py-10">You're the only member of this group right now.</p>;
   }
 
   return (

@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Link this chat_id to the profile
-  await adminClient
+  const { error: updateError } = await adminClient
     .from('telegram_subscriptions')
     .update({
       chat_id: String(chatId),
@@ -57,6 +57,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       verification_expires_at: null,
     })
     .eq('profile_id', sub.profile_id);
+
+  if (updateError) {
+    console.error('[telegram/webhook] verification update error:', updateError);
+    await sendTelegramMessage(String(chatId), 'Something went wrong, please try again.');
+    return;
+  }
 
   await sendTelegramMessage(
     String(chatId),
