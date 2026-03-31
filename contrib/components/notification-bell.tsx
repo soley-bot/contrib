@@ -63,6 +63,20 @@ function NotificationTypeIcon({ type }: { type: NotificationType }) {
           <path d="M8 6.5v3M8 11.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
         </svg>
       );
+    case 'deadline_approaching':
+      return (
+        <svg className={cls} width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.4"/>
+          <path d="M8 4.5v4l2.5 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    case 'weekly_digest':
+      return (
+        <svg className={cls} width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
+          <path d="M2 7h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+        </svg>
+      );
     default:
       return null;
   }
