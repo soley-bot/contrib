@@ -1,20 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/nextjs';
+import { adminClient } from '@/lib/supabase-admin';
 import { signupSchema } from '@/lib/validation';
-import { rateLimit, getClientIp } from '@/lib/rate-limit';
-
-const adminClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
   // Rate limit: 5 signup attempts per IP per minute
   const ip = getClientIp(req.headers);
-  if (!rateLimit(`signup:${ip}`, 5, 60_000)) {
+  if (!rateLimit(`signup:${ip}`, RATE_LIMITS.SIGNUP.limit, RATE_LIMITS.SIGNUP.window)) {
     return res.status(429).json({ error: 'Too many signup attempts. Please wait a moment.' });
   }
 
@@ -52,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error('[signup] error:', err);
+    Sentry.captureException(err, { tags: { route: 'signup' } });
     return res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 }

@@ -57,8 +57,8 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
   return (
     <div className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
       onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}>
-      <div ref={modalRef} className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
-        style={{ animation: 'slideUp .25s ease' }} role="dialog" aria-label="Task details">
+      <div ref={modalRef} className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto animate-slide-up"
+        role="dialog" aria-label="Task details">
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-base font-semibold text-text truncate">{task.title}</h2>
@@ -139,7 +139,6 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
         </div>
         </form>
       </div>
-      <style jsx>{`@keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }`}</style>
     </div>
   );
 }

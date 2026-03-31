@@ -92,8 +92,8 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
           </button>
           {menuOpen && (
             <div
-              className="fixed right-4 w-44 bg-white border border-border rounded-xl py-1 z-[200]"
-              style={{ top: 56, boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}
+              className="fixed right-4 w-44 bg-white border border-border rounded-xl shadow-dropdown py-1 z-[200]"
+              style={{ top: 56 }}
             >
               {profile && (
                 <div className="px-3 py-2 border-b border-[#F3F4F6]">

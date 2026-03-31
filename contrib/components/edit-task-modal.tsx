@@ -92,8 +92,7 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
     >
       <div
         ref={modalRef}
-        className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
-        style={{ animation: 'slideUp .25s ease' }}
+        className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto animate-slide-up"
         role="dialog" aria-labelledby="edit-task-title"
       >
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
@@ -177,9 +176,6 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
           </button>
         </div>
         </form>
-        <style jsx>{`
-          @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-        `}</style>
       </div>
     </div>
   );

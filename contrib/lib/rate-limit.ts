@@ -46,6 +46,14 @@ export function rateLimit(key: string, limit = 20, windowMs = 60_000): boolean {
   return true;
 }
 
+export const RATE_LIMITS = {
+  SIGNUP: { limit: 5, window: 60_000 },
+  JOIN_LOOKUP: { limit: 30, window: 60_000 },
+  REPORT_LOOKUP: { limit: 20, window: 60_000 },
+  REPORT_SHARE: { limit: 10, window: 60_000 },
+  DEFAULT: { limit: 10, window: 60_000 },
+} as const;
+
 /**
  * Extract client IP from Next.js API request headers.
  */

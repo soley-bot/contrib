@@ -1,5 +1,6 @@
 import { createServerClient as createSSRClient } from '@supabase/ssr';
 import type { GetServerSidePropsContext } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 /**
  * Create a Supabase client for server-side use in getServerSideProps.
@@ -92,4 +93,36 @@ export async function requireStudent(ctx: GetServerSidePropsContext) {
     return { ...result, redirect: redirectToTeacher.redirect };
   }
   return result;
+}
+
+/**
+ * Extract user from Supabase auth cookie in an API route handler.
+ * Uses @supabase/ssr for proper cookie handling (matches getServerSideProps pattern).
+ */
+export async function getUserFromApiRoute(req: NextApiRequest, res: NextApiResponse) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const client = createSSRClient(url, anonKey, {
+    cookies: {
+      getAll() {
+        return (req.headers.cookie ?? '').split(';').map((c) => {
+          const [name, ...rest] = c.trim().split('=');
+          return { name: name ?? '', value: decodeURIComponent(rest.join('=') || '') };
+        }).filter((c) => c.name);
+      },
+      setAll(cookies) {
+        cookies.forEach(({ name, value, options }) => {
+          const parts = [`${name}=${encodeURIComponent(value)}`];
+          if (options?.path) parts.push(`Path=${options.path}`);
+          if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);
+          if (options?.httpOnly) parts.push('HttpOnly');
+          if (options?.secure) parts.push('Secure');
+          if (options?.sameSite) parts.push(`SameSite=${options.sameSite}`);
+          res.appendHeader('Set-Cookie', parts.join('; '));
+        });
+      },
+    },
+  });
+  const { data: { user } } = await client.auth.getUser();
+  return user ?? null;
 }

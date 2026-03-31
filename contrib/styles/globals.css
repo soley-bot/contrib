@@ -89,6 +89,26 @@ select {
   font-size: 16px;
 }
 
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@media (min-width: 768px) {
+  @keyframes slideUp {
+    from { transform: translateY(8px); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.25s ease;
+}
+
+.shadow-dropdown {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;

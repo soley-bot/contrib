@@ -55,8 +55,7 @@ export default function CourseCard({ course, groupCount, memberCount, attentionC
             </svg>
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-8 w-36 bg-white border border-border rounded-[8px] shadow-lg py-1 z-20"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}>
+            <div className="absolute right-0 top-8 w-36 bg-white border border-border rounded-[8px] shadow-dropdown py-1 z-20">
               {onEdit && (
                 <button
                   onClick={() => { setMenuOpen(false); onEdit(); }}

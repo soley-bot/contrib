@@ -219,7 +219,7 @@ export default function NotificationBell({ userId, sidebar }: NotificationBellPr
           <span className="relative flex-shrink-0">
             <IconBell size={16} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#DC2626] text-white rounded-full flex items-center justify-center" style={{ fontSize: '9px', lineHeight: 1 }}>
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#DC2626] text-white rounded-full flex items-center justify-center text-[9px] leading-none">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -228,8 +228,7 @@ export default function NotificationBell({ userId, sidebar }: NotificationBellPr
         </button>
         {showDropdown && (
           <div
-            className="absolute left-full top-0 ml-1 w-80 bg-white border border-[#E2E8F0] rounded-xl shadow-lg z-[200] overflow-hidden"
-            style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}
+            className="absolute left-full top-0 ml-1 w-80 bg-white border border-[#E2E8F0] rounded-xl shadow-dropdown z-[200] overflow-hidden"
           >
             {dropdownContent}
           </div>
@@ -247,15 +246,14 @@ export default function NotificationBell({ userId, sidebar }: NotificationBellPr
       >
         <IconBell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#DC2626] text-white rounded-full flex items-center justify-center" style={{ fontSize: '10px', lineHeight: 1 }}>
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#DC2626] text-white rounded-full flex items-center justify-center text-[10px] leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
       {showDropdown && (
         <div
-          className="absolute right-0 top-10 w-[calc(100vw-2rem)] max-w-80 bg-white border border-[#E2E8F0] rounded-xl shadow-lg z-[200] overflow-hidden"
-          style={{ boxShadow: '0 4px 16px rgba(0,0,0,.10)' }}
+          className="absolute right-0 top-10 w-[calc(100vw-2rem)] max-w-80 bg-white border border-[#E2E8F0] rounded-xl shadow-dropdown z-[200] overflow-hidden"
         >
           {dropdownContent}
         </div>

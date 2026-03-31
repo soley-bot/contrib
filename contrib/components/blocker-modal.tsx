@@ -40,8 +40,7 @@ export default function BlockerModal({ groupId, onClose, onCreated }: BlockerMod
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto"
-        style={{ animation: 'slideUp .25s ease' }}
+        className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto animate-slide-up"
         role="dialog"
         aria-label="Declare a blocker"
       >
@@ -105,19 +104,6 @@ export default function BlockerModal({ groupId, onClose, onCreated }: BlockerMod
           </div>
         </form>
       </div>
-
-      <style jsx>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
-        @media (min-width: 768px) {
-          @keyframes slideUp {
-            from { transform: translateY(8px); opacity: 0; }
-            to   { transform: translateY(0);   opacity: 1; }
-          }
-        }
-      `}</style>
     </div>
   );
 }

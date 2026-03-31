@@ -1,55 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
-import { createServerClient as createSSRClient } from '@supabase/ssr';
+import * as Sentry from '@sentry/nextjs';
+import { adminClient } from '@/lib/supabase-admin';
+import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { reportShareSchema, reportLookupSchema } from '@/lib/validation';
 import { generateInviteToken } from '@/lib/invite';
-import { rateLimit, getClientIp } from '@/lib/rate-limit';
-
-const adminClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
-
-/**
- * Helper: extract user from Supabase auth cookie via API request.
- * Uses @supabase/ssr for proper cookie handling (matches getServerSideProps pattern).
- */
-async function getUser(req: NextApiRequest, res: NextApiResponse) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  const client = createSSRClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        const cookieHeader = req.headers.cookie ?? '';
-        return cookieHeader.split(';').map((c) => {
-          const [name, ...rest] = c.trim().split('=');
-          return { name: name ?? '', value: decodeURIComponent(rest.join('=') || '') };
-        }).filter((c) => c.name);
-      },
-      setAll(cookies) {
-        cookies.forEach(({ name, value, options }) => {
-          const parts = [`${name}=${encodeURIComponent(value)}`];
-          if (options?.path) parts.push(`Path=${options.path}`);
-          if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);
-          if (options?.httpOnly) parts.push('HttpOnly');
-          if (options?.secure) parts.push('Secure');
-          if (options?.sameSite) parts.push(`SameSite=${options.sameSite}`);
-          res.appendHeader('Set-Cookie', parts.join('; '));
-        });
-      },
-    },
-  });
-  const { data: { user } } = await client.auth.getUser();
-  return user;
-}
+import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const ip = getClientIp(req.headers);
 
   // ── GET: fetch existing share for a group ──
   if (req.method === 'GET') {
-    const user = await getUser(req, res);
+    const user = await getUserFromApiRoute(req, res);
     if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
     const parsed = reportShareSchema.safeParse({ group_id: req.query.group_id });
@@ -78,11 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── POST: create share link ──
   if (req.method === 'POST') {
-    if (!rateLimit(`report-share:${ip}`, 10, 60_000)) {
+    if (!rateLimit(`report-share:${ip}`, RATE_LIMITS.REPORT_SHARE.limit, RATE_LIMITS.REPORT_SHARE.window)) {
       return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
     }
 
-    const user = await getUser(req, res);
+    const user = await getUserFromApiRoute(req, res);
     if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
     const parsed = reportShareSchema.safeParse(req.body);
@@ -125,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .insert({ group_id, token, created_by: user.id });
 
     if (insertError) {
-      console.error('[report/share] insert error:', insertError);
+      Sentry.captureMessage(`[report/share] insert error: ${insertError.message}`, { level: 'error', tags: { route: 'report/share' } });
       return res.status(500).json({ error: 'Failed to create share link.' });
     }
 
@@ -140,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── DELETE: revoke share link ──
   if (req.method === 'DELETE') {
-    const user = await getUser(req, res);
+    const user = await getUserFromApiRoute(req, res);
     if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
     const parsed = reportShareSchema.safeParse({ group_id: req.query.group_id });
@@ -165,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('group_id', group_id);
 
     if (deleteError) {
-      console.error('[report/share] delete error:', deleteError);
+      Sentry.captureMessage(`[report/share] delete error: ${deleteError.message}`, { level: 'error', tags: { route: 'report/share' } });
       return res.status(500).json({ error: 'Failed to revoke share link.' });
     }
 

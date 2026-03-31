@@ -1,12 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/nextjs';
+import { adminClient } from '@/lib/supabase-admin';
 import { sendTelegramMessage } from '@/lib/telegram';
-
-const adminClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
 
 interface TelegramUpdate {
   message?: {
@@ -85,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .eq('profile_id', sub.profile_id);
 
   if (updateError) {
-    console.error('[telegram/webhook] verification update error:', updateError);
+    Sentry.captureMessage(`[telegram/webhook] verification update error: ${updateError.message}`, { level: 'error', tags: { route: 'telegram/webhook' } });
     await sendTelegramMessage(String(chatId), 'Something went wrong, please try again.');
     return res.status(200).end();
   }

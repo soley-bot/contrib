@@ -1,54 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
-import { createServerClient as createSSRClient } from '@supabase/ssr';
+import * as Sentry from '@sentry/nextjs';
+import { adminClient } from '@/lib/supabase-admin';
+import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { createBlockerSchema } from '@/lib/validation';
-import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 import { notifyGroupMembers } from '@/lib/notify';
-
-const adminClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
-
-async function getUser(req: NextApiRequest, res: NextApiResponse) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  const client = createSSRClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        const cookieHeader = req.headers.cookie ?? '';
-        return cookieHeader.split(';').map((c) => {
-          const [name, ...rest] = c.trim().split('=');
-          return { name: name ?? '', value: decodeURIComponent(rest.join('=') || '') };
-        }).filter((c) => c.name);
-      },
-      setAll(cookies) {
-        cookies.forEach(({ name, value, options }) => {
-          const parts = [`${name}=${encodeURIComponent(value)}`];
-          if (options?.path) parts.push(`Path=${options.path}`);
-          if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);
-          if (options?.httpOnly) parts.push('HttpOnly');
-          if (options?.secure) parts.push('Secure');
-          if (options?.sameSite) parts.push(`SameSite=${options.sameSite}`);
-          res.appendHeader('Set-Cookie', parts.join('; '));
-        });
-      },
-    },
-  });
-  const { data: { user } } = await client.auth.getUser();
-  return user;
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const ip = getClientIp(req.headers);
-  if (!rateLimit(`blockers:${ip}`, 10, 60_000)) {
+  if (!rateLimit(`blockers:${ip}`, RATE_LIMITS.DEFAULT.limit, RATE_LIMITS.DEFAULT.window)) {
     return res.status(429).json({ error: 'Too many requests.' });
   }
 
-  const user = await getUser(req, res);
+  const user = await getUserFromApiRoute(req, res);
   if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
   const groupId = req.query.id;
@@ -78,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .insert({ group_id: groupId, profile_id: user.id, reason });
 
   if (blockerError) {
-    console.error('[blockers] insert error:', blockerError);
+    Sentry.captureMessage(`[blockers] insert error: ${blockerError.message}`, { level: 'error', tags: { route: 'blockers' } });
     return res.status(500).json({ error: 'Failed to save declaration.' });
   }
 
@@ -94,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   if (logError) {
-    console.error('[blockers] activity log error:', logError);
+    Sentry.captureMessage(`[blockers] activity log error: ${logError.message}`, { level: 'error', tags: { route: 'blockers' } });
     // Non-fatal — declaration saved, just log the error
   }
 
@@ -110,7 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     `${actor?.name ?? 'A teammate'} sent a heads up: ${reason}`,
     'blockers',
     user.id,
-  ).catch((err) => console.error('[blockers] notify error:', err));
+  ).catch((err) => Sentry.captureException(err, { tags: { route: 'blockers' } }));
 
   return res.status(201).json({ ok: true });
 }

@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs';
+
 const BASE_URL = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 
 /**
@@ -13,11 +15,11 @@ export async function sendTelegramMessage(chatId: string, text: string): Promise
     });
     if (!res.ok) {
       const body = await res.text();
-      console.error('[telegram] sendMessage failed:', body);
+      Sentry.captureMessage(`[telegram] sendMessage failed: ${body}`, { level: 'error', tags: { route: 'telegram' } });
     }
     return res.ok;
   } catch (err) {
-    console.error('[telegram] sendMessage error:', err);
+    Sentry.captureException(err, { tags: { route: 'telegram' } });
     return false;
   }
 }
