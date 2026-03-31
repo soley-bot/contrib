@@ -65,6 +65,13 @@ export default function JoinPage({ group }: PageProps) {
     // Mark as just joined for welcome banner
     try { localStorage.setItem(`contrib_just_joined_${group.id}`, '1'); } catch {}
 
+    // Notify group via Telegram (fire-and-forget)
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId: group.id, message: `A new member joined ${group.name}!`, type: 'contributions' }),
+    }).catch(() => {});
+
     // Fire-and-forget notification
     if (group.lead_id && group.lead_id !== user.id) {
       (async () => {

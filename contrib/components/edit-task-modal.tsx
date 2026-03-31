@@ -71,6 +71,14 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
           meta: { taskId: task.id, groupName: groupName ?? null },
         }).then(null, () => {});
       }
+
+      // Notify group via Telegram (fire-and-forget)
+      const assigneeName = members.find((m) => m.profile_id === assigneeId)?.profile?.name ?? 'someone';
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId: task.group_id, message: `Task "${title.trim()}" reassigned to ${assigneeName}`, type: 'contributions' }),
+      }).catch(() => {});
     }
 
     setSaving(false);

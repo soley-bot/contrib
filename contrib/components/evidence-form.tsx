@@ -42,6 +42,13 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
       meta: { task_title: taskTitle },
     });
 
+    // Notify group via Telegram (fire-and-forget)
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId, message: `New evidence logged for "${taskTitle}"`, type: 'contributions' }),
+    }).catch(() => {});
+
     onSaved();
   }
 

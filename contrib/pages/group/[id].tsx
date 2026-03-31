@@ -248,6 +248,12 @@ export default function GroupPage() {
           meta: { groupName: group?.name },
         }).then(null, () => {});
       });
+      // Notify group via Telegram (fire-and-forget)
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId, message: `Peer review is now open in ${group?.name ?? 'your group'}. Go to Contrib to submit your review.`, type: 'contributions' }),
+      }).catch(() => {});
       refreshActivity();
     } catch { showToast('Failed to open peer review. Please try again.'); }
   }

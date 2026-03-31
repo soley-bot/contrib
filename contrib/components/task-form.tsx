@@ -61,6 +61,14 @@ export default function TaskForm({ groupId, groupName, members, userId, onCreate
       }).then(null, () => {});
     }
 
+    // Notify group via Telegram (fire-and-forget)
+    const assigneeName = members.find((m) => m.profile_id === assignee)?.profile?.name ?? 'someone';
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId, message: `New task "${title.trim()}" assigned to ${assigneeName}`, type: 'contributions' }),
+    }).catch(() => {});
+
     onCreated();
     onClose();
   }
