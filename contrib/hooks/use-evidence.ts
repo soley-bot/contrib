@@ -32,21 +32,19 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
     return () => { supabase.removeChannel(channel); };
   }, [taskId, tick]);
 
-  function fetchEvidence(id: string) {
-    supabase
+  async function fetchEvidence(id: string) {
+    const { data, error: fetchError } = await supabase
       .from('evidence')
       .select('*, uploader:profiles!evidence_uploaded_by_fkey(*)')
       .eq('task_id', id)
-      .order('version_number', { ascending: true })
-      .then(({ data, error: fetchError }) => {
-        if (fetchError) {
-          console.error('Failed to load evidence:', fetchError);
-          setError('Failed to load data.');
-          return;
-        }
-        setError(null);
-        setEvidence((data as Evidence[]) ?? []);
-      });
+      .order('version_number', { ascending: true });
+    if (fetchError) {
+      console.error('Failed to load evidence:', fetchError);
+      setError('Failed to load data.');
+      return;
+    }
+    setError(null);
+    setEvidence((data as Evidence[]) ?? []);
   }
 
   return { evidence, error, refresh: () => setTick((t) => t + 1) };

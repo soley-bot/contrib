@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import Nav from '@/components/nav';
+import TeacherNav from '@/components/teacher-nav';
 import { requireTeacher } from '@/lib/supabase-server';
 import TaskCard from '@/components/task-card';
 import FeedItem from '@/components/feed-item';
@@ -102,9 +102,8 @@ export default function TeacherGroupDetail() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav
+      <TeacherNav
         profile={profile}
-        role="teacher"
         title={group.name}
         backLabel={courseName || 'Course'}
         onBack={() => router.push(`/teacher/course/${courseId}`)}

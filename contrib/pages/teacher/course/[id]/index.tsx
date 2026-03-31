@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import Nav from '@/components/nav';
+import TeacherNav from '@/components/teacher-nav';
 import CourseGroupRow from '@/components/course-group-row';
 import type { GroupHealthStatus } from '@/components/course-group-row';
 import { IconPlus } from '@/components/icons';
@@ -268,9 +268,8 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav
+      <TeacherNav
         profile={profile}
-        role="teacher"
         title={course.name}
         backLabel="My Courses"
         onBack={() => router.push('/teacher')}

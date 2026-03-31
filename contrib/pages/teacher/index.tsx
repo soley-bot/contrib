@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import Nav from '@/components/nav';
+import TeacherNav from '@/components/teacher-nav';
 import CourseCard from '@/components/course-card';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
@@ -123,7 +123,7 @@ export default function TeacherDashboard() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav profile={profile} role="teacher" onProfileUpdate={refreshProfile} />
+      <TeacherNav profile={profile} onProfileUpdate={refreshProfile} />
 
       <div className="md:pl-[220px]">
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">

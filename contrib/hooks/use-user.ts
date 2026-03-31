@@ -17,12 +17,14 @@ export function useUser(): UseUserResult {
   const userIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    async function initSession() {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       userIdRef.current = session?.user?.id ?? null;
       if (session?.user) fetchProfile(session.user.id);
       else setLoading(false);
-    });
+    }
+    initSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);

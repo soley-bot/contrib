@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import Nav from '@/components/nav';
+import StudentNav from '@/components/student-nav';
 import { IconPlus, IconChevronRight } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { requireStudent } from '@/lib/supabase-server';
@@ -95,7 +95,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav profile={profile} />
+      <StudentNav profile={profile} />
 
       {/* Desktop layout */}
       <div className="md:pl-[220px]">

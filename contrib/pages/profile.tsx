@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import Nav from '@/components/nav';
+import StudentNav from '@/components/student-nav';
 import RoleToggle from '@/components/role-toggle';
 import { useUser } from '@/hooks/use-user';
 import { requireAuth } from '@/lib/supabase-server';
@@ -58,22 +58,23 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase
-      .from('telegram_subscriptions')
-      .select('verified, chat_id, verification_code, verification_expires_at')
-      .eq('profile_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) { setTgStatus('disconnected'); return; }
-        if (data.verified) { setTgStatus('connected'); return; }
-        if (data.verification_code) {
-          const expired = data.verification_expires_at && new Date(data.verification_expires_at) < new Date();
-          if (expired) { setTgStatus('disconnected'); return; }
-          setTgStatus('pending');
-          return;
-        }
-        setTgStatus('disconnected');
-      });
+    async function fetchTgStatus() {
+      const { data } = await supabase
+        .from('telegram_subscriptions')
+        .select('verified, chat_id, verification_code, verification_expires_at')
+        .eq('profile_id', user!.id)
+        .maybeSingle();
+      if (!data) { setTgStatus('disconnected'); return; }
+      if (data.verified) { setTgStatus('connected'); return; }
+      if (data.verification_code) {
+        const expired = data.verification_expires_at && new Date(data.verification_expires_at) < new Date();
+        if (expired) { setTgStatus('disconnected'); return; }
+        setTgStatus('pending');
+        return;
+      }
+      setTgStatus('disconnected');
+    }
+    fetchTgStatus();
   }, [user?.id]);
 
   async function handleTgConnect() {
@@ -169,17 +170,18 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase
-      .from('tasks')
-      .select('id, status')
-      .eq('assignee_id', user.id)
-      .is('deleted_at', null)
-      .then(({ data }) => {
-        const tasks = data ?? [];
-        setTasksAssigned(tasks.length);
-        setTasksDone(tasks.filter((t) => t.status === 'done').length);
-        setStatsLoaded(true);
-      });
+    async function fetchStats() {
+      const { data } = await supabase
+        .from('tasks')
+        .select('id, status')
+        .eq('assignee_id', user!.id)
+        .is('deleted_at', null);
+      const tasks = data ?? [];
+      setTasksAssigned(tasks.length);
+      setTasksDone(tasks.filter((t) => t.status === 'done').length);
+      setStatsLoaded(true);
+    }
+    fetchStats();
   }, [user?.id]);
 
   async function handleSave() {
@@ -206,7 +208,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav profile={profile} onProfileUpdate={refreshProfile} />
+      <StudentNav profile={profile} onProfileUpdate={refreshProfile} />
 
       <div className="md:pl-[220px]">
         <div className="hidden md:flex items-center h-14 px-6 bg-white border-b border-border">

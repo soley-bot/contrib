@@ -3,24 +3,19 @@ import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
 import { requireStudent } from '@/lib/supabase-server';
-import Nav from '@/components/nav';
-import TaskCard from '@/components/task-card';
+import StudentNav from '@/components/student-nav';
 import TaskModal from '@/components/task-modal';
 import TaskForm from '@/components/task-form';
 import EditTaskModal from '@/components/edit-task-modal';
 import EditGroupModal from '@/components/edit-group-modal';
 import TransferLeadModal from '@/components/transfer-lead-modal';
 import ConfirmModal from '@/components/confirm-modal';
-import FeedItem from '@/components/feed-item';
-import MemberRow from '@/components/member-row';
-import InviteBanner from '@/components/invite-banner';
-import EvaluationForm from '@/components/evaluation-form';
-import EvaluationResults from '@/components/evaluation-results';
-import TaskBoardSkeleton from '@/components/task-skeleton';
 import BlockerModal from '@/components/blocker-modal';
-import InlineTip from '@/components/inline-tip';
-import GettingStartedChecklist from '@/components/getting-started-checklist';
-import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck, IconLink, IconCopy } from '@/components/icons';
+import GroupTasksTab from '@/components/group-tasks-tab';
+import GroupTimelineTab from '@/components/group-timeline-tab';
+import GroupMembersTab from '@/components/group-members-tab';
+import GroupEvaluationTab from '@/components/group-evaluation-tab';
+import { IconPlus, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconCheck } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
@@ -29,27 +24,12 @@ import { useGroupEvidence } from '@/hooks/use-group-evidence';
 import { useEvaluationSession } from '@/hooks/use-evaluation-session';
 import { useEvaluation } from '@/hooks/use-evaluation';
 import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
+import { useShareLink } from '@/hooks/use-share-link';
 import { generateReport, DEFAULT_PDF_THEME } from '@/lib/pdf';
 import { useToast } from '@/components/toast-provider';
-import type { Task, TaskStatus, GroupMember, EvaluationInsert } from '@/types';
-
-const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
-  { label: 'Coral',  color: [255, 88,  65]  },
-  { label: 'Navy',   color: [30,  64,  175] },
-  { label: 'Forest', color: [22,  101, 52]  },
-  { label: 'Slate',  color: [71,  85,  105] },
-  { label: 'Amber',  color: [180, 83,  9]   },
-  { label: 'Plum',   color: [126, 34,  206] },
-];
+import type { Task, GroupMember, EvaluationInsert } from '@/types';
 
 type Tab = 'tasks' | 'activity' | 'members' | 'evaluation';
-type StatusFilter = 'all' | TaskStatus;
-
-const STATUS_COLS: { status: TaskStatus; label: string; countClass: string; headerClass: string }[] = [
-  { status: 'todo',       label: 'To Do',      countClass: 'bg-border text-text-secondary',  headerClass: 'bg-bg-hover text-text-secondary' },
-  { status: 'inprogress', label: 'In Progress', countClass: 'bg-[#FDE68A] text-[#92400E]', headerClass: 'bg-[#FEF3C7] text-[#B45309]' },
-  { status: 'done',       label: 'Done',        countClass: 'bg-[#BBF7D0] text-[#15803D]', headerClass: 'bg-[#DCFCE7] text-[#15803D]' },
-];
 
 export default function GroupPage() {
   const router = useRouter();
@@ -65,11 +45,11 @@ export default function GroupPage() {
   const { session: evalSession, loading: evalSessionLoading, openEvaluation, resetEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
   const { hasSubmitted, submit: submitEvaluation, refresh: refreshEvalSubmit } = useEvaluation(groupId, user?.id);
   const { summaries: evalSummaries, refresh: refreshSummaries } = useEvaluationSummaries(groupId, !!evalSession);
+  const { shareUrl, shareLoading, handleShareLink, handleRevokeShare } = useShareLink(groupId, user?.id, isLead, refreshActivity);
 
   const [pdfTheme, setPdfTheme] = useState<[number, number, number]>(DEFAULT_PDF_THEME);
   const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('tasks');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewTask, setShowNewTask] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -102,7 +82,6 @@ export default function GroupPage() {
   function handleDeleteTaskClick(task: Task) {
     setTaskToDelete(task);
   }
-
 
   async function executeDeleteTask() {
     if (!taskToDelete || !user) return;
@@ -167,13 +146,9 @@ export default function GroupPage() {
     } catch { showToast('Failed to remove member. Please try again.'); }
   }
 
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [shareLoading, setShareLoading] = useState(false);
-
   function handleExport() {
     if (!group) return;
     generateReport(group, members, tasks, activity, evidenceByTask, [], pdfTheme, 'student');
-    // Log export
     if (user) {
       supabase.from('activity_log').insert({
         group_id: group.id, actor_id: user.id, action: 'report_exported',
@@ -181,51 +156,6 @@ export default function GroupPage() {
       });
     }
   }
-
-  async function handleShareLink() {
-    if (!group || !user || shareLoading) return;
-    setShareLoading(true);
-    try {
-      const res = await fetch('/api/report/share', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ group_id: group.id }),
-      });
-      if (!res.ok) { showToast('Failed to create share link.'); return; }
-      const data = await res.json();
-      setShareUrl(data.url);
-      await navigator.clipboard.writeText(data.url);
-      showToast('Link copied to clipboard!', 'success');
-      // Log share
-      if (!data.existing) {
-        await supabase.from('activity_log').insert({
-          group_id: group.id, actor_id: user.id, action: 'report_shared',
-          task_id: null, meta: { token: data.token },
-        });
-        refreshActivity();
-      }
-    } catch { showToast('Failed to create share link.'); }
-    finally { setShareLoading(false); }
-  }
-
-  async function handleRevokeShare() {
-    if (!group || !user) return;
-    try {
-      const res = await fetch(`/api/report/share?group_id=${group.id}`, { method: 'DELETE' });
-      if (!res.ok) { showToast('Failed to revoke link.'); return; }
-      setShareUrl(null);
-      showToast('Share link revoked.', 'success');
-    } catch { showToast('Failed to revoke link.'); }
-  }
-
-  // Fetch existing share link on load
-  useEffect(() => {
-    if (!groupId || !isLead) return;
-    fetch(`/api/report/share?group_id=${groupId}`)
-      .then((r) => r.json())
-      .then((d) => { if (d.share) setShareUrl(`${window.location.origin}/report/${d.share.token}`); })
-      .catch(() => {});
-  }, [groupId, isLead]);
 
   async function handleOpenEvaluation() {
     if (!groupId || !user) return;
@@ -238,7 +168,6 @@ export default function GroupPage() {
         task_id: null,
         meta: null,
       });
-      // Notify all group members except the opener (fire-and-forget)
       members.filter((m) => m.profile_id !== user.id).forEach((m) => {
         supabase.from('notifications').insert({
           recipient_id: m.profile_id,
@@ -248,7 +177,6 @@ export default function GroupPage() {
           meta: { groupName: group?.name },
         }).then(null, () => {});
       });
-      // Notify group via Telegram (fire-and-forget)
       fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -284,7 +212,6 @@ export default function GroupPage() {
     } catch { showToast('Failed to submit evaluation. Please try again.'); }
   }
 
-  const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
   const isMember = members.some((m) => m.profile_id === user?.id);
 
   // Tab badge computations
@@ -329,7 +256,7 @@ export default function GroupPage() {
         return TABS[next];
       });
     }
-    if (anyModalOpen) return; // Don't register swipe handlers when modals are open
+    if (anyModalOpen) return;
     document.addEventListener('touchstart', onStart, { passive: true });
     document.addEventListener('touchend', onEnd, { passive: true });
     return () => {
@@ -353,7 +280,7 @@ export default function GroupPage() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} tabBadges={tabBadges} />
+      <StudentNav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} tabBadges={tabBadges} />
 
       <div className="pt-14 md:pt-0 md:pl-[220px]">
 
@@ -401,358 +328,72 @@ export default function GroupPage() {
           </div>
         )}
 
-        {/* ── TASKS TAB ── */}
+        {/* ── TAB CONTENT ── */}
         {tab === 'tasks' && (
-          <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            {/* Peer review status banner */}
-            {evalSession && !hasSubmitted && (
-              <div className="bg-brand-light border border-brand-border rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
-                <p className="text-sm text-text">Peer Review is open — submit your ratings</p>
-                <button onClick={() => setTab('evaluation')}
-                  className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
-                  Go to Review
-                </button>
-              </div>
-            )}
-            {evalSession && hasSubmitted && (
-              <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl px-4 py-2.5 mb-4 flex items-center gap-2">
-                <IconCheck size={14} />
-                <p className="text-sm text-[#15803D]">Peer Review submitted — {evalSummaries.length > 0 ? `${Math.max(...evalSummaries.map(s => s.eval_count))}/${members.length - 1} responded` : 'waiting for others'}</p>
-              </div>
-            )}
-
-            {/* All-tasks-done evaluation nudge */}
-            {!evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
-              isLead ? (
-                <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
-                  <p className="text-sm text-text">All tasks complete — ready for peer review?</p>
-                  <button onClick={handleOpenEvaluation}
-                    className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
-                    Open Peer Review
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
-                  <IconCheck size={14} />
-                  <p className="text-sm text-text">All tasks complete! Your group lead can open Peer Review when ready.</p>
-                </div>
-              )
-            )}
-
-            {/* Contribution Record — lead only */}
-            {isLead && (
-              <div className="bg-white border border-border rounded-xl px-4 py-3 mb-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-text">Contribution Record</p>
-                    <p className="text-[11px] text-text-tertiary mt-0.5">Share or download your group&apos;s contribution record</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button onClick={handleShareLink} disabled={shareLoading}
-                      className="h-8 px-3 border border-border bg-bg hover:bg-bg-hover text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-60">
-                      <IconLink size={14} /> {shareLoading ? 'Sharing...' : 'Share Link'}
-                    </button>
-                    <button onClick={handleExport}
-                      className="h-8 px-3 border border-border bg-bg hover:bg-bg-hover text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
-                      <IconExport size={14} /> Download PDF
-                    </button>
-                  </div>
-                </div>
-                {shareUrl && (
-                  <div className="mt-2.5 flex items-center gap-2 bg-bg border border-border rounded-md px-3 py-2">
-                    <p className="text-[12px] text-muted truncate flex-1">{shareUrl}</p>
-                    <button onClick={() => { navigator.clipboard.writeText(shareUrl); showToast('Link copied!', 'success'); }}
-                      className="flex-shrink-0 p-1 text-muted hover:text-text transition-colors" title="Copy link">
-                      <IconCopy size={14} />
-                    </button>
-                    <button onClick={handleRevokeShare}
-                      className="flex-shrink-0 text-[11px] text-red hover:text-[#B91C1C] font-medium transition-colors">
-                      Revoke
-                    </button>
-                  </div>
-                )}
-                <div className="flex gap-1.5 mt-2.5">
-                  {PDF_THEMES.map((t) => {
-                    const isActive = pdfTheme.join() === t.color.join();
-                    return (
-                      <button key={t.label} title={t.label} onClick={() => setPdfTheme(t.color)}
-                        className={`w-5 h-5 rounded-full transition-all ${isActive ? 'ring-2 ring-offset-1 ring-text' : 'opacity-50 hover:opacity-100'}`}
-                        style={{ backgroundColor: `rgb(${t.color.join(',')})` }}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Getting started checklist for lead */}
-            {isLead && groupId && !tasksLoading && (
-              <GettingStartedChecklist
-                groupId={groupId}
-                hasTasks={tasks.length > 0}
-                hasTeammates={members.length > 1}
-                hasEvidence={Object.values(evidenceByTask).some((arr) => arr.length > 0)}
-              />
-            )}
-
-            {/* Task board skeleton while loading */}
-            {tasksLoading ? <TaskBoardSkeleton /> : <>
-
-            {/* Stats row */}
-            <div className="flex gap-2.5 overflow-x-auto pb-1 mb-4" style={{ scrollbarWidth: 'none' }}>
-              {[
-                { label: 'Total tasks', value: tasks.length,                                        color: '' },
-                { label: 'Done',        value: tasks.filter(t => t.status === 'done').length,       color: '#16A34A' },
-                { label: 'In progress', value: tasks.filter(t => t.status === 'inprogress').length, color: '#D97706' },
-                { label: 'To do',       value: tasks.filter(t => t.status === 'todo').length,       color: '#94A3B8' },
-              ].map((s) => (
-                <div key={s.label} className="flex-shrink-0 bg-white border border-border rounded-xl px-3.5 py-2.5 min-w-[80px] shadow-sm">
-                  <p className="text-lg font-bold" style={{ color: s.color || '#0F172A' }}>{s.value}</p>
-                  <p className="text-[12px] text-text-tertiary mt-0.5">{s.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile: status filter */}
-            <div className="flex gap-2 mb-4 overflow-x-auto md:hidden" style={{ scrollbarWidth: 'none' }}>
-              {(['all', 'todo', 'inprogress', 'done'] as StatusFilter[]).map((s) => (
-                <button key={s} onClick={() => setStatusFilter(s)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
-                    statusFilter === s ? 'bg-brand-light text-brand border-brand-border' : 'bg-white text-text-secondary border-border'
-                  }`}
-                >
-                  {{ all: `All (${tasks.length})`, todo: `To Do (${tasks.filter(t=>t.status==='todo').length})`, inprogress: `In Progress (${tasks.filter(t=>t.status==='inprogress').length})`, done: `Done (${tasks.filter(t=>t.status==='done').length})` }[s]}
-                </button>
-              ))}
-            </div>
-
-            {/* Mobile: flat list */}
-            <div className="md:hidden">
-              {tasks.length === 0
-                ? <div className="text-center py-8">
-                    <p className="text-[15px] font-semibold text-text mb-1">No tasks yet</p>
-                    <p className="text-sm text-text-tertiary mb-4 max-w-xs mx-auto">Add your first task to start tracking contributions.{members.length < 2 ? ' Then invite teammates from the Members tab.' : ''}</p>
-                    <button onClick={() => setShowNewTask(true)} className="inline-flex items-center gap-2 h-10 px-5 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
-                      <IconPlus size={16} /> Add a task
-                    </button>
-                  </div>
-                : filteredTasks.length === 0
-                ? <p className="text-sm text-text-tertiary text-center py-8">No tasks here.</p>
-                : filteredTasks.map((task) => (
-                    <TaskCard key={task.id} task={task} isLead={isLead} currentUserId={user!.id}
-                      evidenceCount={evidenceByTask[task.id]?.length ?? 0}
-                      onClick={setSelectedTask} onEdit={setEditingTask} onDelete={handleDeleteTaskClick}
-                    />
-                  ))
-              }
-            </div>
-
-            {/* Desktop: kanban */}
-            <div className="hidden md:grid grid-cols-3 gap-4">
-              {tasks.length === 0
-                ? <div className="col-span-3 text-center py-8">
-                    <p className="text-[15px] font-semibold text-text mb-1">No tasks yet</p>
-                    <p className="text-sm text-text-tertiary mb-4 max-w-xs mx-auto">Add your first task to start tracking contributions.{members.length < 2 ? ' Then invite teammates from the Members tab.' : ''}</p>
-                    <button onClick={() => setShowNewTask(true)} className="inline-flex items-center gap-2 h-10 px-5 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
-                      <IconPlus size={16} /> Add a task
-                    </button>
-                  </div>
-                : STATUS_COLS.map((col) => {
-                    const colTasks = tasks.filter(t => t.status === col.status);
-                    return (
-                      <div key={col.status}>
-                        <div className={`flex items-center gap-1.5 mb-3 px-2.5 py-1.5 rounded-full w-fit ${col.headerClass}`}>
-                          {col.status === 'todo'       && <IconList size={13} />}
-                          {col.status === 'inprogress' && <IconActivity size={13} />}
-                          {col.status === 'done'       && <IconCheck size={13} />}
-                          <span className="text-[11px] font-bold uppercase tracking-wider">{col.label}</span>
-                          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${col.countClass}`}>{colTasks.length}</span>
-                        </div>
-                        {colTasks.length === 0 ? (
-                          <div className="flex items-center justify-center py-8 border-2 border-dashed border-border rounded-xl">
-                            <p className="text-[12px] text-[#C4C0BB]">No tasks here</p>
-                          </div>
-                        ) : colTasks.map((task) => (
-                          <TaskCard key={task.id} task={task} isLead={isLead} currentUserId={user!.id}
-                            evidenceCount={evidenceByTask[task.id]?.length ?? 0}
-                            onClick={setSelectedTask} onEdit={setEditingTask} onDelete={handleDeleteTaskClick}
-                          />
-                        ))}
-                      </div>
-                    );
-                  })
-              }
-            </div>
-            </>}
-          </div>
+          <GroupTasksTab
+            tasks={tasks}
+            members={members}
+            isLead={isLead}
+            userId={user.id}
+            groupId={groupId!}
+            tasksLoading={tasksLoading}
+            evalSession={!!evalSession}
+            evalSessionLoading={evalSessionLoading}
+            hasSubmitted={hasSubmitted}
+            evalSummaries={evalSummaries}
+            evidenceByTask={evidenceByTask}
+            pdfTheme={pdfTheme}
+            setPdfTheme={setPdfTheme}
+            shareUrl={shareUrl}
+            shareLoading={shareLoading}
+            onShareLink={handleShareLink}
+            onRevokeShare={handleRevokeShare}
+            onCopyShareUrl={() => { navigator.clipboard.writeText(shareUrl!); showToast('Link copied!', 'success'); }}
+            onExport={handleExport}
+            onOpenEvaluation={handleOpenEvaluation}
+            onSetTab={setTab}
+            onSelectTask={setSelectedTask}
+            onEditTask={setEditingTask}
+            onDeleteTask={handleDeleteTaskClick}
+            onNewTask={() => setShowNewTask(true)}
+          />
         )}
 
-        {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
-          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            <InlineTip id="timeline-blocker">Use the &quot;Heads Up&quot; button to flag blockers. Your team and teacher will see it here in the Timeline.</InlineTip>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Recent activity</p>
-              <button
-                onClick={() => setShowBlockerModal(true)}
-                className="h-7 px-3 border border-border bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[12px] font-medium text-muted hover:text-[#DC2626] rounded-md flex items-center gap-1.5 transition-colors"
-              >
-                Heads Up
-              </button>
-            </div>
-            {activity.length === 0 ? (
-              <div className="flex flex-col items-center py-14 text-center">
-                <svg viewBox="0 0 120 90" fill="none" className="w-28 mx-auto mb-4 opacity-80">
-                  <ellipse cx="60" cy="82" rx="44" ry="6" fill="#F1F5F9"/>
-                  {/* clock body */}
-                  <circle cx="60" cy="42" r="28" fill="#F1F5F9" stroke="#E2E8F0" strokeWidth="2"/>
-                  <circle cx="60" cy="42" r="22" fill="white"/>
-                  {/* clock hands */}
-                  <line x1="60" y1="42" x2="60" y2="26" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round"/>
-                  <line x1="60" y1="42" x2="70" y2="48" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round"/>
-                  <circle cx="60" cy="42" r="2.5" fill="#94A3B8"/>
-                  {/* tick marks */}
-                  <line x1="60" y1="22" x2="60" y2="25" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="60" y1="59" x2="60" y2="62" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="40" y1="42" x2="43" y2="42" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
-                  <line x1="77" y1="42" x2="80" y2="42" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                <p className="text-[14px] font-semibold text-text-secondary mb-1">No activity yet</p>
-                <p className="text-sm text-text-tertiary">Actions will appear here as your team works.</p>
-              </div>
-            ) : activity.map((entry) => <FeedItem key={entry.id} entry={entry} />)
-            }
-          </div>
+          <GroupTimelineTab
+            activity={activity}
+            onShowBlockerModal={() => setShowBlockerModal(true)}
+          />
         )}
 
-        {/* ── MEMBERS TAB ── */}
         {tab === 'members' && (
-          <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
-            {members.length < 6 && (
-              <InviteBanner
-                token={group.invite_token}
-                onReset={isLead ? async () => {
-                  const res = await fetch(`/api/groups/${group.id}/reset-invite`, { method: 'POST' });
-                  if (res.ok) refreshGroup();
-                } : undefined}
-              />
-            )}
-            <InlineTip id="members-invite">Share the invite link above to add teammates. Groups can have up to 6 members.</InlineTip>
-
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
-              {members.length} member{members.length !== 1 ? 's' : ''}
-            </p>
-            {members.map((m) => (
-              <MemberRow key={m.id} member={m} tasks={tasks}
-                isThisMemberLead={m.profile_id === group.lead_id}
-                canRemove={isLead && m.profile_id !== user?.id}
-                onRemove={() => setMemberToRemove(m)}
-              />
-            ))}
-
-            {/* Group management */}
-            <div className="mt-4 flex flex-col gap-2">
-              {isLead && (
-                <button onClick={() => setShowTransferLead(true)}
-                  className="w-full h-10 border border-border bg-white hover:bg-bg-hover text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                  Transfer Lead
-                </button>
-              )}
-              {isLead ? (
-                <button onClick={() => setShowDeleteGroup(true)}
-                  className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                  <IconTrash size={15} /> Delete Group
-                </button>
-              ) : (
-                <button onClick={() => setShowLeaveConfirm(true)}
-                  className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-                  Leave Group
-                </button>
-              )}
-            </div>
-          </div>
+          <GroupMembersTab
+            group={group}
+            members={members}
+            tasks={tasks}
+            isLead={isLead}
+            userId={user.id}
+            onRemoveMember={setMemberToRemove}
+            onTransferLead={() => setShowTransferLead(true)}
+            onDeleteGroup={() => setShowDeleteGroup(true)}
+            onLeaveGroup={() => setShowLeaveConfirm(true)}
+            onRefreshGroup={refreshGroup}
+          />
         )}
-        {/* ── EVALUATION TAB ── */}
+
         {tab === 'evaluation' && (
-          <div>
-            {/* Not open */}
-            {!evalSession && (
-              <div className="max-w-2xl mx-auto px-4 py-10 flex flex-col items-center text-center gap-3">
-                <InlineTip id="eval-explainer">When all tasks are done, the group lead opens Peer Review. Each member rates everyone else&apos;s contribution anonymously.</InlineTip>
-                <p className="text-[15px] font-semibold text-text">Peer Review</p>
-                <p className="text-sm text-text-secondary max-w-xs">
-                  When all work is done, the lead opens peer review so teammates can rate each other&apos;s contributions.
-                </p>
-                {isLead ? (
-                  <button onClick={handleOpenEvaluation}
-                    className="mt-2 h-10 px-5 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-md transition-colors">
-                    Open Peer Review
-                  </button>
-                ) : (
-                  <p className="text-sm text-text-tertiary">
-                    Waiting for the lead to open peer review.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Open + not yet submitted */}
-            {evalSession && !hasSubmitted && (
-              <EvaluationForm
-                groupId={group.id}
-                currentUserId={user!.id}
-                members={members}
-                onSubmit={handleSubmitEvaluation}
-              />
-            )}
-
-            {/* Open + not yet submitted */}
-            {evalSession && !hasSubmitted && isLead && (
-              <div className="flex justify-center mt-2 pb-4">
-                <button onClick={() => setShowResetEval(true)}
-                  className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
-                  Reset evaluation
-                </button>
-              </div>
-            )}
-
-            {/* Open + submitted */}
-            {evalSession && hasSubmitted && (
-              <>
-                {/* Post-submission guidance */}
-                <div className="max-w-2xl mx-auto px-4 pt-4">
-                  <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl px-4 py-3 mb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <IconCheck size={14} />
-                      <p className="text-sm font-medium text-[#15803D]">Your review is submitted</p>
-                    </div>
-                    <p className="text-[13px] text-[#166534]">
-                      {evalSummaries.length > 0
-                        ? `${Math.max(...evalSummaries.map(s => s.eval_count))} of ${members.length} members have responded.`
-                        : 'Waiting for other members to respond.'}
-                      {isLead
-                        ? ' You can export the Contribution Record once everyone submits.'
-                        : ' The group lead will export the Contribution Record when ready.'}
-                    </p>
-                  </div>
-                </div>
-                <EvaluationResults
-                  summaries={evalSummaries}
-                  members={members}
-                  currentUserId={user!.id}
-                  memberCount={members.length}
-                />
-                {isLead && (
-                  <div className="flex justify-center mt-2 pb-4">
-                    <button onClick={() => setShowResetEval(true)}
-                      className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
-                      Reset evaluation
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+          <GroupEvaluationTab
+            groupId={groupId!}
+            userId={user.id}
+            isLead={isLead}
+            members={members}
+            evalSession={evalSession}
+            hasSubmitted={hasSubmitted}
+            evalSummaries={evalSummaries}
+            onOpenEvaluation={handleOpenEvaluation}
+            onSubmitEvaluation={handleSubmitEvaluation}
+            onShowResetEval={() => setShowResetEval(true)}
+          />
         )}
       </div>
 
