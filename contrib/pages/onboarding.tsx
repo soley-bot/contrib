@@ -4,6 +4,7 @@ import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
 import { requireAuth } from '@/lib/supabase-server';
 import RoleToggle from '@/components/role-toggle';
+import InlineTip from '@/components/inline-tip';
 import type { User } from '@supabase/supabase-js';
 import type { UserRole } from '@/types';
 
@@ -99,6 +100,7 @@ export default function Onboarding() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <InlineTip id="onboarding-role">Your role determines which dashboard you see. Students track group work. Teachers monitor courses.</InlineTip>
           <div className="flex flex-col gap-1">
             <label className="text-[13px] font-medium text-text-secondary">Full name</label>
             <input

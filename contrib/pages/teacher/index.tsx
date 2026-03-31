@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import TeacherNav from '@/components/teacher-nav';
 import CourseCard from '@/components/course-card';
+import InlineTip from '@/components/inline-tip';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useToast } from '@/components/toast-provider';
@@ -164,6 +165,9 @@ export default function TeacherDashboard() {
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
+              {courses.length > 0 && (
+                <InlineTip id="teacher-invite">Share your course invite link with students. They can enroll and form groups themselves.</InlineTip>
+              )}
               {courses.map((course) => (
                 <CourseCard
                   key={course.id}

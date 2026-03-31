@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import TeacherNav from '@/components/teacher-nav';
 import CourseGroupRow from '@/components/course-group-row';
+import InlineTip from '@/components/inline-tip';
 import type { GroupHealthStatus } from '@/components/course-group-row';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
@@ -371,6 +372,10 @@ export default function CourseDetail() {
                 ))}
               </div>
             </div>
+          )}
+
+          {groups.length > 0 && (
+            <InlineTip id="teacher-attention">Groups flagged &quot;needs attention&quot; are overdue, inactive, or have unresolved blockers.</InlineTip>
           )}
 
           {groups.length > 0 && showAlertBanner && (
