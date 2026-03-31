@@ -28,10 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const text = update.message?.text?.trim().toUpperCase();
   const chatId = update.message?.chat?.id;
 
-  // Acknowledge immediately — Telegram retries if we don't respond quickly
-  res.status(200).end();
-
-  if (!text || !chatId) return;
+  if (!text || !chatId) return res.status(200).end();
 
   // Look up a pending verification matching this code
   const { data: sub } = await adminClient
@@ -44,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!sub) {
     await sendTelegramMessage(String(chatId), 'Code not found or expired. Go back to Contrib and request a new code.');
-    return;
+    return res.status(200).end();
   }
 
   // Link this chat_id to the profile
@@ -61,11 +58,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (updateError) {
     console.error('[telegram/webhook] verification update error:', updateError);
     await sendTelegramMessage(String(chatId), 'Something went wrong, please try again.');
-    return;
+    return res.status(200).end();
   }
 
   await sendTelegramMessage(
     String(chatId),
     'Connected! You will now receive Contrib notifications here.'
   );
+  return res.status(200).end();
 }
