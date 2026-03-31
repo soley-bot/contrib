@@ -30,6 +30,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!text || !chatId) return res.status(200).end();
 
+  // Handle /start and /help commands
+  if (text === '/START') {
+    // Check if already connected
+    const { data: existing } = await adminClient
+      .from('telegram_subscriptions')
+      .select('verified')
+      .eq('chat_id', String(chatId))
+      .eq('verified', true)
+      .maybeSingle();
+
+    if (existing) {
+      await sendTelegramMessage(String(chatId), 'You are already connected to Contrib. You will receive notifications here when things happen in your groups.');
+    } else {
+      await sendTelegramMessage(String(chatId), 'Welcome to Contrib notifications!\n\nTo connect, go to your profile at joincontrib.com and click "Connect Telegram". You will get a 6-character code to send here.');
+    }
+    return res.status(200).end();
+  }
+
+  if (text === '/HELP') {
+    await sendTelegramMessage(String(chatId), 'Contrib sends you notifications when:\n- A task is assigned to you\n- A group member declares a blocker\n- A deadline is approaching\n- A peer review is opened\n\nTo connect: go to joincontrib.com/profile and click "Connect Telegram".\nTo disconnect: use the same page.\n\nThis bot is one-way — it sends notifications only. For questions, visit joincontrib.com.');
+    return res.status(200).end();
+  }
+
+  // If it doesn't look like a 6-char verification code, give a helpful response
+  if (text.length !== 6 || !/^[A-Z0-9]+$/.test(text)) {
+    await sendTelegramMessage(String(chatId), 'I only understand verification codes from Contrib. Go to joincontrib.com/profile and click "Connect Telegram" to get your code.');
+    return res.status(200).end();
+  }
+
   // Look up a pending verification matching this code
   const { data: sub } = await adminClient
     .from('telegram_subscriptions')
