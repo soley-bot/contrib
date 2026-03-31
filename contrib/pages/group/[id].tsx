@@ -39,7 +39,7 @@ export default function GroupPage() {
   const { user, profile, loading: userLoading } = useUser();
   const { group, members, isLead, loading: groupLoading, refresh: refreshGroup } = useGroup(groupId, user?.id);
   const { tasks, loading: tasksLoading, refresh: refreshTasks } = useTasks(groupId);
-  const { activity, refresh: refreshActivity } = useActivity(groupId);
+  const { activity, loadMore, hasMore, loadingMore, refresh: refreshActivity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
   const { evidenceByTask, refresh: refreshEvidence } = useGroupEvidence(taskIds);
   const { session: evalSession, loading: evalSessionLoading, openEvaluation, resetEvaluation, refresh: refreshEvalSession } = useEvaluationSession(groupId);
@@ -363,6 +363,9 @@ export default function GroupPage() {
           <GroupTimelineTab
             activity={activity}
             onShowBlockerModal={() => setShowBlockerModal(true)}
+            onLoadMore={loadMore}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
           />
         )}
 
