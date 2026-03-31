@@ -154,6 +154,9 @@ export default function GroupTasksTab({
         />
       )}
 
+      <InlineTip id="tasks-log-work">Mark tasks as done and log evidence to build your Contribution Record for grading.</InlineTip>
+      <InlineTip id="tasks-types">Tag tasks by type (research, meeting, coordination) to show the full picture of your contributions.</InlineTip>
+
       {/* Task board skeleton while loading */}
       {tasksLoading ? <TaskBoardSkeleton /> : <>
 

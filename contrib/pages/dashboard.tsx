@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { formatDueDate } from '@/lib/date';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import InlineTip from '@/components/inline-tip';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -122,6 +123,10 @@ export default function Dashboard() {
 
         {/* Content */}
         <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
+          <InlineTip id="dashboard-telegram">Connect Telegram in your profile to get deadline reminders 24h before.</InlineTip>
+          {contributionCounts.total > 0 && (
+            <InlineTip id="dashboard-contribution">Your contribution summary shows completed work by type across all groups.</InlineTip>
+          )}
           {/* Enrolled courses without a group yet */}
           {(() => {
             const groupCourseIds = new Set(groups.filter((g) => g.course_id).map((g) => g.course_id));

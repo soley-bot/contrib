@@ -10,6 +10,7 @@ import { useProfile } from '@/hooks/use-profile';
 import { useRoleLock } from '@/hooks/use-role-lock';
 import { supabase } from '@/lib/supabase';
 import { IconCopy, IconCheck } from '@/components/icons';
+import InlineTip from '@/components/inline-tip';
 import type { UserRole } from '@/types';
 
 type TelegramStatus = 'loading' | 'disconnected' | 'pending' | 'connected';
@@ -336,6 +337,9 @@ export default function ProfilePage() {
             </div>
           )}
           {/* Telegram notifications */}
+          {tgStatus === 'disconnected' && (
+            <InlineTip id="profile-telegram">Connecting Telegram lets you receive task reminders and team notifications on your phone.</InlineTip>
+          )}
           <div className="mt-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-2.5">Notifications</p>
             {tgStatus === 'disconnected' && (
