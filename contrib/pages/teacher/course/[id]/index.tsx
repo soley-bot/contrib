@@ -40,6 +40,7 @@ export default function CourseDetail() {
   const [filterMode, setFilterMode] = useState<'all' | 'attention'>('all');
   const [courseResetState, setCourseResetState] = useState<'idle' | 'confirm' | 'resetting' | 'done'>('idle');
   const [ungroupedStudents, setUngroupedStudents] = useState<Profile[]>([]);
+  const [blockerCounts, setBlockerCounts] = useState<Record<string, number>>({});
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -105,6 +106,23 @@ export default function CourseDetail() {
       setUngroupedStudents((profiles as Profile[]) ?? []);
     })();
   }, [courseId, courseLoading, course, groups]);
+
+  const groupIds = useMemo(() => groups.map(({ group }) => group.id), [groups]);
+
+  useEffect(() => {
+    if (groupIds.length === 0) return;
+    (async () => {
+      const { data } = await supabase
+        .from('blocker_declarations')
+        .select('group_id')
+        .in('group_id', groupIds);
+      const counts: Record<string, number> = {};
+      (data ?? []).forEach((row: { group_id: string }) => {
+        counts[row.group_id] = (counts[row.group_id] ?? 0) + 1;
+      });
+      setBlockerCounts(counts);
+    })();
+  }, [groupIds.join(',')]);
 
   const courseInviteLink = course ? `${inviteBase}course/${course.invite_token}` : '';
 
@@ -182,7 +200,6 @@ export default function CourseDetail() {
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
   }
 
-  const groupIds = useMemo(() => groups.map(({ group }) => group.id), [groups]);
   const { evalSessions, evalCounts, evalScores, latestActivity, loading: analyticsLoading } = useCourseAnalytics(groupIds);
 
   const totalMembers = groups.reduce((s, g) => s + g.memberCount, 0);
@@ -257,6 +274,14 @@ export default function CourseDetail() {
   const attentionCount = groups.filter(({ group, taskDone, taskTotal, memberCount }) =>
     needsAttention(group.id, group, taskDone, taskTotal, memberCount)
   ).length;
+
+  const totalBlockers = Object.values(blockerCounts).reduce((s, c) => s + c, 0);
+  const inactiveGroupCount = groups.filter(({ group }) => {
+    const lastAct = latestActivity[group.id];
+    if (!lastAct) return true;
+    return (todayDate.getTime() - new Date(lastAct).getTime()) >= THREE_DAYS_MS;
+  }).length;
+  const showAlertBanner = overdueCount > 0 || inactiveGroupCount > 0 || totalBlockers > 0;
 
   if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   if (!course) return (
@@ -346,6 +371,25 @@ export default function CourseDetail() {
                 ))}
               </div>
             </div>
+          )}
+
+          {groups.length > 0 && showAlertBanner && (
+            <button
+              onClick={() => setFilterMode('attention')}
+              className="w-full mb-3 px-3 py-2.5 bg-[#FEF3C7] border border-[#FDE68A] rounded-lg flex items-center gap-2 text-left transition-colors hover:bg-[#FDE68A]/50"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 text-[#92400E]">
+                <path d="M8 1.5L1.5 13h13L8 1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                <path d="M8 6v3M8 11.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span className="text-[13px] text-[#92400E] font-medium">
+                {[
+                  overdueCount > 0 ? `${overdueCount} group${overdueCount > 1 ? 's' : ''} overdue` : '',
+                  inactiveGroupCount > 0 ? `${inactiveGroupCount} group${inactiveGroupCount > 1 ? 's' : ''} inactive (7+ days)` : '',
+                  totalBlockers > 0 ? `${totalBlockers} unresolved blocker${totalBlockers > 1 ? 's' : ''}` : '',
+                ].filter(Boolean).join(' \u00b7 ')}
+              </span>
+            </button>
           )}
 
           {groups.length > 0 && (
