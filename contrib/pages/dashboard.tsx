@@ -8,6 +8,8 @@ import { requireStudent } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
 import { useDashboardSummary } from '@/hooks/use-dashboard-summary';
 import { useCourseMemberships } from '@/hooks/use-course-memberships';
+import { useContributionSummary } from '@/hooks/use-contribution-summary';
+import ContributionSummary from '@/components/contribution-summary';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { formatDueDate } from '@/lib/date';
@@ -27,6 +29,7 @@ export default function Dashboard() {
   const groupIds = groups.map((g) => g.id);
   const { summaries } = useDashboardSummary(groupIds, user?.id);
   const { courses: enrolledCourses, loading: coursesLoading } = useCourseMemberships(user?.id);
+  const { counts: contributionCounts } = useContributionSummary(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [subject, setSubject] = useState('');
@@ -148,6 +151,7 @@ export default function Dashboard() {
               </div>
             );
           })()}
+          <ContributionSummary counts={contributionCounts} />
           {groupsLoading ? (
             <div className="flex flex-col gap-2.5 mt-2">
               {[1, 2, 3].map((i) => (
