@@ -4,7 +4,7 @@ Individual effort is invisible in group work. Contrib turns it on.
 
 ## Current Priority
 
-Phase 4 Telegram notifications shipped (Mar 2026). Next: webhook registration after deploy, teacher weekly digest cron, then teacher onboarding + course analytics.
+Phase 4 complete (Telegram bot live, all notification triggers wired). Next: deadline cron job, teacher weekly digest, then course analytics improvements.
 
 ## Tech Stack
 
@@ -21,8 +21,8 @@ Phase 4 Telegram notifications shipped (Mar 2026). Next: webhook registration af
 
 ## Core Constraints (never break these)
 
-0. **Live users in production** — real users are active. Never run destructive DB operations (DROP, TRUNCATE, DELETE without WHERE, column removal). All migrations must be additive (add columns/tables, not remove). All schema changes must be backwards-compatible. Test locally first, never against production.
-1. **Pages Router only** — no `app/`, `layout.tsx`, `use client`, `getServerSideProps` is correct here
+0. **Live users in production** — no destructive DB operations. All migrations additive and backwards-compatible.
+1. **Pages Router only** — no `app/`, `layout.tsx`, `use client`. `getServerSideProps` is correct here.
 2. **Evidence is immutable** — versioning only (`version_number`), never mutate or delete
 3. **Soft delete tasks** — use `deleted_at`, never hard delete
 4. **No emojis** — SVG icons only (`components/icons.tsx`)
@@ -44,8 +44,7 @@ Phase 4 Telegram notifications shipped (Mar 2026). Next: webhook registration af
 - Teacher: `#1240C4` (dark blue)
 - Background: `#F8FAFF` (never `#F9FAFB`)
 - Text: `#0F172A` (slate)
-- **Banned:** teal `#0E7490`, coral `#FF5841`, warm stone `#3A3632`
-- **No gradients, no deep shadows** — flat design only
+- **Banned:** teal, coral, warm stone — **No gradients, no deep shadows** — flat design only
 
 ## Page Structure
 
@@ -56,147 +55,127 @@ pages/
   forgot-password.tsx / reset-password.tsx
   auth/callback.tsx       — OAuth callback
   onboarding.tsx          — new user setup
-  dashboard.tsx           — student dashboard (getServerSideProps: requireStudent)
-  profile.tsx             — user profile (getServerSideProps: requireAuth)
-  group/[id].tsx          — student group (getServerSideProps: requireAuth)
-  join/[token].tsx        — join group via invite
-  join/course/[token].tsx — join course via teacher invite
+  dashboard.tsx           — student dashboard (+ course memberships)
+  profile.tsx             — user profile + Telegram connection
+  group/[id].tsx          — student group view (largest page ~900 lines)
+  join/[token].tsx        — join group via invite (auto-transfers lead from teacher)
+  join/course/[token].tsx — join course via invite (enrolls in course_members)
   report/[token].tsx      — public shareable contribution record (no auth)
-  teacher/index.tsx       — teacher dashboard (getServerSideProps: requireTeacher)
-  teacher/course/[id]/index.tsx            — course detail
+  teacher/index.tsx       — teacher dashboard
+  teacher/course/[id]/index.tsx            — course detail + ungrouped students
   teacher/course/[id]/group/[groupId].tsx  — group drill-down (read-only)
 ```
 
-## Security Infrastructure (shipped)
-
-- **Server-side auth**: `lib/supabase-server.ts` — `requireAuth()`, `requireStudent()`, `requireTeacher()` in `getServerSideProps`
-- **Input validation**: `lib/validation.ts` — Zod schemas for signup, join, groups, tasks, evidence, evaluations, courses
-- **Rate limiting**: `lib/rate-limit.ts` — in-memory, applied to API routes (signup: 5/min, lookup: 30/min)
-- **Error boundary**: Sentry `withErrorBoundary` in `_app.tsx`
-- **Toast provider**: `components/toast-provider.tsx` — shared context, auto-dismiss
-- **RLS policies**: All 9 tables have RLS enabled, 6 additional policies from audit (teacher evidence read, member leave/remove, eval delete, group delete)
-- **DB indexes**: 9 performance indexes on common query patterns
-- **Report shares**: Time-limited tokens (default 7 days), public viewer at `/report/[token]` strips peer review scores
-- **Role lock**: Users locked to chosen role after first meaningful action
-
 ## API Routes
 
-- `POST /api/auth/signup` — rate-limited user registration (5/min)
-- `GET  /api/join/lookup` — group invite token lookup (30/min)
-- `GET  /api/report/lookup` — public report data, no auth (20/min)
-- `*    /api/report/share` — create/get/delete shareable links (10/min)
+| Route | Method | Purpose | Auth |
+|---|---|---|---|
+| `/api/auth/signup` | POST | Registration (5/min) | None |
+| `/api/join/lookup` | GET | Group invite lookup (30/min) | None |
+| `/api/report/lookup` | GET | Public report data (20/min) | None |
+| `/api/report/share` | GET/POST/DELETE | Shareable links (10/min) | Required |
+| `/api/groups/[id]/blockers` | POST | Declare blocker | Required |
+| `/api/groups/[id]/reset-invite` | POST | Reset group invite | Required (lead) |
+| `/api/groups/[id]/auto-transfer-lead` | POST | Transfer lead from teacher to student | Required |
+| `/api/courses/[id]/reset-invite` | POST | Reset course invite | Required (teacher) |
+| `/api/notify` | POST | Send Telegram notification to group | Required |
+| `/api/telegram/connect` | POST | Generate verification code | Required |
+| `/api/telegram/disconnect` | POST | Remove Telegram link | Required |
+| `/api/telegram/webhook` | POST | Incoming Telegram messages | Webhook secret |
+| `/api/telegram/setup` | GET | Register webhook (run once) | Secret param |
 
-## Phase 1 Schema (added Mar 2026)
+## Database (14 tables)
 
-Three new tables/columns from `database/supabase-phase1-migration.sql`:
+`profiles`, `groups`, `group_members`, `tasks`, `evidence`, `activity_log`, `courses`, `course_members`, `evaluation_sessions`, `evaluations`, `blocker_declarations`, `telegram_subscriptions`, `report_shares`, `notifications`
 
-- **`tasks.contribution_type`** — text, default `'task'`, enum: `task | coordination | meeting | discussion | research`
-- **`blocker_declarations`** — `id, group_id, profile_id, reason, created_at`. RLS: group members + lead + teacher (via course) can read; only the student themselves can insert. Logged to `activity_log` as `blocker_declared`.
-- **`telegram_subscriptions`** — `id, profile_id (unique), chat_id, verified, verification_code, verification_expires_at, notify_contributions, notify_blockers, notify_deadlines, notify_weekly_digest, created_at, updated_at`. RLS: users see/manage only their own row.
-
-## Key Types (`types/index.ts`)
-
-Profile, Group, Task, Evidence, ActivityLog, Course, EvaluationSession, Evaluation, EvaluationSummary — see file for full shapes.
+Key details:
+- `tasks.contribution_type`: `task | coordination | meeting | discussion | research`
+- `telegram_subscriptions.chat_id`: nullable bigint (null when pending)
+- `course_members`: tracks course enrollment before group assignment
+- All tables have RLS enabled
 
 ## What's Built
 
-- **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), timeline (realtime), peer review, PDF export (6 themes), task board skeletons, shareable contribution record links, role lock, blocker declarations ("Heads Up"), in-app notifications, Telegram notifications
-- **Teacher:** courses, group list + progress, group drill-down (read-only), teacher-mode PDF with executive summary, role-based PDF export, course analytics (health status, peer review rates, "needs attention" filter)
-- **Real-time:** tasks, activity_log, group_members, evaluation_sessions, evaluations, evidence, courses, notifications — all via Supabase `postgres_changes`
-- **Notifications:** bell icon in nav, task assignment / peer review opened / member joined triggers
+- **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), timeline (realtime), peer review, PDF export (6 themes), shareable report links, blocker declarations, in-app + Telegram notifications, course enrollment
+- **Teacher:** courses, group creation (auto-transfers lead to first student), group list + progress, drill-down (read-only), course analytics, ungrouped students view
+- **Real-time:** tasks, activity_log, group_members, evaluation_sessions, evaluations, evidence, courses, notifications
+- **Telegram:** 6 notification types (task created, task reassigned, evidence logged, peer review opened, member joined, blocker declared). Bot responds to /start, /help, and non-code messages.
 
-## Supabase Realtime
+## Course Invite Flows
 
-These tables must have Realtime enabled in the Supabase dashboard (Database > Replication):
-`tasks`, `activity_log`, `group_members`, `evaluation_sessions`, `evaluations`, `evidence`, `courses`, `notifications`
+**Flow 1 (student-driven):** Teacher creates course → shares invite link → student joins course → student creates group inside course from dashboard → group lead invites members
 
-## Z-Index Hierarchy
+**Flow 2 (teacher-driven):** Teacher creates course → creates group in course (teacher = temp lead) → copies group invite link → first student who joins auto-becomes lead (teacher removed from group_members)
 
-| Layer | Z-index |
-|---|---|
-| Content | default |
-| Sticky tabs | `z-40` |
-| Navigation | `z-50` |
-| Modals | `z-[100]` |
+## Shared Types & Constants (`types/index.ts`)
 
-## Role-Based Architecture
+`Profile`, `Group`, `Task`, `Evidence`, `ActivityLog`, `Course`, `CourseMember`, `EvaluationSession`, `Evaluation`, `EvaluationSummary`, `EvaluationInsert`, `CONTRIBUTION_TYPES`
 
-Contrib has two user types (student, teacher). Keep them strictly separated:
+## Security
 
-- **Pages:** `pages/teacher/*` for teacher, `pages/` root for student — never mix
-- **API routes:** Separate routes per role (`/api/teacher/...` vs `/api/student/...` or root-level for students). One route should not branch on role to do fundamentally different things.
-- **Components:** If a component needs a role check, split it into two components — never add `if (role === 'teacher')` inside a shared component
-- **Service/utility functions:** Shared is fine — they operate on data, not UI
-- **Database queries:** Shared fine — RLS handles authorization
+- **Auth:** `lib/supabase-server.ts` — `requireAuth()`, `requireStudent()`, `requireTeacher()`. All API routes use `getUser()` (not `getSession()`).
+- **Validation:** Zod schemas for all user inputs
+- **Rate limiting:** In-memory (`lib/rate-limit.ts`) — adequate for current scale, migrate to Upstash Redis before scaling
+- **RLS:** All 14 tables. Known gaps: `profiles` SELECT is overly broad, `courses` SELECT exposes invite tokens, `notifications` INSERT is too permissive — fix before scaling.
+- **CSP:** Defined in `next.config.ts` only (removed from `vercel.json`)
 
-**The rule:** Role logic should be encoded in the folder/file structure, not in scattered `if (user.role === 'teacher')` branches.
+## Telegram Bot
+
+One-way notification bot (`@contrib_notify_bot`). Setup guide: `database/TELEGRAM-SETUP.md`
+
+- `lib/telegram.ts` — `sendTelegramMessage`, `getBotUsername`, `setWebhook`
+- `lib/notify.ts` — `notifyGroupMembers(groupId, text, type, excludeId)` — respects `notify_*` preference columns
+- `pages/api/notify.ts` — client-callable endpoint for Telegram notifications (auth + group membership verified)
+- Webhook registered at `joincontrib.com/api/telegram/webhook`
 
 ## Coding Standards
 
 ### Always
 - Check Supabase `error` and surface to user — never silent failures
-- Show spinner/skeleton while loading — never `return null` or flash `0`
+- Show spinner/skeleton while loading — never `return null` for missing data
 - Guard modals: disable backdrop click during async, `<form onSubmit>` for Enter key
-- Double-submit prevention: `if (submitting) return` on every async handler
-- Validate inputs with Zod before Supabase operations
+- Double-submit prevention on every async handler
+- Validate inputs with Zod before Supabase
 - Type check: `npx tsc --noEmit` after multi-file changes
+- Use `getUser()` not `getSession()` in API routes
 
 ### Never
 - Teal, coral, warm stone colors
 - Old feature names (Activity, Evaluation, Export Report, Upload evidence)
-- `return null` for missing data
 - Hard delete on tasks or evidence
 - App Router conventions in this Pages Router project
+- `res.end()` before async work in API routes (Vercel kills the function)
 
-### Mobile
-- Bottom elements: `calc(60px + env(safe-area-inset-bottom))`
-- No duplicate components across tabs (e.g. InviteBanner)
-- Touch handlers check for open modals
+## Role-Based Architecture
 
-## Git Workflow
+- **Pages:** `pages/teacher/*` for teacher, `pages/` root for student
+- **Components:** Split by role if needed — never `if (role === 'teacher')` in shared components
+- **Service/utility functions:** Shared is fine
 
-- `main` is always deployable — feature branches, rebase before merge
-- Commit messages: short, imperative ("Add task modal", "Fix auth redirect")
-- After merge: pull main, prune, delete local branch
-- After conflicts: verify with `npm run build` before committing
-- Worktree safety: always confirm active worktree path with `git rev-parse --show-toplevel` before writing any files
-- When making git commits or PRs, always use the git assistant skill if available. Do not attempt manual git workflows unless the skill is unavailable
+## Git & Deployment
 
-## Verification
-
-- After making changes, always verify the app builds successfully with `npm run build` before claiming the task is done. Never say fixes are complete without verification
-- Before fixing anything, diagnose the root cause first. Read the relevant files, check the error logs, and explain what's wrong. Only then propose a fix and verify it builds
-- Run `npx tsc --noEmit` after multi-file changes
-
-## Authentication
-
-- When fixing auth flows (Google OAuth, PKCE, session persistence), always test the full login → callback → redirect → session chain. Auth race conditions have been a recurring issue
-- Before starting auth work, run `git fetch origin && git merge origin/main` and resolve any conflicts to avoid divergence
+- `main` is always deployable. Domain: `joincontrib.com`
+- Verify with `npm run build` before claiming done
+- Worktree safety: confirm path with `git rev-parse --show-toplevel`
+- After deploy: webhook auto-registered (no manual setup needed)
 
 ## Dev Setup
 
 ```bash
 cd contrib && npm install
-# Ensure .env.local has NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET
+# .env.local needs: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET
 npm run dev  # localhost:3000
 ```
-
-SQL migrations in `database/` — apply via Supabase dashboard.
-
-## Telegram Bot (Phase 4, Mar 2026)
-
-One-way notification bot. Students connect via profile page; bot sends DMs when group events happen.
-
-- **`lib/telegram.ts`** — `sendTelegramMessage`, `getBotUsername`, `setWebhook`
-- **`lib/notify.ts`** — `notifyGroupMembers(groupId, text, excludeId)` — notifies all verified subscribers in a group
-- **`pages/api/telegram/connect.ts`** — POST, auth required — generates 6-char code stored in `telegram_subscriptions`
-- **`pages/api/telegram/webhook.ts`** — POST from Telegram — verifies code, links `chat_id`
-- **`pages/api/telegram/disconnect.ts`** — POST, auth required — clears `chat_id`
-- **`pages/api/telegram/setup.ts`** — GET with `?secret=` — registers webhook URL with Telegram (run once after deploy)
-
-**After deploying:** visit `https://your-domain.vercel.app/api/telegram/setup?secret=contrib_webhook_secret_2026` once to activate the webhook.
 
 ## Business Model
 
 - Students: free forever
 - Teachers/institutions: pay for real-time monitoring + AI features (post-launch)
+
+## Deferred Work
+
+- Rate limiting → Upstash Redis (before scaling)
+- RLS tightening: profiles, courses, notifications tables
+- `group/[id].tsx` split (~900 lines, refactor when adding next feature)
+- `nav.tsx` role split (refactor when touching nav)
+- Deadline approaching + weekly digest (need cron jobs)
