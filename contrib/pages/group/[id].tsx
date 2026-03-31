@@ -18,6 +18,8 @@ import EvaluationForm from '@/components/evaluation-form';
 import EvaluationResults from '@/components/evaluation-results';
 import TaskBoardSkeleton from '@/components/task-skeleton';
 import BlockerModal from '@/components/blocker-modal';
+import InlineTip from '@/components/inline-tip';
+import GettingStartedChecklist from '@/components/getting-started-checklist';
 import { IconPlus, IconExport, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconList, IconCheck, IconLink, IconCopy } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
@@ -80,6 +82,19 @@ export default function GroupPage() {
   const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null);
   const [showResetEval, setShowResetEval] = useState(false);
   const [showBlockerModal, setShowBlockerModal] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Check for just-joined welcome banner
+  useEffect(() => {
+    if (!groupId) return;
+    try {
+      const key = `contrib_just_joined_${groupId}`;
+      if (localStorage.getItem(key)) {
+        setShowWelcome(true);
+        localStorage.removeItem(key);
+      }
+    } catch {}
+  }, [groupId]);
 
   useEffect(() => {
     if (!userLoading && !user) router.replace('/signup');
@@ -267,6 +282,26 @@ export default function GroupPage() {
   const filteredTasks = statusFilter === 'all' ? tasks : tasks.filter((t) => t.status === statusFilter);
   const isMember = members.some((m) => m.profile_id === user?.id);
 
+  // Tab badge computations
+  const myTodoCount = tasks.filter((t) => t.status === 'todo' && t.assignee_id === user?.id).length;
+  const hasNewActivity = (() => {
+    if (!groupId || activity.length === 0) return false;
+    try {
+      const lastVisit = localStorage.getItem(`contrib_timeline_${groupId}`);
+      if (!lastVisit) return true;
+      return new Date(activity[0]?.created_at) > new Date(lastVisit);
+    } catch { return false; }
+  })();
+  const needsEvalAction = !!evalSession && !hasSubmitted;
+  const tabBadges = { tasks: myTodoCount, activity: hasNewActivity, evaluation: needsEvalAction };
+
+  // Track timeline visits
+  useEffect(() => {
+    if (tab === 'activity' && groupId) {
+      try { localStorage.setItem(`contrib_timeline_${groupId}`, new Date().toISOString()); } catch {}
+    }
+  }, [tab, groupId]);
+
   // ── Swipe navigation between tabs ──
   const TABS: Tab[] = ['tasks', 'activity', 'members', 'evaluation'];
   const touchRef = useRef({ x: 0, y: 0, active: false });
@@ -313,7 +348,7 @@ export default function GroupPage() {
 
   return (
     <div className="min-h-dvh bg-bg">
-      <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} />
+      <Nav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} tabBadges={tabBadges} />
 
       <div className="pt-14 md:pt-0 md:pl-[220px]">
 
@@ -344,6 +379,23 @@ export default function GroupPage() {
           </div>
         </div>
 
+        {/* Welcome banner for new members */}
+        {showWelcome && (
+          <div className="max-w-5xl mx-auto px-4 pt-4">
+            <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-text mb-1">Welcome to {group.name}!</p>
+                <p className="text-[13px] text-text-secondary">
+                  Use <strong>Tasks</strong> to log your work, <strong>Timeline</strong> to see activity, and <strong>Peer Review</strong> when your lead opens it.
+                </p>
+              </div>
+              <button onClick={() => setShowWelcome(false)} className="flex-shrink-0 p-1 text-text-tertiary hover:text-text transition-colors" aria-label="Dismiss">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">
@@ -364,15 +416,22 @@ export default function GroupPage() {
               </div>
             )}
 
-            {/* All-tasks-done evaluation nudge (lead only, evaluation not yet open) */}
-            {isLead && !evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
-              <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
-                <p className="text-sm text-text">All tasks complete — ready for peer review?</p>
-                <button onClick={handleOpenEvaluation}
-                  className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
-                  Open Peer Review
-                </button>
-              </div>
+            {/* All-tasks-done evaluation nudge */}
+            {!evalSessionLoading && !evalSession && tasks.length > 0 && tasks.every((t) => t.status === 'done') && (
+              isLead ? (
+                <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
+                  <p className="text-sm text-text">All tasks complete — ready for peer review?</p>
+                  <button onClick={handleOpenEvaluation}
+                    className="flex-shrink-0 h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md transition-colors">
+                    Open Peer Review
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
+                  <IconCheck size={14} />
+                  <p className="text-sm text-text">All tasks complete! Your group lead can open Peer Review when ready.</p>
+                </div>
+              )
             )}
 
             {/* Contribution Record — lead only */}
@@ -421,6 +480,16 @@ export default function GroupPage() {
               </div>
             )}
 
+            {/* Getting started checklist for lead */}
+            {isLead && groupId && !tasksLoading && (
+              <GettingStartedChecklist
+                groupId={groupId}
+                hasTasks={tasks.length > 0}
+                hasTeammates={members.length > 1}
+                hasEvidence={Object.values(evidenceByTask).some((arr) => arr.length > 0)}
+              />
+            )}
+
             {/* Task board skeleton while loading */}
             {tasksLoading ? <TaskBoardSkeleton /> : <>
 
@@ -455,7 +524,13 @@ export default function GroupPage() {
             {/* Mobile: flat list */}
             <div className="md:hidden">
               {tasks.length === 0
-                ? <p className="text-sm text-text-tertiary text-center py-8">No tasks yet. Add your first task to get started.</p>
+                ? <div className="text-center py-8">
+                    <p className="text-[15px] font-semibold text-text mb-1">No tasks yet</p>
+                    <p className="text-sm text-text-tertiary mb-4 max-w-xs mx-auto">Add your first task to start tracking contributions.{members.length < 2 ? ' Then invite teammates from the Members tab.' : ''}</p>
+                    <button onClick={() => setShowNewTask(true)} className="inline-flex items-center gap-2 h-10 px-5 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
+                      <IconPlus size={16} /> Add a task
+                    </button>
+                  </div>
                 : filteredTasks.length === 0
                 ? <p className="text-sm text-text-tertiary text-center py-8">No tasks here.</p>
                 : filteredTasks.map((task) => (
@@ -470,7 +545,13 @@ export default function GroupPage() {
             {/* Desktop: kanban */}
             <div className="hidden md:grid grid-cols-3 gap-4">
               {tasks.length === 0
-                ? <p className="col-span-3 text-sm text-text-tertiary text-center py-8">No tasks yet. Add your first task to get started.</p>
+                ? <div className="col-span-3 text-center py-8">
+                    <p className="text-[15px] font-semibold text-text mb-1">No tasks yet</p>
+                    <p className="text-sm text-text-tertiary mb-4 max-w-xs mx-auto">Add your first task to start tracking contributions.{members.length < 2 ? ' Then invite teammates from the Members tab.' : ''}</p>
+                    <button onClick={() => setShowNewTask(true)} className="inline-flex items-center gap-2 h-10 px-5 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
+                      <IconPlus size={16} /> Add a task
+                    </button>
+                  </div>
                 : STATUS_COLS.map((col) => {
                     const colTasks = tasks.filter(t => t.status === col.status);
                     return (
@@ -504,6 +585,7 @@ export default function GroupPage() {
         {/* ── ACTIVITY TAB ── */}
         {tab === 'activity' && (
           <div className="max-w-2xl mx-auto px-4 py-4 pb-24 md:pb-4">
+            <InlineTip id="timeline-blocker">Use the &quot;Heads Up&quot; button to flag blockers. Your team and teacher will see it here in the Timeline.</InlineTip>
             <div className="flex items-center justify-between mb-3">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Recent activity</p>
               <button
@@ -550,6 +632,7 @@ export default function GroupPage() {
                 } : undefined}
               />
             )}
+            <InlineTip id="members-invite">Share the invite link above to add teammates. Groups can have up to 6 members.</InlineTip>
 
             <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
               {members.length} member{members.length !== 1 ? 's' : ''}
@@ -590,6 +673,7 @@ export default function GroupPage() {
             {/* Not open */}
             {!evalSession && (
               <div className="max-w-2xl mx-auto px-4 py-10 flex flex-col items-center text-center gap-3">
+                <InlineTip id="eval-explainer">When all tasks are done, the group lead opens Peer Review. Each member rates everyone else&apos;s contribution anonymously.</InlineTip>
                 <p className="text-[15px] font-semibold text-text">Peer Review</p>
                 <p className="text-sm text-text-secondary max-w-xs">
                   When all work is done, the lead opens peer review so teammates can rate each other&apos;s contributions.
@@ -630,6 +714,23 @@ export default function GroupPage() {
             {/* Open + submitted */}
             {evalSession && hasSubmitted && (
               <>
+                {/* Post-submission guidance */}
+                <div className="max-w-2xl mx-auto px-4 pt-4">
+                  <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl px-4 py-3 mb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <IconCheck size={14} />
+                      <p className="text-sm font-medium text-[#15803D]">Your review is submitted</p>
+                    </div>
+                    <p className="text-[13px] text-[#166534]">
+                      {evalSummaries.length > 0
+                        ? `${Math.max(...evalSummaries.map(s => s.eval_count))} of ${members.length} members have responded.`
+                        : 'Waiting for other members to respond.'}
+                      {isLead
+                        ? ' You can export the Contribution Record once everyone submits.'
+                        : ' The group lead will export the Contribution Record when ready.'}
+                    </p>
+                  </div>
+                </div>
                 <EvaluationResults
                   summaries={evalSummaries}
                   members={members}
@@ -659,16 +760,29 @@ export default function GroupPage() {
           { id: 'activity',   label: 'Timeline', icon: <IconActivity size={22} />, action: () => setTab('activity') },
           { id: 'members',    label: 'Members',  icon: <IconUsers size={22} />,    action: () => setTab('members') },
           { id: 'evaluation', label: 'Review',   icon: <IconCheck size={22} />,    action: () => setTab('evaluation') },
-        ].map((item) => (
-          <button key={item.id} onClick={item.action}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
-              item.id === tab ? 'text-brand' : 'text-text-tertiary'
-            }`}
-          >
-            {item.icon}
-            {item.label}
-          </button>
-        ))}
+        ].map((item) => {
+          const badge = item.id === 'tasks' && tabBadges.tasks ? tabBadges.tasks
+            : item.id === 'activity' && tabBadges.activity ? true
+            : item.id === 'evaluation' && tabBadges.evaluation ? true
+            : null;
+          return (
+            <button key={item.id} onClick={item.action}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors relative ${
+                item.id === tab ? 'text-brand' : 'text-text-tertiary'
+              }`}
+            >
+              <span className="relative">
+                {item.icon}
+                {badge && (
+                  typeof badge === 'number'
+                    ? <span className="absolute -top-1 -right-2.5 text-[9px] font-bold bg-brand text-white rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">{badge}</span>
+                    : <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-brand" />
+                )}
+              </span>
+              {item.label}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Mobile FAB */}

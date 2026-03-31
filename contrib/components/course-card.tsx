@@ -5,12 +5,13 @@ interface CourseCardProps {
   course: Course;
   groupCount: number;
   memberCount?: number;
+  attentionCount?: number;
   onClick: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
-export default function CourseCard({ course, groupCount, memberCount, onClick, onEdit, onDelete }: CourseCardProps) {
+export default function CourseCard({ course, groupCount, memberCount, attentionCount, onClick, onEdit, onDelete }: CourseCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +38,11 @@ export default function CourseCard({ course, groupCount, memberCount, onClick, o
           {course.subject} · {groupCount} {groupCount === 1 ? 'group' : 'groups'}
           {memberCount !== undefined && <> · {memberCount} {memberCount === 1 ? 'student' : 'students'}</>}
         </p>
+        {attentionCount !== undefined && attentionCount > 0 && (
+          <span className="inline-flex items-center mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E]">
+            {attentionCount} {attentionCount === 1 ? 'group needs' : 'groups need'} attention
+          </span>
+        )}
       </div>
       {(onEdit || onDelete) ? (
         <div className="relative flex-shrink-0" ref={menuRef} onClick={(e) => e.stopPropagation()}>

@@ -98,7 +98,7 @@ export default function TaskForm({ groupId, groupName, members, userId, onCreate
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none resize-none" />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[13px] font-medium text-text-secondary">Type</label>
+            <label className="text-[13px] font-medium text-text-secondary">Type <span className="font-normal text-text-tertiary">— what kind of work is this?</span></label>
             <div className="flex flex-wrap gap-1.5 pt-0.5">
               {CONTRIBUTION_TYPES.map((t) => (
                 <button

@@ -286,6 +286,12 @@ export default function ProfilePage() {
           {/* Telegram notifications */}
           <div className="mt-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-2.5">Notifications</p>
+            {tgStatus === 'disconnected' && (
+              <div className="bg-[#EBF0FF] border-l-3 border-l-brand rounded-lg px-4 py-3 mb-3 flex items-start gap-3">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5"><circle cx="8" cy="8" r="7" stroke="#1A56E8" strokeWidth="1.5"/><path d="M8 7v4" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="5" r="0.75" fill="#1A56E8"/></svg>
+                <p className="text-[13px] text-text-secondary">Connect Telegram to get notified when teammates log work or declare blockers.</p>
+              </div>
+            )}
             <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">

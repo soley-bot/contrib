@@ -325,20 +325,24 @@ export default function CourseDetail() {
           )}
 
           {groups.length === 0 ? (
-            <div className="text-center py-12">
-              <svg viewBox="0 0 160 100" fill="none" className="w-36 mx-auto mb-4">
-                <ellipse cx="80" cy="92" rx="56" ry="6" fill="#EBF0FF"/>
-                <circle cx="40" cy="36" r="10" fill="#93B4FF"/>
-                <rect x="28" y="52" width="24" height="16" rx="6" fill="#1240C4"/>
-                <circle cx="80" cy="30" r="12" fill="#C5D5FF"/>
-                <rect x="66" y="48" width="28" height="18" rx="7" fill="#0E3AAF"/>
-                <circle cx="120" cy="36" r="10" fill="#93B4FF"/>
-                <rect x="108" y="52" width="24" height="16" rx="6" fill="#1240C4"/>
-                <circle cx="80" cy="18" r="10" fill="#1240C4"/>
-                <path d="M80 13v10M75 18h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              <p className="text-[15px] font-bold text-text mb-1">No groups yet</p>
-              <p className="text-sm text-text-tertiary mb-4 max-w-xs mx-auto">Share the invite link above or create groups manually.</p>
+            <div className="py-8">
+              <p className="text-[15px] font-bold text-text mb-1 text-center">No groups yet</p>
+              <p className="text-sm text-text-tertiary mb-6 text-center max-w-xs mx-auto">Here&apos;s how to get started with your course:</p>
+              <div className="flex flex-col gap-3 max-w-sm mx-auto">
+                {[
+                  { step: '1', title: 'Share the invite link', desc: 'Copy the course invite link above and send it to your students.' },
+                  { step: '2', title: 'Students create & link groups', desc: 'Group leads use the link to connect their group to your course.' },
+                  { step: '3', title: 'Monitor & download records', desc: 'Track progress in real-time and export Contribution Records for grading.' },
+                ].map((item) => (
+                  <div key={item.step} className="flex gap-3 items-start bg-white border border-border rounded-xl px-4 py-3">
+                    <div className="w-7 h-7 rounded-full bg-[#1240C4] text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">{item.step}</div>
+                    <div>
+                      <p className="text-[14px] font-semibold text-text">{item.title}</p>
+                      <p className="text-[13px] text-text-secondary mt-0.5">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">

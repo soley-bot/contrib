@@ -6,6 +6,12 @@ import { IconLogout, IconHome, IconBoard, IconActivity, IconUsers, IconCheck, Lo
 import { useProfile } from '@/hooks/use-profile';
 import type { Profile, Group, UserRole } from '@/types';
 
+interface TabBadges {
+  tasks?: number;
+  activity?: boolean;
+  evaluation?: boolean;
+}
+
 interface NavProps {
   profile: Profile | null;
   role?: UserRole;
@@ -16,9 +22,10 @@ interface NavProps {
   onTabChange?: (tab: string) => void;
   activeTab?: string;
   onProfileUpdate?: () => void;
+  tabBadges?: TabBadges;
 }
 
-export default function Nav({ profile, role, group, title, backLabel, onBack, onTabChange, activeTab, onProfileUpdate }: NavProps) {
+export default function Nav({ profile, role, group, title, backLabel, onBack, onTabChange, activeTab, onProfileUpdate, tabBadges }: NavProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -148,20 +155,32 @@ export default function Nav({ profile, role, group, title, backLabel, onBack, on
               { id: 'activity',   label: 'Timeline',   icon: <IconActivity size={16} /> },
               { id: 'members',    label: 'Members',    icon: <IconUsers size={16} />    },
               { id: 'evaluation', label: 'Peer Review', icon: <IconCheck size={16} />    },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
-                  activeTab === item.id
-                    ? 'bg-brand-light text-brand'
-                    : 'text-muted hover:bg-brand-light'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
+            ].map((item) => {
+              const badge = item.id === 'tasks' && tabBadges?.tasks ? tabBadges.tasks
+                : item.id === 'activity' && tabBadges?.activity ? true
+                : item.id === 'evaluation' && tabBadges?.evaluation ? true
+                : null;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onTabChange(item.id)}
+                  className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium transition-colors ${
+                    activeTab === item.id
+                      ? 'bg-brand-light text-brand'
+                      : 'text-muted hover:bg-brand-light'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                  {typeof badge === 'number' && badge > 0 && (
+                    <span className="ml-auto text-[10px] font-bold bg-brand text-white rounded-full w-5 h-5 flex items-center justify-center">{badge}</span>
+                  )}
+                  {badge === true && (
+                    <span className="ml-auto w-2 h-2 rounded-full bg-brand" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
 

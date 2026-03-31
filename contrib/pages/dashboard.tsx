@@ -6,6 +6,7 @@ import { IconPlus, IconChevronRight } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
 import { requireStudent } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
+import { useDashboardSummary } from '@/hooks/use-dashboard-summary';
 import { supabase } from '@/lib/supabase';
 import { generateInviteToken } from '@/lib/invite';
 import { formatDueDate } from '@/lib/date';
@@ -22,6 +23,8 @@ export default function Dashboard() {
   const router = useRouter();
   const { user, profile, loading } = useUser();
   const { groups, loading: groupsLoading, refresh: refreshGroups } = useGroups(user?.id);
+  const groupIds = groups.map((g) => g.id);
+  const { summaries } = useDashboardSummary(groupIds, user?.id);
   const [showModal, setShowModal] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [subject, setSubject] = useState('');
@@ -168,24 +171,50 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
-              {groups.map((group) => (
-                <div
-                  key={group.id}
-                  onClick={() => router.push(`/group/${group.id}`)}
-                  className="bg-white border border-border rounded-xl p-4 flex items-center gap-3.5 cursor-pointer hover:border-brand transition-colors shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">
-                    {group.name.slice(0, 2).toUpperCase()}
+              {groups.map((group) => {
+                const s = summaries[group.id];
+                const pct = s && s.taskTotal > 0 ? Math.round((s.taskDone / s.taskTotal) * 100) : 0;
+                const isOverdue = group.due_date && new Date(group.due_date + 'T00:00:00') < new Date(new Date().toDateString());
+                const needsReview = s?.evalOpen && !s?.evalSubmitted;
+                return (
+                  <div
+                    key={group.id}
+                    onClick={() => router.push(`/group/${group.id}`)}
+                    className="bg-white border border-border rounded-xl p-4 cursor-pointer hover:border-brand transition-colors shadow-sm"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">
+                        {group.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[15px] font-semibold text-text truncate">{group.name}</p>
+                        <p className="text-xs text-text-tertiary mt-0.5">
+                          {group.subject}{group.due_date ? ` · Due ${formatDueDate(group.due_date)}` : ''}
+                        </p>
+                      </div>
+                      <IconChevronRight size={16} />
+                    </div>
+                    {s && s.taskTotal > 0 && (
+                      <div className="mt-3 flex items-center gap-3">
+                        <div className="flex-1 h-1.5 bg-bg-hover rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#16A34A' : '#1A56E8' }} />
+                        </div>
+                        <span className="text-[11px] font-medium text-text-tertiary flex-shrink-0">{s.taskDone}/{s.taskTotal}</span>
+                      </div>
+                    )}
+                    {(needsReview || (isOverdue && s && s.taskDone < s.taskTotal)) && (
+                      <div className="mt-2 flex gap-2">
+                        {needsReview && (
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E]">Review open</span>
+                        )}
+                        {isOverdue && s && s.taskDone < s.taskTotal && (
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FEE2E2] text-[#DC2626]">Overdue</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-semibold text-text truncate">{group.name}</p>
-                    <p className="text-xs text-text-tertiary mt-0.5">
-                      {group.subject}{group.due_date ? ` · Due ${formatDueDate(group.due_date)}` : ''}
-                    </p>
-                  </div>
-                  <IconChevronRight size={16} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
