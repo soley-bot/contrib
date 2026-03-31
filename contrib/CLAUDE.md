@@ -4,7 +4,7 @@ Individual effort is invisible in group work. Contrib turns it on.
 
 ## Current Priority
 
-Phase 4 complete (Telegram bot live, all notification triggers wired). Next: deadline cron job, teacher weekly digest, then course analytics improvements.
+Phase 5 complete (deadline reminders, teacher digest, contribution summary, alert banner, timeline pagination, auto-archive, inline tips, What's New changelog). Next: task comments, email notifications, mobile PWA.
 
 ## Tech Stack
 
@@ -226,6 +226,7 @@ fetch('/api/notify', {
 - Copy-paste `adminClient`, `getUser()`, or rate limit numbers into new files
 - `console.error` in API routes (use Sentry)
 - Inline `style={{ animation }}` or `style={{ boxShadow }}` (use CSS classes)
+- Ship a user-facing feature without adding it to the `CHANGELOG` array in `components/whats-new.tsx`
 
 ## Role-Based Architecture
 
@@ -253,10 +254,27 @@ npm run dev  # localhost:3000
 - Students: free forever
 - Teachers/institutions: pay for real-time monitoring + AI features (post-launch)
 
+## What's New Changelog
+
+When shipping any user-facing feature, add an entry to the `CHANGELOG` array in `components/whats-new.tsx`. Bump the `version` number. Users see a blue dot on the star icon in the nav until they open the dropdown.
+
+## Cron Job
+
+- **Route:** `pages/api/cron/daily.ts`
+- **Schedule:** `30 0 * * *` (7:30 AM Cambodia time daily)
+- **Jobs:** Deadline reminders (daily), Teacher weekly digest (Mondays only)
+- **Auth:** `CRON_SECRET` header (Vercel auto-provisions)
+- **Config:** `vercel.json` → `crons` array
+
 ## Deferred Work
 
 - Rate limiting → Upstash Redis (before scaling)
 - RLS tightening: profiles, courses, notifications tables
-- `group/[id].tsx` split (~900 lines, refactor when adding next feature)
-- `nav.tsx` role split (refactor when touching nav)
-- Deadline approaching + weekly digest (need cron jobs)
+- Task comments/discussion (biggest gap in daily student use)
+- Email notifications (fallback for users without Telegram)
+- Mobile PWA (manifest + service worker + offline caching)
+- Task templates (pre-built task sets for common project types)
+- Bulk group creation for teachers (CSV upload)
+- Feature spotlight tour (guided walkthrough for new users)
+- Dedicated changelog page (currently nav dropdown only)
+- LMS integration (Google Classroom roster import)
