@@ -19,6 +19,7 @@ export interface Group {
   lead_id: string;
   invite_token: string;
   course_id: string | null;
+  archived_at: string | null;
   created_at: string;
 }
 

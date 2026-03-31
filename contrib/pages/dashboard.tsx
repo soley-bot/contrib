@@ -31,6 +31,7 @@ export default function Dashboard() {
   const { courses: enrolledCourses, loading: coursesLoading } = useCourseMemberships(user?.id);
   const { counts: contributionCounts } = useContributionSummary(user?.id);
   const [showModal, setShowModal] = useState(false);
+  const [showPastGroups, setShowPastGroups] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [subject, setSubject] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -164,7 +165,16 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-          ) : groups.length === 0 ? (
+          ) : (() => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeGroups = groups.filter((group) => {
+              if (group.archived_at) return false;
+              const s = summaries[group.id];
+              if (group.due_date && group.due_date < todayStr && s && s.taskTotal > 0 && s.taskDone === s.taskTotal) return false;
+              return true;
+            });
+            const pastGroups = groups.filter((group) => !activeGroups.includes(group));
+            return activeGroups.length === 0 && pastGroups.length === 0 ? (
             <div className="text-center py-14">
               <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
                 <ellipse cx="100" cy="128" rx="72" ry="8" fill="#F1F5F9"/>
@@ -209,7 +219,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
-              {groups.map((group) => {
+              {activeGroups.map((group) => {
                 const s = summaries[group.id];
                 const pct = s && s.taskTotal > 0 ? Math.round((s.taskDone / s.taskTotal) * 100) : 0;
                 const isOverdue = group.due_date && new Date(group.due_date + 'T00:00:00') < new Date(new Date().toDateString());
@@ -253,8 +263,43 @@ export default function Dashboard() {
                   </div>
                 );
               })}
+              {pastGroups.length > 0 && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowPastGroups(!showPastGroups)}
+                    className="flex items-center gap-1.5 text-[13px] font-medium text-text-tertiary hover:text-text-secondary transition-colors mb-2"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className={`transition-transform ${showPastGroups ? 'rotate-90' : ''}`}>
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Past groups ({pastGroups.length})
+                  </button>
+                  {showPastGroups && (
+                    <div className="flex flex-col gap-2">
+                      {pastGroups.map((group) => (
+                        <div
+                          key={group.id}
+                          onClick={() => router.push(`/group/${group.id}`)}
+                          className="bg-white border border-border rounded-xl p-3.5 cursor-pointer hover:border-brand/40 transition-colors opacity-70"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-bg-hover text-text-tertiary font-bold text-sm flex items-center justify-center flex-shrink-0">
+                              {group.name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[14px] font-medium text-text-secondary truncate">{group.name}</p>
+                              <p className="text-xs text-text-tertiary mt-0.5">{group.subject} · Completed</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
+          );
+          })()}
         </div>
       </div>
 

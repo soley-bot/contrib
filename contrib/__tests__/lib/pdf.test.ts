@@ -36,7 +36,7 @@ import type { Group, GroupMember, Task, ActivityLog, Evidence, EvaluationSummary
 
 const mockGroup: Group = {
   id: 'g1', name: 'Test Group', subject: 'CS', due_date: '2026-04-01',
-  lead_id: 'u1', invite_token: 'abc123', course_id: null, created_at: '2026-01-01',
+  lead_id: 'u1', invite_token: 'abc123', course_id: null, archived_at: null, created_at: '2026-01-01',
 };
 
 const mockMembers: GroupMember[] = [
