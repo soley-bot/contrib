@@ -19,6 +19,20 @@ export function useGroups(userId: string | undefined): UseGroupsResult {
     if (!userId) { setLoading(false); return; }
     setLoading(true);
     fetchGroups(userId).finally(() => setLoading(false));
+
+    const channel = supabase
+      .channel(`user-groups:${userId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'group_members',
+        filter: `profile_id=eq.${userId}`,
+      }, () => {
+        fetchGroups(userId);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [userId, tick]);
 
   async function fetchGroups(id: string) {

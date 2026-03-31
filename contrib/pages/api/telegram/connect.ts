@@ -12,7 +12,9 @@ const adminClient = createClient(
 
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, b => chars[b % chars.length]).join('');
 }
 
 async function getUser(req: NextApiRequest, res: NextApiResponse) {
@@ -39,8 +41,8 @@ async function getUser(req: NextApiRequest, res: NextApiResponse) {
       },
     },
   });
-  const { data: { session } } = await client.auth.getSession();
-  return session?.user ?? null;
+  const { data: { user } } = await client.auth.getUser();
+  return user ?? null;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -16,7 +16,7 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (!groupId) return;
+    if (!groupId) { setLoading(false); return; }
     setLoading(true);
     fetchTasks(groupId).finally(() => setLoading(false));
 

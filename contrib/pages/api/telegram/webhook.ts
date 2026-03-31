@@ -19,10 +19,8 @@ interface TelegramUpdate {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  // Validate the secret token Telegram sends in the header (only if env var is set)
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  const receivedSecret = req.headers['x-telegram-bot-api-secret-token'];
-  if (expectedSecret && receivedSecret !== expectedSecret) {
+  if (!expectedSecret || req.headers['x-telegram-bot-api-secret-token'] !== expectedSecret) {
     return res.status(401).end();
   }
 

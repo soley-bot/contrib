@@ -233,7 +233,7 @@ export default function Dashboard() {
       {showModal && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !creating) setShowModal(false); }}
         >
           <div ref={modalRef} className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />

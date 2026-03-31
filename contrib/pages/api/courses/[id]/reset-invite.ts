@@ -34,8 +34,8 @@ async function getUser(req: NextApiRequest, res: NextApiResponse) {
       },
     },
   });
-  const { data: { session } } = await client.auth.getSession();
-  return session?.user ?? null;
+  const { data: { user } } = await client.auth.getUser();
+  return user ?? null;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

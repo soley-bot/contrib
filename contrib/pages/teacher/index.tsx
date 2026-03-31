@@ -5,6 +5,7 @@ import Nav from '@/components/nav';
 import CourseCard from '@/components/course-card';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
+import { useToast } from '@/components/toast-provider';
 import { requireTeacher } from '@/lib/supabase-server';
 import { useCourses } from '@/hooks/use-courses';
 import { useCreateCourse } from '@/hooks/use-create-course';
@@ -38,6 +39,7 @@ export default function TeacherDashboard() {
   // Delete course confirm
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
@@ -110,8 +112,9 @@ export default function TeacherDashboard() {
   async function handleDelete() {
     if (!confirmDeleteId) return;
     setDeleting(true);
-    await supabase.from('courses').delete().eq('id', confirmDeleteId);
+    const { error } = await supabase.from('courses').delete().eq('id', confirmDeleteId);
     setDeleting(false);
+    if (error) { showToast('Failed to delete course.', 'error'); return; }
     setConfirmDeleteId(null);
     refreshCourses();
   }
@@ -215,7 +218,7 @@ export default function TeacherDashboard() {
       {editingCourse && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setEditingCourse(null); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !saving) setEditingCourse(null); }}
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
@@ -250,7 +253,7 @@ export default function TeacherDashboard() {
       {showModal && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !creating) setShowModal(false); }}
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
@@ -260,7 +263,7 @@ export default function TeacherDashboard() {
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
-            <div className="p-5 flex flex-col gap-3.5">
+            <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] font-medium text-text-secondary">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
@@ -273,12 +276,12 @@ export default function TeacherDashboard() {
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-border">
-                <button onClick={handleCreate} disabled={creating}
+                <button type="submit" disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
                   {creating ? 'Creating…' : 'Create course'}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

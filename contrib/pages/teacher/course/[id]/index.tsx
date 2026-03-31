@@ -6,6 +6,7 @@ import CourseGroupRow from '@/components/course-group-row';
 import type { GroupHealthStatus } from '@/components/course-group-row';
 import { IconPlus } from '@/components/icons';
 import { useUser } from '@/hooks/use-user';
+import { useToast } from '@/components/toast-provider';
 import { requireTeacher } from '@/lib/supabase-server';
 import { useCourse } from '@/hooks/use-course';
 import { useCourseAnalytics } from '@/hooks/use-course-analytics';
@@ -38,6 +39,7 @@ export default function CourseDetail() {
   const [savingGroup, setSavingGroup] = useState(false);
   const [filterMode, setFilterMode] = useState<'all' | 'attention'>('all');
   const [courseResetState, setCourseResetState] = useState<'idle' | 'confirm' | 'resetting' | 'done'>('idle');
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!loading && !user) { router.replace('/login'); return; }
@@ -99,7 +101,7 @@ export default function CourseDetail() {
     setDeletingGroupId(confirmDeleteGroupId);
     const { error } = await supabase.from('groups').delete().eq('id', confirmDeleteGroupId);
     setDeletingGroupId(null);
-    if (error) { alert('Failed to delete group.'); return; }
+    if (error) { showToast('Failed to delete group.', 'error'); return; }
     setConfirmDeleteGroupId(null);
     refresh();
   }
@@ -111,7 +113,7 @@ export default function CourseDetail() {
       supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
     ]);
-    if (membersRes.error || tasksRes.error || activityRes.error) { alert('Failed to load group data for PDF.'); setDownloadingId(null); return; }
+    if (membersRes.error || tasksRes.error || activityRes.error) { showToast('Failed to load group data for PDF.', 'error'); setDownloadingId(null); return; }
     const taskIds = ((tasksRes.data as Task[]) ?? []).map((t) => t.id);
     const [evidenceRes, evalRes] = await Promise.all([
       taskIds.length > 0
@@ -119,7 +121,7 @@ export default function CourseDetail() {
         : Promise.resolve({ data: [] as Evidence[], error: null }),
       supabase.from('evaluation_summaries').select('*').eq('group_id', group.id),
     ]);
-    if (evidenceRes.error || evalRes.error) { alert('Failed to load evidence or evaluations for PDF.'); setDownloadingId(null); return; }
+    if (evidenceRes.error || evalRes.error) { showToast('Failed to load evidence or evaluations for PDF.', 'error'); setDownloadingId(null); return; }
     const evidenceByTask: Record<string, Evidence[]> = {};
     ((evidenceRes.data as Evidence[]) ?? []).forEach((e) => {
       if (!evidenceByTask[e.task_id]) evidenceByTask[e.task_id] = [];
@@ -221,7 +223,12 @@ export default function CourseDetail() {
   ).length;
 
   if (loading || courseLoading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
-  if (!course) return null;
+  if (!course) return (
+    <div className="flex flex-col items-center justify-center min-h-dvh gap-3">
+      <p className="text-[15px] font-semibold text-text">Course not found</p>
+      <a href="/teacher" className="text-sm text-brand hover:underline">Back to My Courses</a>
+    </div>
+  );
 
   return (
     <div className="min-h-dvh bg-bg">

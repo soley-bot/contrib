@@ -31,7 +31,7 @@ import { useEvaluation } from '@/hooks/use-evaluation';
 import { useEvaluationSummaries } from '@/hooks/use-evaluation-summaries';
 import { generateReport, DEFAULT_PDF_THEME } from '@/lib/pdf';
 import { useToast } from '@/components/toast-provider';
-import type { Task, TaskStatus, GroupMember, Evaluation } from '@/types';
+import type { Task, TaskStatus, GroupMember, EvaluationInsert } from '@/types';
 
 const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
   { label: 'Coral',  color: [255, 88,  65]  },
@@ -43,7 +43,6 @@ const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
 ];
 
 type Tab = 'tasks' | 'activity' | 'members' | 'evaluation';
-type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
 type StatusFilter = 'all' | TaskStatus;
 
 const STATUS_COLS: { status: TaskStatus; label: string; countClass: string; headerClass: string }[] = [

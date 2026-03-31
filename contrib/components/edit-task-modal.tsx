@@ -3,15 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { useToast } from '@/components/toast-provider';
+import { CONTRIBUTION_TYPES } from '@/types';
 import type { Task, GroupMember, ContributionType } from '@/types';
-
-const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
-  { value: 'task',         label: 'Task' },
-  { value: 'research',     label: 'Research' },
-  { value: 'meeting',      label: 'Meeting' },
-  { value: 'discussion',   label: 'Discussion' },
-  { value: 'coordination', label: 'Coordination' },
-];
 
 interface EditTaskModalProps {
   task: Task;

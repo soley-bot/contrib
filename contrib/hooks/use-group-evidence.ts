@@ -12,6 +12,7 @@ export function useGroupEvidence(taskIds: string[]): UseGroupEvidenceResult {
   const [evidenceByTask, setEvidenceByTask] = useState<Record<string, Evidence[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+
   const key = taskIds.join(',');
 
   useEffect(() => {
@@ -35,7 +36,6 @@ export function useGroupEvidence(taskIds: string[]): UseGroupEvidenceResult {
         });
         setEvidenceByTask(byTask);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, tick]);
 
   return { evidenceByTask, error, refresh: () => setTick((t) => t + 1) };

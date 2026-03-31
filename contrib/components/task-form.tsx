@@ -2,15 +2,8 @@ import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose } from '@/components/icons';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import { CONTRIBUTION_TYPES } from '@/types';
 import type { GroupMember, ContributionType } from '@/types';
-
-const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
-  { value: 'task',         label: 'Task' },
-  { value: 'research',     label: 'Research' },
-  { value: 'meeting',      label: 'Meeting' },
-  { value: 'discussion',   label: 'Discussion' },
-  { value: 'coordination', label: 'Coordination' },
-];
 
 interface TaskFormProps {
   groupId: string;

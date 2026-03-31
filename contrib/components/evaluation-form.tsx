@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import type { GroupMember, Evaluation } from '@/types';
-
-type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
+import type { GroupMember, EvaluationInsert } from '@/types';
 
 interface RatingState {
   evaluatee_id: string;

@@ -34,6 +34,14 @@ export type TaskStatus = 'todo' | 'inprogress' | 'done';
 
 export type ContributionType = 'task' | 'coordination' | 'meeting' | 'discussion' | 'research';
 
+export const CONTRIBUTION_TYPES: { value: ContributionType; label: string }[] = [
+  { value: 'task',         label: 'Task' },
+  { value: 'research',     label: 'Research' },
+  { value: 'meeting',      label: 'Meeting' },
+  { value: 'discussion',   label: 'Discussion' },
+  { value: 'coordination', label: 'Coordination' },
+];
+
 export interface Task {
   id: string;
   group_id: string;
@@ -129,6 +137,8 @@ export interface Evaluation {
   comment: string | null;
   submitted_at: string;
 }
+
+export type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
 
 export interface EvaluationSummary {
   group_id: string;

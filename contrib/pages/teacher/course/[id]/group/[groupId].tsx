@@ -87,7 +87,18 @@ export default function TeacherGroupDetail() {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
 
-  if (!group || !isOwner) return null;
+  if (!group) return (
+    <div className="flex flex-col items-center justify-center min-h-dvh gap-3">
+      <p className="text-[15px] font-semibold text-text">Group not found</p>
+      <a href={courseId ? `/teacher/course/${courseId}` : '/teacher'} className="text-sm text-brand hover:underline">Back to course</a>
+    </div>
+  );
+  if (!isOwner) return (
+    <div className="flex flex-col items-center justify-center min-h-dvh gap-3">
+      <p className="text-[15px] font-semibold text-text">You don&apos;t have access to this group</p>
+      <a href="/teacher" className="text-sm text-brand hover:underline">Back to My Courses</a>
+    </div>
+  );
 
   return (
     <div className="min-h-dvh bg-bg">
@@ -309,9 +320,9 @@ export default function TeacherGroupDetail() {
                   <path d="M28 40h24M40 28v24" stroke="#1240C4" strokeWidth="2.5" strokeLinecap="round" opacity=".3"/>
                   <circle cx="40" cy="40" r="6" fill="#1240C4" opacity=".4"/>
                 </svg>
-                <p className="text-[15px] font-semibold text-text">Evaluation not started</p>
+                <p className="text-[15px] font-semibold text-text">Peer Review not started</p>
                 <p className="text-sm text-text-tertiary max-w-xs">
-                  Peer evaluation hasn&apos;t been opened yet. The group lead opens it when all tasks are done.
+                  Peer review hasn&apos;t been opened yet. The group lead opens it when all tasks are done.
                 </p>
               </div>
             ) : (

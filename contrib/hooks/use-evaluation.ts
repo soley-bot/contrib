@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Evaluation } from '@/types';
-
-type EvaluationInsert = Omit<Evaluation, 'id' | 'submitted_at'>;
+import type { EvaluationInsert } from '@/types';
 
 interface UseEvaluationResult {
   hasSubmitted: boolean;
