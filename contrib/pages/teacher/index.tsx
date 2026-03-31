@@ -8,6 +8,7 @@ import { useUser } from '@/hooks/use-user';
 import { requireTeacher } from '@/lib/supabase-server';
 import { useCourses } from '@/hooks/use-courses';
 import { useCreateCourse } from '@/hooks/use-create-course';
+import { useCourseAttention } from '@/hooks/use-course-attention';
 import { supabase } from '@/lib/supabase';
 import type { Course } from '@/types';
 
@@ -16,6 +17,8 @@ export default function TeacherDashboard() {
   const { user, profile, loading, refreshProfile } = useUser();
   const { courses, refresh: refreshCourses } = useCourses(user?.id);
   const { createCourse, creating } = useCreateCourse();
+  const courseIds = courses.map((c) => c.id);
+  const { attentionCounts } = useCourseAttention(courseIds);
   const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
 
@@ -164,6 +167,7 @@ export default function TeacherDashboard() {
                   course={course}
                   groupCount={groupCounts[course.id] ?? 0}
                   memberCount={memberCounts[course.id]}
+                  attentionCount={attentionCounts[course.id]}
                   onClick={() => router.push(`/teacher/course/${course.id}`)}
                   onEdit={() => openEdit(course)}
                   onDelete={() => setConfirmDeleteId(course.id)}

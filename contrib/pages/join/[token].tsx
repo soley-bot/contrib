@@ -69,6 +69,9 @@ export default function JoinPage() {
 
     setStatus('joined');
 
+    // Mark as just joined for welcome banner
+    try { localStorage.setItem(`contrib_just_joined_${group.id}`, '1'); } catch {}
+
     // Fire-and-forget notification
     if (group.lead_id && group.lead_id !== user.id) {
       (async () => {
