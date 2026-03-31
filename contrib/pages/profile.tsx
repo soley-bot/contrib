@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import Nav from '@/components/nav';
@@ -9,6 +9,7 @@ import { useGroups } from '@/hooks/use-groups';
 import { useProfile } from '@/hooks/use-profile';
 import { useRoleLock } from '@/hooks/use-role-lock';
 import { supabase } from '@/lib/supabase';
+import { IconCopy, IconCheck } from '@/components/icons';
 import type { UserRole } from '@/types';
 
 type TelegramStatus = 'loading' | 'disconnected' | 'pending' | 'connected';
@@ -37,6 +38,9 @@ export default function ProfilePage() {
   const [tgBotUsername, setTgBotUsername] = useState('');
   const [tgConnecting, setTgConnecting] = useState(false);
   const [tgDisconnecting, setTgDisconnecting] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [countdown, setCountdown] = useState(600); // 10 minutes in seconds
+  const countdownStartRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -80,6 +84,8 @@ export default function ProfilePage() {
       if (res.ok && data.code) {
         setTgCode(data.code);
         setTgBotUsername(data.botUsername ?? '');
+        countdownStartRef.current = Date.now();
+        setCountdown(600);
         setTgStatus('pending');
       } else {
         setError(data.error ?? 'Failed to generate code. Try again.');
@@ -117,23 +123,48 @@ export default function ProfilePage() {
     if (data?.verified) setTgStatus('connected');
   }
 
-  // Auto-poll while pending — updates UI as soon as Telegram verifies
+  const handleCopyCode = useCallback(async () => {
+    if (!tgCode) return;
+    try {
+      await navigator.clipboard.writeText(tgCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch { /* clipboard not available */ }
+  }, [tgCode]);
+
+  // Countdown timer + auto-poll while pending
   useEffect(() => {
     if (tgStatus !== 'pending' || !user?.id) return;
-    const interval = setInterval(async () => {
+    // Initialize countdown start time
+    if (!countdownStartRef.current) countdownStartRef.current = Date.now();
+    const startTime = countdownStartRef.current;
+    const totalMs = 10 * 60 * 1000; // 10 minutes
+
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
+      setCountdown(remaining);
+      if (remaining <= 0) {
+        setTgStatus('disconnected');
+        setTgCode('');
+        countdownStartRef.current = null;
+      }
+    }, 1000);
+
+    // Poll for verification every 3 seconds
+    const poll = setInterval(async () => {
       const { data } = await supabase
         .from('telegram_subscriptions')
         .select('verified')
         .eq('profile_id', user.id)
         .maybeSingle();
-      if (data?.verified) setTgStatus('connected');
+      if (data?.verified) {
+        setTgStatus('connected');
+        countdownStartRef.current = null;
+      }
     }, 3000);
-    // Stop polling after 5 minutes (code expired)
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      setTgStatus('disconnected');
-    }, 5 * 60 * 1000);
-    return () => { clearInterval(interval); clearTimeout(timeout); };
+
+    return () => { clearInterval(tick); clearInterval(poll); };
   }, [tgStatus, user?.id]);
 
   useEffect(() => {
@@ -308,7 +339,7 @@ export default function ProfilePage() {
             {tgStatus === 'disconnected' && (
               <div className="bg-[#EBF0FF] border-l-3 border-l-brand rounded-lg px-4 py-3 mb-3 flex items-start gap-3">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5"><circle cx="8" cy="8" r="7" stroke="#1A56E8" strokeWidth="1.5"/><path d="M8 7v4" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="5" r="0.75" fill="#1A56E8"/></svg>
-                <p className="text-[13px] text-text-secondary">Connect Telegram to get notified when teammates log work or declare blockers.</p>
+                <p className="text-[13px] text-text-secondary">Connect Telegram to receive notifications about your group.</p>
               </div>
             )}
             <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-sm">
@@ -330,9 +361,14 @@ export default function ProfilePage() {
                     <p className="text-[14px] font-semibold text-[#0F172A]">Telegram</p>
                     <p className={`text-[12px] mt-0.5 ${tgStatus === 'connected' ? 'text-[#15803D]' : 'text-[#64748B]'}`}>
                       {tgStatus === 'loading' && 'Checking…'}
-                      {tgStatus === 'disconnected' && 'Get notified when teammates log work or declare blockers'}
+                      {tgStatus === 'disconnected' && 'Not connected'}
                       {tgStatus === 'pending' && 'Waiting for you to send the code…'}
-                      {tgStatus === 'connected' && 'Connected'}
+                      {tgStatus === 'connected' && (
+                        <span className="flex items-center gap-1.5">
+                          <span className="inline-block w-2 h-2 rounded-full bg-[#15803D] flex-shrink-0" />
+                          Connected to Telegram{tgBotUsername ? ` via @${tgBotUsername}` : ''}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -363,8 +399,29 @@ export default function ProfilePage() {
                     <p className="text-[12px] text-[#475569] mb-2">
                       Open Telegram and message <span className="font-semibold text-[#0F172A]">@{tgBotUsername}</span> with this code:
                     </p>
-                    <p className="text-2xl font-bold tracking-[0.2em] text-[#0F172A] text-center py-2">{tgCode}</p>
-                    <p className="text-[11px] text-[#94A3B8] text-center">Expires in 10 minutes · Checking automatically…</p>
+                    <div className="flex items-center justify-center gap-2 py-2">
+                      <p className="text-2xl font-bold tracking-[0.2em] text-[#0F172A]">{tgCode}</p>
+                      <button
+                        onClick={handleCopyCode}
+                        className="h-8 px-2 flex items-center gap-1 text-[12px] text-[#64748B] hover:text-brand border border-[#E2E8F0] rounded-md hover:bg-[#EBF0FF] transition-colors"
+                        title="Copy code"
+                      >
+                        {codeCopied ? (
+                          <>
+                            <span className="text-[#15803D]"><IconCheck size={14} /></span>
+                            <span className="text-[#15803D]">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <IconCopy size={14} />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-[#94A3B8] text-center">
+                      Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')} · Checking automatically…
+                    </p>
                   </div>
                   <button
                     onClick={handleTgDisconnect}

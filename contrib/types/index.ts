@@ -176,7 +176,7 @@ export interface ReportShare {
   expires_at: string | null;
 }
 
-export type NotificationType = 'task_assigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added';
+export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added' | 'blocker_declared';
 
 export interface Notification {
   id: string;

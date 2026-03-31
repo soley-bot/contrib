@@ -44,7 +44,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       .select('*')
       .eq('recipient_id', uid)
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(50);
     if (fetchError) {
       console.error('Failed to load notifications:', fetchError);
       setError('Failed to load notifications.');
