@@ -16,12 +16,10 @@ CREATE POLICY "Teachers can read course members"
     EXISTS (SELECT 1 FROM courses WHERE courses.id = course_members.course_id AND courses.teacher_id = auth.uid())
   );
 
--- Students can see fellow course members
-CREATE POLICY "Course members can read fellow members"
+-- Users can read their own course memberships
+CREATE POLICY "Users can read own memberships"
   ON course_members FOR SELECT
-  USING (
-    EXISTS (SELECT 1 FROM course_members cm WHERE cm.course_id = course_members.course_id AND cm.profile_id = auth.uid())
-  );
+  USING (auth.uid() = profile_id);
 
 -- Authenticated users can join courses (via invite link)
 CREATE POLICY "Authenticated users can join courses"
