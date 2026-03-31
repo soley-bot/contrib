@@ -58,21 +58,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const groupsRel = task.groups as unknown as { name: string } | { name: string }[] | null;
       const groupName = (Array.isArray(groupsRel) ? groupsRel[0]?.name : groupsRel?.name) ?? 'your group';
 
-      // In-app notification
-      const { error: notifError } = await adminClient.from('notifications').insert({
-        recipient_id: null, // populated per-member via group membership in notifyGroupMembers
-        group_id: task.group_id,
-        type: 'deadline_approaching' as const,
-        title: 'Task due tomorrow',
-        body: `"${task.title}" in ${groupName} is due tomorrow.`,
-        meta: { task_id: task.id },
-      });
+      // In-app notification for the task assignee
+      const { data: taskData } = await adminClient
+        .from('tasks')
+        .select('assignee_id')
+        .eq('id', task.id)
+        .single();
 
-      if (notifError) {
-        Sentry.captureMessage(`[cron/daily] notification insert error: ${notifError.message}`, {
-          level: 'error',
-          tags: { route: 'cron/daily', task_id: task.id },
+      if (taskData?.assignee_id) {
+        const { error: notifError } = await adminClient.from('notifications').insert({
+          recipient_id: taskData.assignee_id,
+          group_id: task.group_id,
+          type: 'deadline_approaching' as const,
+          title: `Task "${task.title}" in ${groupName} is due tomorrow`,
+          meta: { taskId: task.id, groupName },
         });
+
+        if (notifError) {
+          Sentry.captureMessage(`[cron/daily] notification insert error: ${notifError.message}`, {
+            level: 'error',
+            tags: { route: 'cron/daily', task_id: task.id },
+          });
+        }
       }
 
       // Telegram notification
@@ -119,9 +126,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           recipient_id: m.profile_id,
           group_id: group.id,
           type: 'deadline_approaching' as const,
-          title: 'Group due tomorrow',
-          body: `Your group "${group.name}" project is due tomorrow.`,
-          meta: { group_id: group.id },
+          title: `Your group "${group.name}" is due tomorrow`,
+          meta: { groupName: group.name },
         }));
 
         const { error: groupNotifError } = await adminClient
