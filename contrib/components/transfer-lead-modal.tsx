@@ -40,17 +40,22 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
     setSaving(true);
     const newLeadMember = others.find((m) => m.profile_id === newLeadId);
 
-    const { error: updateError } = await supabase.from('groups').update({ lead_id: newLeadId }).eq('id', group.id);
-    if (updateError) { setSaving(false); showToast('Failed to transfer lead. Please try again.'); return; }
+    const transferRes = await fetch(`/api/groups/${group.id}/transfer-lead`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ newLeadId }),
+    });
+    if (!transferRes.ok) { setSaving(false); showToast('Failed to transfer lead. Please try again.'); return; }
 
-    const { error: logError } = await supabase.from('activity_log').insert({
+    // Log activity (fire-and-forget, non-blocking)
+    supabase.from('activity_log').insert({
       group_id: group.id,
       actor_id: userId,
       action: 'lead_transferred',
       task_id: null,
       meta: { to_name: newLeadMember?.profile?.name ?? '' },
-    });
-    if (logError) { setSaving(false); showToast('Failed to transfer lead. Please try again.'); return; }
+    }).then(null, () => {});
 
     setSaving(false);
     onUpdated();
