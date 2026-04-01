@@ -92,7 +92,8 @@ export type ActivityAction =
   | 'evaluation_submitted'
   | 'report_shared'
   | 'report_exported'
-  | 'blocker_declared';
+  | 'blocker_declared'
+  | 'comment_added';
 
 export interface ActivityLog {
   id: string;
@@ -168,6 +169,16 @@ export interface BlockerDeclaration {
   profile?: Profile;
 }
 
+export interface TaskComment {
+  id: string;
+  task_id: string;
+  author_id: string;
+  content: string;
+  deleted_at: string | null;
+  created_at: string;
+  author?: Profile;
+}
+
 export interface ReportShare {
   id: string;
   group_id: string;
@@ -177,7 +188,7 @@ export interface ReportShare {
   expires_at: string | null;
 }
 
-export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added' | 'blocker_declared' | 'deadline_approaching' | 'weekly_digest';
+export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added' | 'blocker_declared' | 'deadline_approaching' | 'weekly_digest' | 'task_comment';
 
 export interface Notification {
   id: string;

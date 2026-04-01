@@ -69,6 +69,12 @@ export const createBlockerSchema = z.object({
   reason: z.string().trim().min(3, 'Please describe your situation briefly.').max(500, 'Reason must be 500 characters or less.'),
 });
 
+// ── Task comments ───────────────────────────────────────────────────────────
+
+export const taskCommentSchema = z.object({
+  content: z.string().trim().min(1, 'Comment cannot be empty.').max(2000, 'Comment is too long (max 2000 characters).'),
+});
+
 // ── Report sharing ─────────────────────────────────────────────────────────
 
 export const reportLookupSchema = z.object({
