@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
 import TeacherNav from '@/components/teacher-nav';
@@ -113,10 +114,14 @@ export default function CourseDetail() {
   useEffect(() => {
     if (groupIds.length === 0) return;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('blocker_declarations')
         .select('group_id')
         .in('group_id', groupIds);
+      if (error) {
+        Sentry.captureMessage(`Failed to load blocker counts: ${error.message}`, { level: 'warning' });
+        return;
+      }
       const counts: Record<string, number> = {};
       (data ?? []).forEach((row: { group_id: string }) => {
         counts[row.group_id] = (counts[row.group_id] ?? 0) + 1;

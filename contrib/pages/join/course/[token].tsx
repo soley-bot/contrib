@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSidePropsContext } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { adminClient } from '@/lib/supabase-admin';
 import { useUser } from '@/hooks/use-user';
 import { supabase } from '@/lib/supabase';
 import { IconAlertTriangle, IconLink, IconCheck } from '@/components/icons';
@@ -146,13 +146,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   if (typeof token !== 'string') return { props: { course: null } };
 
   // Use service role to bypass RLS — only reading public fields
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-
-  const { data: course } = await admin
+  const { data: course } = await adminClient
     .from('courses')
     .select('id, name, subject, teacher_id')
     .eq('invite_token', token)
@@ -160,7 +154,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   if (!course) return { props: { course: null } };
 
-  const { data: teacher } = await admin
+  const { data: teacher } = await adminClient
     .from('profiles')
     .select('name')
     .eq('id', course.teacher_id)

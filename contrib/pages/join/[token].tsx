@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSidePropsContext } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { adminClient } from '@/lib/supabase-admin';
 import { useUser } from '@/hooks/use-user';
 import { supabase } from '@/lib/supabase';
 import { IconAlertTriangle, IconLink, IconCheck } from '@/components/icons';
@@ -33,7 +33,10 @@ export default function JoinPage({ group }: PageProps) {
   }, [group, user, userLoading]);
 
   async function handleJoin() {
-    if (!group || !user) return;
+    if (!group || !user) {
+      setStatus('idle');
+      return;
+    }
     setStatus('joining');
 
     const { count } = await supabase
@@ -57,7 +60,12 @@ export default function JoinPage({ group }: PageProps) {
 
     // Auto-transfer leadership if the current lead is a teacher (Flow 2)
     if (group.leadIsTeacher) {
-      fetch(`/api/groups/${group.id}/auto-transfer-lead`, { method: 'POST' }).then(null, () => {});
+      try {
+        await fetch(`/api/groups/${group.id}/auto-transfer-lead`, {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
+      } catch {}
     }
 
     setStatus('joined');
@@ -206,13 +214,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   if (typeof token !== 'string') return { props: { group: null } };
 
   // Use service role to bypass RLS — only reading public fields
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-
-  const { data: group } = await admin
+  const { data: group } = await adminClient
     .from('groups')
     .select('id, name, subject, lead_id')
     .eq('invite_token', token)
@@ -221,11 +223,11 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   if (!group) return { props: { group: null } };
 
   const [{ count: memberCount }, { data: leadProfile }] = await Promise.all([
-    admin
+    adminClient
       .from('group_members')
       .select('id', { count: 'exact', head: true })
       .eq('group_id', group.id),
-    admin
+    adminClient
       .from('profiles')
       .select('role')
       .eq('id', group.lead_id)

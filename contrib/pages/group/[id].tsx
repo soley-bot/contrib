@@ -83,8 +83,11 @@ export default function GroupPage() {
     setTaskToDelete(task);
   }
 
+  const actionInFlight = useRef(false);
+
   async function executeDeleteTask() {
-    if (!taskToDelete || !user) return;
+    if (!taskToDelete || !user || actionInFlight.current) return;
+    actionInFlight.current = true;
     try {
       await supabase.from('activity_log').insert({
         group_id: taskToDelete.group_id,
@@ -98,20 +101,22 @@ export default function GroupPage() {
       setTaskToDelete(null);
       refreshTasks();
       refreshActivity();
-    } catch { showToast('Failed to delete task. Please try again.'); }
+    } catch { showToast('Failed to delete task. Please try again.'); } finally { actionInFlight.current = false; }
   }
 
   async function executeDeleteGroup() {
-    if (!group || !isLead) return;
+    if (!group || !isLead || actionInFlight.current) return;
+    actionInFlight.current = true;
     try {
       const { error } = await supabase.from('groups').delete().eq('id', group.id);
       if (error) throw error;
       router.push('/dashboard');
-    } catch { showToast('Failed to delete group. Please try again.'); }
+    } catch { showToast('Failed to delete group. Please try again.'); } finally { actionInFlight.current = false; }
   }
 
   async function executeLeaveGroup() {
-    if (!user || !group) return;
+    if (!user || !group || actionInFlight.current) return;
+    actionInFlight.current = true;
     const myMembership = members.find((m) => m.profile_id === user.id);
     if (!myMembership) return;
     try {
@@ -125,11 +130,12 @@ export default function GroupPage() {
       const { error } = await supabase.from('group_members').delete().eq('id', myMembership.id);
       if (error) throw error;
       router.push('/dashboard');
-    } catch { showToast('Failed to leave group. Please try again.'); }
+    } catch { showToast('Failed to leave group. Please try again.'); } finally { actionInFlight.current = false; }
   }
 
   async function executeRemoveMember() {
-    if (!memberToRemove || !user || !group || !isLead) return;
+    if (!memberToRemove || !user || !group || !isLead || actionInFlight.current) return;
+    actionInFlight.current = true;
     try {
       await supabase.from('activity_log').insert({
         group_id: group.id,
@@ -143,7 +149,7 @@ export default function GroupPage() {
       setMemberToRemove(null);
       refreshGroup();
       refreshActivity();
-    } catch { showToast('Failed to remove member. Please try again.'); }
+    } catch { showToast('Failed to remove member. Please try again.'); } finally { actionInFlight.current = false; }
   }
 
   function handleExport() {

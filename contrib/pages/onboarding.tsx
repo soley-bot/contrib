@@ -58,21 +58,29 @@ export default function Onboarding() {
     e.preventDefault();
     setError('');
     if (!name.trim()) { setError('Name is required.'); return; }
-    const ok = await saveProfile(name, university, faculty, yearOfStudy);
-    if (ok) {
-      const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-      const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
-      router.push(dest);
+    try {
+      const ok = await saveProfile(name, university, faculty, yearOfStudy);
+      if (ok) {
+        const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+        const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
+        router.push(dest);
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleSkip() {
     setError('');
-    const ok = await saveProfile(name, '', '', '');
-    if (ok) {
-      const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-      const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
-      router.push(dest);
+    try {
+      const ok = await saveProfile(name, '', '', '');
+      if (ok) {
+        const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+        const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
+        router.push(dest);
+      }
+    } finally {
+      setLoading(false);
     }
   }
 

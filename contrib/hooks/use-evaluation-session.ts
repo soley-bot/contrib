@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { EvaluationSession } from '@/types';
 
@@ -17,10 +18,13 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
     if (!groupId) return;
     setLoading(true);
-    fetchSession(groupId).finally(() => setLoading(false));
+    fetchSession(groupId).finally(() => { if (mountedRef.current) setLoading(false); });
 
     const channel = supabase
       .channel(`eval-sessions:${groupId}`)
@@ -34,7 +38,7 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
   }, [groupId, tick]);
 
   async function fetchSession(id: string) {
@@ -43,7 +47,8 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
       .select('*')
       .eq('group_id', id)
       .maybeSingle();
-    if (error) { console.error('Failed to load session:', error); setError('Failed to load data.'); return; }
+    if (error) { Sentry.captureMessage(`Failed to load session: ${error.message}`, { level: 'error' }); if (mountedRef.current) setError('Failed to load data.'); return; }
+    if (!mountedRef.current) return;
     setError(null);
     setSession(data ?? null);
   }

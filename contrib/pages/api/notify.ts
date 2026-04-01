@@ -2,13 +2,19 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { notifyGroupMembers } from '@/lib/notify';
+import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
-type NotificationType = 'contributions' | 'blockers' | 'deadlines' | 'weekly_digest';
+type NotificationType = 'contributions' | 'blockers' | 'deadlines';
 
-const ALLOWED_TYPES: NotificationType[] = ['contributions', 'blockers', 'deadlines', 'weekly_digest'];
+const ALLOWED_TYPES: NotificationType[] = ['contributions', 'blockers', 'deadlines'];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  const ip = getClientIp(req.headers);
+  if (!rateLimit(`notify:${ip}`, RATE_LIMITS.DEFAULT.limit, RATE_LIMITS.DEFAULT.window)) {
+    return res.status(429).json({ error: 'Too many requests.' });
+  }
 
   const user = await getUserFromApiRoute(req, res);
   if (!user) return res.status(401).json({ error: 'Not authenticated.' });

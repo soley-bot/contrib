@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Task } from '@/types';
 
@@ -15,12 +16,14 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
     if (!groupId) { setLoading(false); return; }
     setLoading(true);
-    fetchTasks(groupId).finally(() => setLoading(false));
+    fetchTasks(groupId).finally(() => { if (mountedRef.current) setLoading(false); });
 
-    // NOTE: Supabase realtime requires the 'tasks' table to have realtime enabled in the Supabase dashboard.
     const channel = supabase
       .channel(`tasks:${groupId}`)
       .on('postgres_changes', {
@@ -33,7 +36,7 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
   }, [groupId, tick]);
 
   async function fetchTasks(id: string) {
@@ -44,10 +47,11 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
     if (error) {
-      console.error('Failed to load tasks:', error);
-      setError('Failed to load data.');
+      Sentry.captureMessage(`Failed to load tasks: ${error.message}`, { level: 'error' });
+      if (mountedRef.current) setError('Failed to load data.');
       return;
     }
+    if (!mountedRef.current) return;
     setError(null);
     setTasks((data as Task[]) ?? []);
   }

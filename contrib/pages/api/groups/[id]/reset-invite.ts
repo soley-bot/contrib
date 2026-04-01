@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import * as Sentry from '@sentry/nextjs';
 import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
@@ -34,7 +35,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .update({ invite_token: newToken })
     .eq('id', groupId);
 
-  if (error) return res.status(500).json({ error: 'Failed to reset invite link.' });
+  if (error) {
+    Sentry.captureMessage(`[groups/reset-invite] update error: ${error.message}`, { level: 'error', tags: { route: 'groups/reset-invite' } });
+    return res.status(500).json({ error: 'Failed to reset invite link.' });
+  }
 
   return res.status(200).json({ invite_token: newToken });
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Notification } from '@/types';
 
@@ -18,10 +19,13 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
     if (!userId) return;
     setLoading(true);
-    fetchNotifications(userId).finally(() => setLoading(false));
+    fetchNotifications(userId).finally(() => { if (mountedRef.current) setLoading(false); });
 
     const channel = supabase
       .channel(`notifications:${userId}`)
@@ -35,7 +39,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
   }, [userId, tick]);
 
   async function fetchNotifications(uid: string) {
@@ -46,10 +50,11 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       .order('created_at', { ascending: false })
       .limit(50);
     if (fetchError) {
-      console.error('Failed to load notifications:', fetchError);
-      setError('Failed to load notifications.');
+      Sentry.captureMessage(`Failed to load notifications: ${fetchError.message}`, { level: 'error' });
+      if (mountedRef.current) setError('Failed to load notifications.');
       return;
     }
+    if (!mountedRef.current) return;
     setError(null);
     setNotifications((data as Notification[]) ?? []);
   }
@@ -62,7 +67,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       .update({ read_at: new Date().toISOString() })
       .eq('id', id);
     if (updateError) {
-      console.error('Failed to mark notification as read:', updateError);
+      Sentry.captureMessage(`Failed to mark notification as read: ${updateError.message}`, { level: 'error' });
       return;
     }
     setNotifications((prev) =>
@@ -78,7 +83,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       .eq('recipient_id', userId)
       .is('read_at', null);
     if (updateError) {
-      console.error('Failed to mark all notifications as read:', updateError);
+      Sentry.captureMessage(`Failed to mark all notifications as read: ${updateError.message}`, { level: 'error' });
       return;
     }
     setNotifications((prev) =>

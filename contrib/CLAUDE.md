@@ -4,7 +4,7 @@ Individual effort is invisible in group work. Contrib turns it on.
 
 ## Current Priority
 
-Phase 5 complete (deadline reminders, teacher digest, contribution summary, alert banner, timeline pagination, auto-archive, inline tips, What's New changelog). Next: task comments, email notifications, mobile PWA.
+Phase 5 complete. Task comments shipped. Next: email notifications, mobile PWA.
 
 ## Tech Stack
 
@@ -84,21 +84,22 @@ pages/
 | `/api/telegram/webhook` | POST | Incoming Telegram messages | Webhook secret |
 | `/api/telegram/setup` | GET | Register webhook (run once) | Secret param |
 
-## Database (14 tables)
+## Database (15 tables)
 
-`profiles`, `groups`, `group_members`, `tasks`, `evidence`, `activity_log`, `courses`, `course_members`, `evaluation_sessions`, `evaluations`, `blocker_declarations`, `telegram_subscriptions`, `report_shares`, `notifications`
+`profiles`, `groups`, `group_members`, `tasks`, `evidence`, `task_comments`, `activity_log`, `courses`, `course_members`, `evaluation_sessions`, `evaluations`, `blocker_declarations`, `telegram_subscriptions`, `report_shares`, `notifications`
 
 Key details:
 - `tasks.contribution_type`: `task | coordination | meeting | discussion | research`
 - `telegram_subscriptions.chat_id`: nullable bigint (null when pending)
 - `course_members`: tracks course enrollment before group assignment
+- `task_comments`: flat discussion on tasks, soft delete via `deleted_at`, author + group lead can delete
 - All tables have RLS enabled
 
 ## What's Built
 
-- **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), timeline (realtime), peer review, PDF export (6 themes), shareable report links, blocker declarations, in-app + Telegram notifications, course enrollment
+- **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), task comments (flat discussion threads), timeline (realtime), peer review, PDF export (6 themes), shareable report links, blocker declarations, in-app + Telegram notifications, course enrollment
 - **Teacher:** courses, group creation (auto-transfers lead to first student), group list + progress, drill-down (read-only), course analytics, ungrouped students view
-- **Real-time:** tasks, activity_log, group_members, evaluation_sessions, evaluations, evidence, courses, notifications
+- **Real-time:** tasks, activity_log, group_members, evaluation_sessions, evaluations, evidence, task_comments, courses, notifications
 - **Telegram:** 6 notification types (task created, task reassigned, evidence logged, peer review opened, member joined, blocker declared). Bot responds to /start, /help, and non-code messages.
 
 ## Course Invite Flows
@@ -109,14 +110,14 @@ Key details:
 
 ## Shared Types & Constants (`types/index.ts`)
 
-`Profile`, `Group`, `Task`, `Evidence`, `ActivityLog`, `Course`, `CourseMember`, `EvaluationSession`, `Evaluation`, `EvaluationSummary`, `EvaluationInsert`, `CONTRIBUTION_TYPES`
+`Profile`, `Group`, `Task`, `Evidence`, `TaskComment`, `ActivityLog`, `Course`, `CourseMember`, `EvaluationSession`, `Evaluation`, `EvaluationSummary`, `EvaluationInsert`, `CONTRIBUTION_TYPES`
 
 ## Security
 
 - **Auth:** `lib/supabase-server.ts` — `requireAuth()`, `requireStudent()`, `requireTeacher()`. All API routes use `getUser()` (not `getSession()`).
 - **Validation:** Zod schemas for all user inputs
 - **Rate limiting:** In-memory (`lib/rate-limit.ts`) — adequate for current scale, migrate to Upstash Redis before scaling
-- **RLS:** All 14 tables. Known gaps: `profiles` SELECT is overly broad, `courses` SELECT exposes invite tokens, `notifications` INSERT is too permissive — fix before scaling.
+- **RLS:** All 15 tables. Known gaps: `profiles` SELECT is overly broad, `courses` SELECT exposes invite tokens, `notifications` INSERT is too permissive — fix before scaling.
 - **CSP:** Defined in `next.config.ts` only (removed from `vercel.json`)
 
 ## Telegram Bot
@@ -204,6 +205,22 @@ fetch('/api/notify', {
 }).catch(() => {});
 ```
 
+## Verification
+
+- After making changes, do NOT claim they are fixed without verifying via `npx tsc --noEmit` and `npm run build`. If browser preview tools fail, use `curl` or check compiled output.
+- Always run `npx tsc --noEmit` after making changes to catch type errors before committing
+- Never say "done" until the build passes
+
+## Interaction Preferences
+
+- When the user says "continue" or "yes", resume the most recent task without asking for clarification
+- Do not ask what they mean — just keep going
+
+## Debugging Priorities
+
+- For auth flow debugging (OAuth, PKCE, session persistence): always check the callback page logic, CSP headers, and race conditions in that order before exploring tangential issues
+- For UI bugs: verify the fix in the compiled output, not just the source code
+
 ## Coding Standards
 
 ### Always
@@ -240,6 +257,8 @@ fetch('/api/notify', {
 - Verify with `npm run build` before claiming done
 - Worktree safety: confirm path with `git rev-parse --show-toplevel`
 - After deploy: webhook auto-registered (no manual setup needed)
+- When resolving merge conflicts, always verify the build passes (`npm run build` and `npx tsc --noEmit`) after resolution before reporting completion
+- When working in git worktrees, always verify the current working directory before writing files. Use `pwd` and check against the expected worktree path. Never write to the main repo directory when a worktree is active
 
 ## Dev Setup
 
@@ -270,7 +289,6 @@ When shipping any user-facing feature, add an entry to the `CHANGELOG` array in 
 
 - Rate limiting → Upstash Redis (before scaling)
 - RLS tightening: profiles, courses, notifications tables
-- Task comments/discussion (biggest gap in daily student use)
 - Email notifications (fallback for users without Telegram)
 - Mobile PWA (manifest + service worker + offline caching)
 - Task templates (pre-built task sets for common project types)

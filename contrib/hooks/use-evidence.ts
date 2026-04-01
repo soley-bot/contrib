@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Evidence } from '@/types';
 
@@ -13,7 +14,10 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
     if (!taskId) { setEvidence([]); return; }
     fetchEvidence(taskId);
 
@@ -29,7 +33,7 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
   }, [taskId, tick]);
 
   async function fetchEvidence(id: string) {
@@ -39,10 +43,11 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
       .eq('task_id', id)
       .order('version_number', { ascending: true });
     if (fetchError) {
-      console.error('Failed to load evidence:', fetchError);
-      setError('Failed to load data.');
+      Sentry.captureMessage(`Failed to load evidence: ${fetchError.message}`, { level: 'error' });
+      if (mountedRef.current) setError('Failed to load data.');
       return;
     }
+    if (!mountedRef.current) return;
     setError(null);
     setEvidence((data as Evidence[]) ?? []);
   }

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { ActivityLog } from '@/types';
 
@@ -22,6 +23,8 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const mountedRef = useRef(true);
+
   async function fetchPage(id: string, offset: number): Promise<ActivityLog[]> {
     const { data, error: fetchError } = await supabase
       .from('activity_log')
@@ -31,17 +34,20 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
       .range(offset, offset + PAGE_SIZE - 1);
 
     if (fetchError) {
-      setError('Failed to load data.');
+      Sentry.captureMessage(`Failed to load activity: ${fetchError.message}`, { level: 'error' });
+      if (mountedRef.current) setError('Failed to load data.');
       return [];
     }
-    setError(null);
+    if (mountedRef.current) setError(null);
     return (data as ActivityLog[]) ?? [];
   }
 
   useEffect(() => {
+    mountedRef.current = true;
     if (!groupId) { setLoading(false); return; }
     setLoading(true);
     fetchPage(groupId, 0).then((entries) => {
+      if (!mountedRef.current) return;
       setActivity(entries);
       setHasMore(entries.length === PAGE_SIZE);
       setLoading(false);
@@ -62,7 +68,7 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
           .eq('id', newEntry.id)
           .single()
           .then(({ data }) => {
-            if (data) {
+            if (data && mountedRef.current) {
               setActivity((prev) => {
                 if (prev.some((a) => a.id === data.id)) return prev;
                 return [data as ActivityLog, ...prev];
@@ -72,7 +78,7 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
   }, [groupId, tick]);
 
   const loadMore = useCallback(() => {

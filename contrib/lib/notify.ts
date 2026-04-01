@@ -44,7 +44,8 @@ export async function notifyGroupMembers(
     .select('chat_id, notify_contributions, notify_blockers, notify_deadlines, notify_weekly_digest')
     .in('profile_id', profileIds)
     .eq('verified', true)
-    .eq(column, true);
+    .eq(column, true)
+    .not('chat_id', 'is', null);
 
   if (!subs?.length) return;
 

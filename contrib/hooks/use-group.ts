@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Group, GroupMember } from '@/types';
 
@@ -18,10 +19,13 @@ export function useGroup(groupId: string | undefined, userId: string | undefined
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
     if (!groupId) return;
     setLoading(true);
-    fetchAll(groupId).finally(() => setLoading(false));
+    fetchAll(groupId).finally(() => { if (mountedRef.current) setLoading(false); });
 
     const channel = supabase
       .channel(`group-members:${groupId}`)
@@ -35,7 +39,7 @@ export function useGroup(groupId: string | undefined, userId: string | undefined
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
   }, [groupId, tick]);
 
   async function fetchAll(id: string) {
@@ -44,10 +48,11 @@ export function useGroup(groupId: string | undefined, userId: string | undefined
       supabase.from('group_members').select('*, profile:profiles(*)').eq('group_id', id).order('joined_at', { ascending: true }),
     ]);
     if (groupResult.error || membersResult.error) {
-      console.error('Failed to load group data:', groupResult.error || membersResult.error);
-      setError('Failed to load data.');
+      Sentry.captureMessage(`Failed to load group data: ${(groupResult.error || membersResult.error)?.message}`, { level: 'error' });
+      if (mountedRef.current) setError('Failed to load data.');
       return;
     }
+    if (!mountedRef.current) return;
     setError(null);
     setGroup(groupResult.data ?? null);
     setMembers((membersResult.data as GroupMember[]) ?? []);

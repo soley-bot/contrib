@@ -10,7 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'GET') return res.status(405).end();
 
   const { secret } = req.query;
-  if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {
+  const setupSecret = process.env.TELEGRAM_SETUP_SECRET || process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (secret !== setupSecret) {
     return res.status(401).json({ error: 'Unauthorized.' });
   }
 

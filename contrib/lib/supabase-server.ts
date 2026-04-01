@@ -55,9 +55,9 @@ export const redirectToTeacher = {
  */
 export async function requireAuth(ctx: GetServerSidePropsContext) {
   const supabase = createServerClient(ctx);
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return { redirect: redirectToLogin.redirect, user: null, profile: null };
   }
 
@@ -65,10 +65,10 @@ export async function requireAuth(ctx: GetServerSidePropsContext) {
   const { data: profile } = await supabase
     .from('profiles')
     .select('id, name, role')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single();
 
-  return { redirect: null, user: session.user, profile };
+  return { redirect: null, user, profile };
 }
 
 /**

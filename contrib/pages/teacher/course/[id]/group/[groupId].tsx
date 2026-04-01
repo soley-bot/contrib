@@ -45,6 +45,7 @@ export default function TeacherGroupDetail() {
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [courseName, setCourseName] = useState('');
   const [isOwner, setIsOwner] = useState(false);
+  const [ownerLoading, setOwnerLoading] = useState(true);
 
   useEffect(() => {
     if (!userLoading && !user) { router.replace('/login'); return; }
@@ -53,11 +54,13 @@ export default function TeacherGroupDetail() {
 
   useEffect(() => {
     if (!courseId || !user) return;
+    setOwnerLoading(true);
     supabase.from('courses').select('name, teacher_id').eq('id', courseId).single().then(({ data }) => {
-      if (!data) { router.replace('/teacher'); return; }
-      if (data.teacher_id !== user.id) { router.replace('/teacher'); return; }
+      if (!data) { router.replace('/teacher'); setOwnerLoading(false); return; }
+      if (data.teacher_id !== user.id) { router.replace('/teacher'); setOwnerLoading(false); return; }
       setCourseName(data.name);
       setIsOwner(true);
+      setOwnerLoading(false);
     });
   }, [courseId, user, router]);
 
@@ -83,7 +86,7 @@ export default function TeacherGroupDetail() {
     setDownloadingPdf(false);
   }
 
-  if (userLoading || groupLoading) {
+  if (userLoading || groupLoading || ownerLoading) {
     return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
   }
 

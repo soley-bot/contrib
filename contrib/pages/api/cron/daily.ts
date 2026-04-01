@@ -135,7 +135,8 @@ async function sendTeacherDigest(): Promise<number> {
         const { count: bCount, error: blockerError } = await adminClient
           .from('blocker_declarations')
           .select('id', { count: 'exact', head: true })
-          .in('group_id', groupIds);
+          .in('group_id', groupIds)
+          .gte('created_at', sevenDaysAgo);
 
         if (blockerError) {
           Sentry.captureMessage(`[cron/daily] sendTeacherDigest blockers query error: ${blockerError.message}`, {

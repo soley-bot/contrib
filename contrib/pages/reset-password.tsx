@@ -14,15 +14,16 @@ export default function ResetPassword() {
   useEffect(() => {
     // Supabase processes the recovery token in the URL hash and fires an
     // AUTH_TOKEN_REFRESHED / PASSWORD_RECOVERY event. Wait for it.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setReady(true);
-      }
-    });
     // If no event fires within 5 seconds, the link is likely invalid/expired
     const timeout = setTimeout(() => {
       setExpired(true);
     }, 5000);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        clearTimeout(timeout);
+        setReady(true);
+      }
+    });
     return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 

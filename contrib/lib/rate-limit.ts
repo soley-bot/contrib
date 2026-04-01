@@ -58,6 +58,9 @@ export const RATE_LIMITS = {
  * Extract client IP from Next.js API request headers.
  */
 export function getClientIp(headers: Record<string, string | string[] | undefined>): string {
+  // Prefer x-real-ip (set by Vercel, cannot be forged by clients)
+  const realIp = headers['x-real-ip'];
+  if (typeof realIp === 'string' && realIp.trim()) return realIp.trim();
   const forwarded = headers['x-forwarded-for'];
   if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
   if (Array.isArray(forwarded)) return forwarded[0];

@@ -58,10 +58,15 @@ export default function Dashboard() {
     if (!loading && profile && profile.role === 'teacher') router.replace('/teacher');
   }, [user, profile, loading, router]);
 
+  const creatingRef = useRef(false);
+
   async function handleCreate() {
+    if (creatingRef.current) return;
+    creatingRef.current = true;
     setFormError('');
     if (!groupName.trim() || !subject.trim()) {
       setFormError('Group name and subject are required.');
+      creatingRef.current = false;
       return;
     }
     setCreating(true);
@@ -93,6 +98,7 @@ export default function Dashboard() {
 
     refreshGroups();
     setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setSelectedCourseId(''); setCreating(false);
+    creatingRef.current = false;
     router.push(`/group/${group.id}`);
   }
 

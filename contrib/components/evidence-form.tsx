@@ -27,6 +27,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
   const activeType = TYPES.find((t) => t.value === type)!;
 
   async function handleSubmit() {
+    if (saving) return;
     setError('');
     if (!content.trim()) { setError('Content is required.'); return; }
     setSaving(true);

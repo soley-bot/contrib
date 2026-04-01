@@ -16,15 +16,25 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
   const [dueDate, setDueDate] = useState(group.due_date ?? '');
   const [saving, setSaving] = useState(false);
 
+  const [error, setError] = useState('');
+
   async function handleSave() {
     if (!name.trim() || !subject.trim()) return;
+    if (saving) return;
     setSaving(true);
+    setError('');
 
-    await supabase.from('groups').update({
+    const { error: updateError } = await supabase.from('groups').update({
       name: name.trim(),
       subject: subject.trim(),
       due_date: dueDate || null,
     }).eq('id', group.id);
+
+    if (updateError) {
+      setError('Failed to update group. Please try again.');
+      setSaving(false);
+      return;
+    }
 
     await supabase.from('activity_log').insert({
       group_id: group.id,
@@ -41,7 +51,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
   return (
     <div
       className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}
     >
       <div className="w-full max-w-[440px] bg-white rounded-xl" role="dialog" aria-labelledby="edit-group-title">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -80,6 +90,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
           </div>
         </div>
         <div className="px-5 py-3 border-t border-border">
+          {error && <p className="text-[13px] text-red-600 mb-2">{error}</p>}
           <button
             onClick={handleSave}
             disabled={saving || !name.trim() || !subject.trim()}

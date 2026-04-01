@@ -41,7 +41,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (profileError) {
       // Roll back the auth user if profile insert fails
-      await adminClient.auth.admin.deleteUser(data.user.id);
+      const { error: deleteError } = await adminClient.auth.admin.deleteUser(data.user.id);
+      if (deleteError) {
+        Sentry.captureMessage(`[signup] rollback deleteUser failed for ${data.user.id}: ${deleteError.message}`, { level: 'error', tags: { route: 'signup' } });
+      }
       return res.status(500).json({ error: 'Failed to create profile. Please try again.' });
     }
 

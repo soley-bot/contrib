@@ -9,6 +9,10 @@ import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const ip = getClientIp(req.headers);
 
+  if (!rateLimit(`report-share:${ip}`, RATE_LIMITS.REPORT_SHARE.limit, RATE_LIMITS.REPORT_SHARE.window)) {
+    return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
+  }
+
   // ── GET: fetch existing share for a group ──
   if (req.method === 'GET') {
     const user = await getUserFromApiRoute(req, res);
@@ -40,10 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── POST: create share link ──
   if (req.method === 'POST') {
-    if (!rateLimit(`report-share:${ip}`, RATE_LIMITS.REPORT_SHARE.limit, RATE_LIMITS.REPORT_SHARE.window)) {
-      return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
-    }
-
     const user = await getUserFromApiRoute(req, res);
     if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
@@ -71,11 +71,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single();
 
     if (existing) {
-      const protocol = req.headers['x-forwarded-proto'] ?? 'http';
-      const host = req.headers.host ?? 'localhost:3000';
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://joincontrib.com';
       return res.status(200).json({
         token: existing.token,
-        url: `${protocol}://${host}/report/${existing.token}`,
+        url: `${baseUrl}/report/${existing.token}`,
         existing: true,
       });
     }
@@ -87,15 +86,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .insert({ group_id, token, created_by: user.id });
 
     if (insertError) {
+      // Handle duplicate key (race condition: concurrent POSTs)
+      if (insertError.code === '23505') {
+        const { data: existing2 } = await adminClient.from('report_shares').select('token').eq('group_id', group_id).single();
+        if (existing2) {
+          const baseUrl2 = process.env.NEXT_PUBLIC_APP_URL || 'https://joincontrib.com';
+          return res.status(200).json({ token: existing2.token, url: `${baseUrl2}/report/${existing2.token}`, existing: true });
+        }
+      }
       Sentry.captureMessage(`[report/share] insert error: ${insertError.message}`, { level: 'error', tags: { route: 'report/share' } });
       return res.status(500).json({ error: 'Failed to create share link.' });
     }
 
-    const protocol = req.headers['x-forwarded-proto'] ?? 'http';
-    const host = req.headers.host ?? 'localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://joincontrib.com';
     return res.status(201).json({
       token,
-      url: `${protocol}://${host}/report/${token}`,
+      url: `${baseUrl}/report/${token}`,
       existing: false,
     });
   }
