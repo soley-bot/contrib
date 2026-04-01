@@ -77,6 +77,13 @@ function NotificationTypeIcon({ type }: { type: NotificationType }) {
           <path d="M2 7h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
         </svg>
       );
+    case 'task_comment':
+      return (
+        <svg className={cls} width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M2 3.5A1.5 1.5 0 013.5 2h9A1.5 1.5 0 0114 3.5v7a1.5 1.5 0 01-1.5 1.5H6l-3 2.5V12H3.5A1.5 1.5 0 012 10.5v-7z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+          <path d="M5 6h6M5 8.5h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+        </svg>
+      );
     default:
       return null;
   }
@@ -105,11 +112,10 @@ interface NotificationBellProps {
 }
 
 export default function NotificationBell({ userId, sidebar }: NotificationBellProps) {
-  if (!userId) return null;
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId ?? '');
 
   useEffect(() => {
     if (!showDropdown) return;
@@ -151,6 +157,8 @@ export default function NotificationBell({ userId, sidebar }: NotificationBellPr
     }
     return groups;
   }, [notifications]);
+
+  if (!userId) return null;
 
   function handleNotificationClick(n: Notification) {
     markAsRead(n.id);

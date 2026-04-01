@@ -13,6 +13,13 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: 3,
+    date: '2026-04-01',
+    items: [
+      { title: 'Task comments', description: 'Discuss tasks with your group. Post comments, coordinate work, and keep the conversation in context.' },
+    ],
+  },
+  {
     version: 2,
     date: '2026-03-31',
     items: [
@@ -43,7 +50,7 @@ function formatDate(dateStr: string): string {
 export default function WhatsNew({ sidebar }: { sidebar?: boolean }) {
   const [open, setOpen] = useState(false);
   const [hasUnseen, setHasUnseen] = useState(false);
-  const [seenVersion, setSeenVersion] = useState(LATEST_VERSION);
+  const [seenVersion, setSeenVersion] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
