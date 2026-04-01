@@ -15,7 +15,8 @@ import GroupTasksTab from '@/components/group-tasks-tab';
 import GroupTimelineTab from '@/components/group-timeline-tab';
 import GroupMembersTab from '@/components/group-members-tab';
 import GroupEvaluationTab from '@/components/group-evaluation-tab';
-import { IconPlus, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconCheck } from '@/components/icons';
+import { IconPlus, IconPencil, IconTrash, IconHome, IconBoard, IconActivity, IconUsers, IconCheck, IconAlertTriangle } from '@/components/icons';
+import GroupActionsMenu from '@/components/group-actions-menu';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
@@ -299,21 +300,56 @@ export default function GroupPage() {
             <span className="text-[#CBD5E1]">›</span>
             <span className="font-semibold text-text">{group.name}</span>
             <span className="text-text-tertiary">{group.subject}</span>
-            <div className="flex items-center gap-0.5 ml-1">
-              <button onClick={() => setShowEditGroup(true)} className="p-1.5 text-text-tertiary hover:text-text-secondary hover:bg-bg-hover rounded-md transition-colors" title="Edit group">
-                <IconPencil size={13} />
-              </button>
-              {isLead && (
-                <button onClick={() => setShowDeleteGroup(true)} className="p-1.5 text-text-tertiary hover:text-red-500 hover:bg-red-50 rounded-md transition-colors" title="Delete group">
-                  <IconTrash size={13} />
-                </button>
-              )}
-            </div>
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={() => setShowBlockerModal(true)} className="h-8 px-3 border border-border bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[13px] font-medium text-text-secondary hover:text-[#DC2626] rounded-md flex items-center gap-1.5 transition-colors">
+              <IconAlertTriangle size={13} /> Heads Up
+            </button>
             <button onClick={() => setShowNewTask(true)} className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
               <IconPlus size={14} /> Add task
             </button>
+            <GroupActionsMenu
+              isLead={isLead}
+              inviteToken={group.invite_token}
+              onEditGroup={() => setShowEditGroup(true)}
+              onCopyInvite={() => {
+                const url = `${window.location.origin}/join/${group.invite_token}`;
+                navigator.clipboard.writeText(url);
+                showToast('Invite link copied!', 'success');
+              }}
+              onExport={handleExport}
+              onShareReport={handleShareLink}
+              onTransferLead={() => setShowTransferLead(true)}
+              onDeleteGroup={() => setShowDeleteGroup(true)}
+              onLeaveGroup={() => setShowLeaveConfirm(true)}
+            />
+          </div>
+        </div>
+
+        {/* Mobile topbar */}
+        <div className="md:hidden flex items-center justify-between h-12 px-4 bg-white border-b border-border">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="font-semibold text-sm text-text truncate">{group.name}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button onClick={() => setShowBlockerModal(true)} className="h-7 px-2.5 border border-border bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[11px] font-medium text-text-secondary hover:text-[#DC2626] rounded-md flex items-center gap-1 transition-colors">
+              <IconAlertTriangle size={12} /> Heads Up
+            </button>
+            <GroupActionsMenu
+              isLead={isLead}
+              inviteToken={group.invite_token}
+              onEditGroup={() => setShowEditGroup(true)}
+              onCopyInvite={() => {
+                const url = `${window.location.origin}/join/${group.invite_token}`;
+                navigator.clipboard.writeText(url);
+                showToast('Invite link copied!', 'success');
+              }}
+              onExport={handleExport}
+              onShareReport={handleShareLink}
+              onTransferLead={() => setShowTransferLead(true)}
+              onDeleteGroup={() => setShowDeleteGroup(true)}
+              onLeaveGroup={() => setShowLeaveConfirm(true)}
+            />
           </div>
         </div>
 

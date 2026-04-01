@@ -1,7 +1,6 @@
 import InviteBanner from '@/components/invite-banner';
 import MemberRow from '@/components/member-row';
 import InlineTip from '@/components/inline-tip';
-import { IconTrash } from '@/components/icons';
 import type { Task, GroupMember, Group } from '@/types';
 
 interface GroupMembersTabProps {
@@ -45,26 +44,10 @@ export default function GroupMembersTab({
         />
       ))}
 
-      {/* Group management */}
-      <div className="mt-4 flex flex-col gap-2">
-        {isLead && (
-          <button onClick={onTransferLead}
-            className="w-full h-10 border border-border bg-white hover:bg-bg-hover text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-            Transfer Lead
-          </button>
-        )}
-        {isLead ? (
-          <button onClick={onDeleteGroup}
-            className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-            <IconTrash size={15} /> Delete Group
-          </button>
-        ) : (
-          <button onClick={onLeaveGroup}
-            className="w-full h-10 border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors">
-            Leave Group
-          </button>
-        )}
-      </div>
+      {/* Group management hint */}
+      <p className="mt-4 text-center text-[12px] text-text-tertiary">
+        Use the menu (<span className="inline-block align-middle">&#8942;</span>) in the header to manage this group.
+      </p>
     </div>
   );
 }
