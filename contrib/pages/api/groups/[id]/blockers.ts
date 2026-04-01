@@ -71,12 +71,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .eq('id', user.id)
     .single();
 
-  notifyGroupMembers(
-    groupId,
-    `${actor?.name ?? 'A teammate'} sent a heads up: ${reason}`,
-    'blockers',
-    user.id,
-  ).catch((err) => Sentry.captureException(err, { tags: { route: 'blockers' } }));
+  try {
+    await notifyGroupMembers(
+      groupId,
+      `${actor?.name ?? 'A teammate'} sent a heads up: ${reason}`,
+      'blockers',
+      user.id,
+    );
+  } catch (err) {
+    Sentry.captureException(err, { tags: { route: 'blockers' } });
+  }
 
   return res.status(201).json({ ok: true });
 }

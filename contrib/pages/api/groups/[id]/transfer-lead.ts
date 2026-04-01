@@ -75,22 +75,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const newLeadName = newLeadProfile?.name ?? 'a new member';
 
-  // Send Telegram notification to group (exclude the person who transferred)
-  notifyGroupMembers(
-    groupId,
-    `Group lead has been transferred to ${newLeadName}.`,
-    'contributions',
-    user.id
-  ).catch(() => {});
-
-  // Create in-app notification for the new lead
-  adminClient.from('notifications').insert({
-    recipient_id: newLeadId,
-    group_id: groupId,
-    type: 'lead_transferred',
-    title: 'You are now the group lead',
-    meta: { previousLeadId: user.id },
-  }).then(null, () => {});
+  // Send Telegram notification and in-app notification before responding
+  try {
+    await Promise.all([
+      notifyGroupMembers(
+        groupId,
+        `Group lead has been transferred to ${newLeadName}.`,
+        'contributions',
+        user.id
+      ),
+      adminClient.from('notifications').insert({
+        recipient_id: newLeadId,
+        group_id: groupId,
+        type: 'lead_transferred',
+        title: 'You are now the group lead',
+        meta: { previousLeadId: user.id },
+      }),
+    ]);
+  } catch (err) {
+    Sentry.captureException(err, { tags: { route: 'transfer-lead' } });
+  }
 
   return res.status(200).json({ transferred: true });
 }
