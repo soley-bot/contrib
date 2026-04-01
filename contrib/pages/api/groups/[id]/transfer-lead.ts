@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
+import { notifyGroupMembers } from '@/lib/notify';
 
 /**
  * POST /api/groups/[id]/transfer-lead
@@ -64,6 +65,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     Sentry.captureMessage(`[transfer-lead] update error: ${updateError.message}`, { level: 'error', tags: { route: 'transfer-lead' } });
     return res.status(500).json({ error: 'Failed to transfer leadership.' });
   }
+
+  // Look up new lead's name for the notification
+  const { data: newLeadProfile } = await adminClient
+    .from('profiles')
+    .select('name')
+    .eq('id', newLeadId)
+    .single();
+
+  const newLeadName = newLeadProfile?.name ?? 'a new member';
+
+  // Send Telegram notification to group (exclude the person who transferred)
+  notifyGroupMembers(
+    groupId,
+    `Group lead has been transferred to ${newLeadName}.`,
+    'contributions',
+    user.id
+  ).catch(() => {});
+
+  // Create in-app notification for the new lead
+  adminClient.from('notifications').insert({
+    recipient_id: newLeadId,
+    group_id: groupId,
+    type: 'lead_transferred',
+    title: 'You are now the group lead',
+    meta: { previousLeadId: user.id },
+  }).then(null, () => {});
 
   return res.status(200).json({ transferred: true });
 }

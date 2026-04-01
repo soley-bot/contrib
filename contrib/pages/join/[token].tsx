@@ -14,8 +14,8 @@ interface PageProps {
 export default function JoinPage({ group }: PageProps) {
   const router = useRouter();
   const { token } = router.query;
-  const { user, loading: userLoading } = useUser();
-  const [status, setStatus] = useState<'idle' | 'already' | 'full' | 'joining' | 'joined' | 'error'>('idle');
+  const { user, profile, loading: userLoading } = useUser();
+  const [status, setStatus] = useState<'idle' | 'already' | 'full' | 'joining' | 'joined' | 'error' | 'teacher_blocked'>('idle');
   const [joinError, setJoinError] = useState('');
 
   // Once user loads, check if already a member
@@ -32,9 +32,20 @@ export default function JoinPage({ group }: PageProps) {
       });
   }, [group, user, userLoading]);
 
+  // Block teachers from joining student groups
+  useEffect(() => {
+    if (!userLoading && profile && profile.role === 'teacher' && group) {
+      setStatus('teacher_blocked');
+    }
+  }, [userLoading, profile, group]);
+
   async function handleJoin() {
     if (!group || !user) {
       setStatus('idle');
+      return;
+    }
+    if (profile?.role === 'teacher') {
+      setStatus('teacher_blocked');
       return;
     }
     setStatus('joining');
@@ -130,6 +141,17 @@ export default function JoinPage({ group }: PageProps) {
         <p className="text-lg font-semibold text-text">This group is full</p>
         <p className="text-sm text-muted">This group already has 6 members and cannot accept new members.</p>
         <button onClick={() => router.push('/dashboard')} className="mt-2 h-10 px-5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover">Back to dashboard</button>
+      </div>
+    );
+  }
+
+  if (status === 'teacher_blocked') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-dvh gap-3 px-5 text-center">
+        <span className="text-text-tertiary"><IconAlertTriangle size={32} /></span>
+        <p className="text-lg font-semibold text-text">Teacher accounts cannot join student groups</p>
+        <p className="text-sm text-muted">To monitor student groups, create a course and use the teacher group flow instead.</p>
+        <button onClick={() => router.push('/teacher')} className="mt-2 h-10 px-5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover">Go to teacher dashboard</button>
       </div>
     );
   }
