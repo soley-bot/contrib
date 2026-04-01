@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
 import EvidenceList from '@/components/evidence-list';
 import EvidenceForm from '@/components/evidence-form';
+import TaskComments from '@/components/task-comments';
 import { useEvidence } from '@/hooks/use-evidence';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { useToast } from '@/components/toast-provider';
@@ -124,6 +125,18 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
                 onCancel={() => setShowForm(false)}
               />
             )}
+          </div>
+
+          {/* Discussion */}
+          <div>
+            <TaskComments
+              taskId={task.id}
+              taskTitle={task.title}
+              groupId={task.group_id}
+              userId={userId}
+              userName={members.find(m => m.profile_id === userId)?.profile?.name ?? 'You'}
+              isLead={isLead}
+            />
           </div>
         </div>
 
