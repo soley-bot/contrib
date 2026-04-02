@@ -13,6 +13,14 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: 4,
+    date: '2026-04-02',
+    items: [
+      { title: 'Notification preferences', description: 'Choose which Telegram notifications you receive — contributions, blockers, deadlines, or weekly digest.' },
+      { title: 'Easier Telegram setup', description: 'Tap the bot link directly from the profile page instead of searching in Telegram.' },
+    ],
+  },
+  {
     version: 3,
     date: '2026-04-01',
     items: [

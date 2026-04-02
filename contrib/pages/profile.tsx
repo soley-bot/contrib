@@ -43,6 +43,13 @@ export default function ProfilePage() {
   const [countdown, setCountdown] = useState(600); // 10 minutes in seconds
   const countdownStartRef = useRef<number | null>(null);
 
+  // Notification preferences
+  const [notifyContributions, setNotifyContributions] = useState(true);
+  const [notifyBlockers, setNotifyBlockers] = useState(true);
+  const [notifyDeadlines, setNotifyDeadlines] = useState(true);
+  const [notifyWeeklyDigest, setNotifyWeeklyDigest] = useState(true);
+  const [prefsSaving, setPrefsSaving] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [user, loading, router]);
@@ -62,10 +69,15 @@ export default function ProfilePage() {
     async function fetchTgStatus() {
       const { data } = await supabase
         .from('telegram_subscriptions')
-        .select('verified, chat_id, verification_code, verification_expires_at')
+        .select('verified, chat_id, verification_code, verification_expires_at, notify_contributions, notify_blockers, notify_deadlines, notify_weekly_digest')
         .eq('profile_id', user!.id)
         .maybeSingle();
       if (!data) { setTgStatus('disconnected'); return; }
+      // Load notification preferences
+      setNotifyContributions(data.notify_contributions ?? true);
+      setNotifyBlockers(data.notify_blockers ?? true);
+      setNotifyDeadlines(data.notify_deadlines ?? true);
+      setNotifyWeeklyDigest(data.notify_weekly_digest ?? true);
       if (data.verified) { setTgStatus('connected'); return; }
       if (data.verification_code) {
         const expired = data.verification_expires_at && new Date(data.verification_expires_at) < new Date();
@@ -196,6 +208,17 @@ export default function ProfilePage() {
     if (role !== profile.role) {
       router.push(role === 'teacher' ? '/teacher' : '/dashboard');
     }
+  }
+
+  async function handleTogglePref(column: string, value: boolean) {
+    if (!user?.id) return;
+    setPrefsSaving(true);
+    const { error: err } = await supabase
+      .from('telegram_subscriptions')
+      .update({ [column]: value })
+      .eq('profile_id', user.id);
+    if (err) setError('Failed to update preference.');
+    setPrefsSaving(false);
   }
 
   if (loading) {
@@ -390,20 +413,25 @@ export default function ProfilePage() {
               </div>
 
               {tgStatus === 'disconnected' && (
-                <button
-                  onClick={handleTgConnect}
-                  disabled={tgConnecting}
-                  className="mt-4 w-full h-10 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60"
-                >
-                  {tgConnecting ? 'Generating code…' : 'Connect Telegram'}
-                </button>
+                <div className="mt-4 space-y-2">
+                  <button
+                    onClick={handleTgConnect}
+                    disabled={tgConnecting}
+                    className="w-full h-10 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60"
+                  >
+                    {tgConnecting ? 'Generating code…' : 'Connect Telegram'}
+                  </button>
+                  <p className="text-[11px] text-[#94A3B8] text-center">
+                    You will message <a href="https://t.me/contrib_notify_bot" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">@contrib_notify_bot</a> with a verification code
+                  </p>
+                </div>
               )}
 
               {tgStatus === 'pending' && tgCode && (
                 <div className="mt-4 space-y-3">
                   <div className="bg-[#F8FAFF] border border-[#E2E8F0] rounded-lg p-3">
                     <p className="text-[12px] text-[#475569] mb-2">
-                      Open Telegram and message <span className="font-semibold text-[#0F172A]">@{tgBotUsername}</span> with this code:
+                      Open <a href={`https://t.me/${tgBotUsername}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand hover:underline">@{tgBotUsername}</a> in Telegram and send this code:
                     </p>
                     <div className="flex items-center justify-center gap-2 py-2">
                       <p className="text-2xl font-bold tracking-[0.2em] text-[#0F172A]">{tgCode}</p>
@@ -441,7 +469,7 @@ export default function ProfilePage() {
               {tgStatus === 'pending' && !tgCode && (
                 <div className="mt-4 space-y-3">
                   <p className="text-[13px] text-[#475569]">
-                    A code was already generated. Message <span className="font-semibold">@{tgBotUsername || 'Contribsbot'}</span> with your code — the page will update automatically.
+                    A code was already generated. Message <a href={`https://t.me/${tgBotUsername || 'contrib_notify_bot'}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand hover:underline">@{tgBotUsername || 'contrib_notify_bot'}</a> with your code — the page will update automatically.
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -461,6 +489,42 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+
+              {/* Notification preferences — only when connected */}
+              {tgStatus === 'connected' && (
+                <div className="mt-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-2.5">What to notify me about</p>
+                  <div className="bg-white border border-[#E2E8F0] rounded-xl divide-y divide-[#E2E8F0] shadow-sm">
+                    {([
+                      { key: 'notify_contributions', label: 'Contributions', desc: 'Tasks created, completed, or reassigned', value: notifyContributions, setter: setNotifyContributions },
+                      { key: 'notify_blockers', label: 'Heads Up', desc: 'When a teammate declares a blocker', value: notifyBlockers, setter: setNotifyBlockers },
+                      { key: 'notify_deadlines', label: 'Deadlines', desc: 'Reminders 24h before a deadline', value: notifyDeadlines, setter: setNotifyDeadlines },
+                      { key: 'notify_weekly_digest', label: 'Weekly digest', desc: 'Monday summary of group activity', value: notifyWeeklyDigest, setter: setNotifyWeeklyDigest },
+                    ] as const).map((pref) => (
+                      <label key={pref.key} className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#F8FAFF] transition-colors">
+                        <div>
+                          <p className="text-[13px] font-medium text-[#0F172A]">{pref.label}</p>
+                          <p className="text-[11px] text-[#64748B] mt-0.5">{pref.desc}</p>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={pref.value}
+                          disabled={prefsSaving}
+                          onClick={() => {
+                            const next = !pref.value;
+                            pref.setter(next);
+                            handleTogglePref(pref.key, next);
+                          }}
+                          className={`relative inline-flex h-6 w-10 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ${pref.value ? 'bg-brand' : 'bg-[#CBD5E1]'} ${prefsSaving ? 'opacity-60' : ''}`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${pref.value ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </button>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
           </div>
         </div>
       </div>
