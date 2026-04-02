@@ -48,14 +48,22 @@ CREATE POLICY "Members and teachers can read groups"
 -- 3. Fix the self-referential "Members can read group_members" policy.
 --    The original policy had an EXISTS subquery against group_members itself,
 --    which can also trigger infinite recursion. Replace with the SECURITY
---    DEFINER function.
+--    DEFINER function. Also include teacher course ownership so teachers
+--    retain visibility after auto-transfer removes them from group_members.
 DROP POLICY IF EXISTS "Members can read group_members" ON public.group_members;
+DROP POLICY IF EXISTS "Members and teachers can read group_members" ON public.group_members;
+DROP POLICY IF EXISTS "Teachers can read group_members in their courses" ON public.group_members;
 
-CREATE POLICY "Members can read group_members"
+CREATE POLICY "Members and teachers can read group_members"
   ON public.group_members FOR SELECT
   USING (
     profile_id = auth.uid()
     OR user_is_group_member(group_members.group_id)
+    OR EXISTS (
+      SELECT 1 FROM public.groups g
+      JOIN public.courses c ON c.id = g.course_id
+      WHERE g.id = group_members.group_id AND c.teacher_id = auth.uid()
+    )
   );
 
 -- 4. Add missing DELETE policies for teacher course/group management.

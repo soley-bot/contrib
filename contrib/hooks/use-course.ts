@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Course, Group, GroupWithStats } from '@/types';
 
@@ -30,12 +31,12 @@ export function useCourse(courseId: string | undefined, userId: string | undefin
       supabase.from('groups').select('*').eq('course_id', id).order('created_at', { ascending: false }),
     ]);
     if (courseError) {
-      console.error('Failed to load course:', courseError);
+      Sentry.captureMessage(`Failed to load course: ${courseError.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }
     if (groupError) {
-      console.error('Failed to load course groups:', groupError);
+      Sentry.captureMessage(`Failed to load course groups: ${groupError.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }
@@ -46,15 +47,15 @@ export function useCourse(courseId: string | undefined, userId: string | undefin
     const groupIds = (groupData as Group[]).map((g) => g.id);
     const [{ data: membersData, error: membersError }, { data: tasksData, error: tasksError }] = await Promise.all([
       supabase.from('group_members').select('group_id').in('group_id', groupIds),
-      supabase.from('tasks').select('group_id, status').in('group_id', groupIds),
+      supabase.from('tasks').select('group_id, status').in('group_id', groupIds).is('deleted_at', null),
     ]);
     if (membersError) {
-      console.error('Failed to load course members:', membersError);
+      Sentry.captureMessage(`Failed to load course members: ${membersError.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }
     if (tasksError) {
-      console.error('Failed to load course tasks:', tasksError);
+      Sentry.captureMessage(`Failed to load course tasks: ${tasksError.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }

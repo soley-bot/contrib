@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { EvaluationSession } from '@/types';
 
@@ -72,22 +73,22 @@ export function useCourseAnalytics(groupIds: string[]): UseCourseAnalyticsResult
     ]);
 
     if (sessionsRes.error) {
-      console.error('Failed to load evaluation sessions:', sessionsRes.error);
+      Sentry.captureMessage(`Failed to load evaluation sessions: ${sessionsRes.error.message}`, { level: 'error' });
       setError('Failed to load peer review data.');
       return;
     }
     if (evalsRes.error) {
-      console.error('Failed to load evaluations:', evalsRes.error);
+      Sentry.captureMessage(`Failed to load evaluations: ${evalsRes.error.message}`, { level: 'error' });
       setError('Failed to load peer review data.');
       return;
     }
     if (activityRes.error) {
-      console.error('Failed to load activity log:', activityRes.error);
+      Sentry.captureMessage(`Failed to load activity log: ${activityRes.error.message}`, { level: 'error' });
       setError('Failed to load activity data.');
       return;
     }
     if (scoresRes.error) {
-      console.error('Failed to load evaluation scores:', scoresRes.error);
+      Sentry.captureMessage(`Failed to load evaluation scores: ${scoresRes.error.message}`, { level: 'error' });
       setError('Failed to load peer review scores.');
       return;
     }

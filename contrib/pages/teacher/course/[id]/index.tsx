@@ -170,7 +170,7 @@ export default function CourseDetail() {
     setDownloadingId(group.id);
     const [membersRes, tasksRes, activityRes] = await Promise.all([
       supabase.from('group_members').select('*, profile:profiles(*)').eq('group_id', group.id).order('joined_at', { ascending: true }),
-      supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
+      supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).is('deleted_at', null).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
     ]);
     if (membersRes.error || tasksRes.error || activityRes.error) { showToast('Failed to load group data for PDF.', 'error'); setDownloadingId(null); return; }

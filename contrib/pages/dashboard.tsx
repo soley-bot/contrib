@@ -58,6 +58,13 @@ export default function Dashboard() {
     if (!loading && profile && profile.role === 'teacher') router.replace('/teacher');
   }, [user, profile, loading, router]);
 
+  // Auto-select course if student is enrolled in exactly one
+  useEffect(() => {
+    if (!coursesLoading && enrolledCourses.length === 1 && !selectedCourseId) {
+      setSelectedCourseId(enrolledCourses[0].id);
+    }
+  }, [coursesLoading, enrolledCourses, selectedCourseId]);
+
   const creatingRef = useRef(false);
 
   async function handleCreate() {
@@ -66,6 +73,11 @@ export default function Dashboard() {
     setFormError('');
     if (!groupName.trim() || !subject.trim()) {
       setFormError('Group name and subject are required.');
+      creatingRef.current = false;
+      return;
+    }
+    if (enrolledCourses.length > 0 && !selectedCourseId) {
+      setFormError('Please link this group to a course.');
       creatingRef.current = false;
       return;
     }
@@ -357,14 +369,14 @@ export default function Dashboard() {
               </div>
               {enrolledCourses.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="group-course" className="text-[13px] font-medium text-text-secondary">Link to course <span className="font-normal text-text-tertiary">(optional)</span></label>
+                  <label htmlFor="group-course" className="text-[13px] font-medium text-text-secondary">Link to course</label>
                   <select
                     id="group-course"
                     value={selectedCourseId}
                     onChange={(e) => setSelectedCourseId(e.target.value)}
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                   >
-                    <option value="">No course</option>
+                    <option value="">Select course…</option>
                     {enrolledCourses.map((c) => (
                       <option key={c.id} value={c.id}>{c.name} — {c.subject}</option>
                     ))}
