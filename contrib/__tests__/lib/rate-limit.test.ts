@@ -1,18 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock @upstash/redis before importing rate-limit
-vi.mock('@upstash/redis', () => ({
-  Redis: vi.fn(() => ({})),
-}));
+vi.mock('@upstash/redis', () => {
+  return { Redis: class MockRedis {} };
+});
 
 // Mock @upstash/ratelimit
 const mockLimit = vi.fn();
-vi.mock('@upstash/ratelimit', () => ({
-  Ratelimit: Object.assign(
-    vi.fn(() => ({ limit: mockLimit })),
-    { slidingWindow: vi.fn(() => 'sliding-window-config') },
-  ),
-}));
+vi.mock('@upstash/ratelimit', () => {
+  class MockRatelimit {
+    limit = mockLimit;
+    static slidingWindow() { return 'sliding-window-config'; }
+  }
+  return { Ratelimit: MockRatelimit };
+});
 
 import { rateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 

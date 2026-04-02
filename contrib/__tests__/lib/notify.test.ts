@@ -39,13 +39,15 @@ describe('notifyGroupMembers', () => {
       }),
     });
 
-    // Second query: telegram_subscriptions
+    // Second query: telegram_subscriptions (chain: select → in → eq → eq → not)
     mockFrom.mockReturnValueOnce({
       select: vi.fn().mockReturnValue({
         in: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({
-              data: [{ chat_id: 111 }, { chat_id: 222 }],
+            eq: vi.fn().mockReturnValue({
+              not: vi.fn().mockResolvedValue({
+                data: [{ chat_id: 111 }, { chat_id: 222 }],
+              }),
             }),
           }),
         }),
@@ -68,23 +70,24 @@ describe('notifyGroupMembers', () => {
       }),
     });
 
-    mockFrom.mockReturnValueOnce({
-      select: vi.fn().mockReturnValue({
-        in: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({
-              data: [{ chat_id: 222 }],
-            }),
+    const mockInFn = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          not: vi.fn().mockResolvedValue({
+            data: [{ chat_id: 222 }],
           }),
         }),
+      }),
+    });
+    mockFrom.mockReturnValueOnce({
+      select: vi.fn().mockReturnValue({
+        in: mockInFn,
       }),
     });
 
     await notifyGroupMembers('g1', 'Hello', 'contributions', 'u1');
 
-    // The in() call should have received only ['u2']
-    const inCall = mockFrom.mock.results[1].value.select().in;
-    expect(inCall).toHaveBeenCalledWith('profile_id', ['u2']);
+    expect(mockInFn).toHaveBeenCalledWith('profile_id', ['u2']);
   });
 
   it('handles empty member list gracefully', async () => {
@@ -124,7 +127,9 @@ describe('notifyGroupMembers', () => {
       select: vi.fn().mockReturnValue({
         in: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: [] }),
+            eq: vi.fn().mockReturnValue({
+              not: vi.fn().mockResolvedValue({ data: [] }),
+            }),
           }),
         }),
       }),
