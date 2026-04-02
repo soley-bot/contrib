@@ -322,7 +322,7 @@ export default function CourseDetail() {
           </button>
         </div>
 
-        <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
+        <div className="pt-16 md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {/* Course invite link for students */}
           <div className="mb-4 p-3 bg-brand-light rounded-[8px] border border-[#93B4FF]">
             <p className="text-[11px] font-semibold text-brand-dark uppercase tracking-wide mb-0.5">Course invite link</p>

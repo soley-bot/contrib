@@ -128,7 +128,7 @@ export default function Dashboard() {
         </div>
 
         {/* Content */}
-        <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
+        <div className="pt-16 md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
           <InlineTip id="dashboard-telegram">Connect Telegram in your profile to get deadline reminders 24h before.</InlineTip>
           {contributionCounts.total > 0 && (
             <InlineTip id="dashboard-contribution">Your contribution summary shows completed work by type across all groups.</InlineTip>

@@ -216,7 +216,7 @@ export default function ProfilePage() {
           <span className="text-base font-semibold text-text">Profile</span>
         </div>
 
-        <div className="pt-14 md:pt-0 px-4 py-6 max-w-lg mx-auto">
+        <div className="pt-16 md:pt-2 px-4 py-6 max-w-lg mx-auto">
           {/* Profile card */}
           <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
             {/* Avatar + name row */}

@@ -64,20 +64,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Non-fatal — declaration saved, just log the error
   }
 
-  // Notify group members via Telegram (non-fatal, fire and forget)
-  const { data: actor } = await adminClient
-    .from('profiles')
-    .select('name')
-    .eq('id', user.id)
-    .single();
+  // Fetch actor name, group name, and group members in parallel for notifications
+  const [{ data: actor }, { data: groupData }, { data: members }] = await Promise.all([
+    adminClient.from('profiles').select('name').eq('id', user.id).single(),
+    adminClient.from('groups').select('name').eq('id', groupId).single(),
+    adminClient.from('group_members').select('profile_id').eq('group_id', groupId),
+  ]);
 
+  const actorName = actor?.name ?? 'A teammate';
+  const message = `${actorName} sent a heads up: ${reason}`;
+
+  // Send Telegram + in-app notifications (non-fatal)
   try {
-    await notifyGroupMembers(
-      groupId,
-      `${actor?.name ?? 'A teammate'} sent a heads up: ${reason}`,
-      'blockers',
-      user.id,
-    );
+    const recipientIds = (members ?? [])
+      .map((m: { profile_id: string }) => m.profile_id)
+      .filter((id) => id !== user.id);
+
+    const notificationInserts = recipientIds.map((recipientId) => ({
+      recipient_id: recipientId,
+      group_id: groupId,
+      type: 'blocker_declared' as const,
+      title: message,
+      meta: { reason, actorName, groupName: groupData?.name ?? null },
+    }));
+
+    await Promise.all([
+      notifyGroupMembers(groupId, message, 'blockers', user.id),
+      notificationInserts.length > 0
+        ? adminClient.from('notifications').insert(notificationInserts)
+        : Promise.resolve(),
+    ]);
   } catch (err) {
     Sentry.captureException(err, { tags: { route: 'blockers' } });
   }

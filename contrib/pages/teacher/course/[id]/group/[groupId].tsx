@@ -113,7 +113,7 @@ export default function TeacherGroupDetail() {
         onProfileUpdate={refreshProfile}
       />
 
-      <div className="md:pl-[220px] pt-14 md:pt-0">
+      <div className="md:pl-[220px] pt-16 md:pt-0">
         {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div className="flex items-center gap-1.5 text-sm">

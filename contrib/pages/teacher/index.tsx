@@ -137,7 +137,7 @@ export default function TeacherDashboard() {
           </button>
         </div>
 
-        <div className="pt-14 md:pt-0 pb-4 px-4 py-4 max-w-2xl mx-auto">
+        <div className="pt-16 md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {courses.length === 0 ? (
             <div className="text-center py-14">
               <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">

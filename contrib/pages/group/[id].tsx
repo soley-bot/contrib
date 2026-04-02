@@ -289,7 +289,7 @@ export default function GroupPage() {
     <div className="min-h-dvh bg-bg">
       <StudentNav profile={profile} group={group} onTabChange={(t) => setTab(t as Tab)} activeTab={tab} tabBadges={tabBadges} />
 
-      <div className="pt-14 md:pt-0 md:pl-[220px]">
+      <div className="pt-16 md:pt-0 md:pl-[220px]">
 
         {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">

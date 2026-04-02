@@ -45,6 +45,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
   const deletingRef = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function handleSubmit() {
     if (saving) return;
@@ -102,6 +103,9 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
     });
 
     setContent('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '52px';
+    }
     setSaving(false);
   }
 
@@ -168,13 +172,19 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
       {/* Input */}
       <div className="flex gap-2 mt-2 items-end">
         <textarea
+          ref={textareaRef}
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            const el = e.target;
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Add a comment..."
-          rows={1}
+          rows={2}
           className="flex-1 border border-border rounded-lg px-3 py-2 text-[13px] text-text outline-none focus:border-brand resize-none"
-          style={{ minHeight: '36px', maxHeight: '120px' }}
+          style={{ minHeight: '52px', maxHeight: '120px' }}
         />
         <button
           onClick={handleSubmit}
