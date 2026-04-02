@@ -9,7 +9,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const ip = getClientIp(req.headers);
 
-  if (!rateLimit(`report-share:${ip}`, RATE_LIMITS.REPORT_SHARE.limit, RATE_LIMITS.REPORT_SHARE.window)) {
+  if (!(await rateLimit(`report-share:${ip}`, RATE_LIMITS.REPORT_SHARE.limit, RATE_LIMITS.REPORT_SHARE.window))) {
     return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
   }
 

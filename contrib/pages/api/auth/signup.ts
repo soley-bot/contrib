@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Rate limit: 5 signup attempts per IP per minute
   const ip = getClientIp(req.headers);
-  if (!rateLimit(`signup:${ip}`, RATE_LIMITS.SIGNUP.limit, RATE_LIMITS.SIGNUP.window)) {
+  if (!(await rateLimit(`signup:${ip}`, RATE_LIMITS.SIGNUP.limit, RATE_LIMITS.SIGNUP.window))) {
     return res.status(429).json({ error: 'Too many signup attempts. Please wait a moment.' });
   }
 

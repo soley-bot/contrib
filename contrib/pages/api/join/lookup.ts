@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Rate limit: 30 lookups per IP per minute
   const ip = getClientIp(req.headers);
-  if (!rateLimit(`lookup:${ip}`, RATE_LIMITS.JOIN_LOOKUP.limit, RATE_LIMITS.JOIN_LOOKUP.window)) {
+  if (!(await rateLimit(`lookup:${ip}`, RATE_LIMITS.JOIN_LOOKUP.limit, RATE_LIMITS.JOIN_LOOKUP.window))) {
     return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
   }
 

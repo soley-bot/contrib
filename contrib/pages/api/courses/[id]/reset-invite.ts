@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') return res.status(405).end();
 
   const ip = getClientIp(req.headers);
-  if (!rateLimit(`reset-course-invite:${ip}`, RATE_LIMITS.DEFAULT.limit, RATE_LIMITS.DEFAULT.window)) {
+  if (!(await rateLimit(`reset-course-invite:${ip}`, RATE_LIMITS.DEFAULT.limit, RATE_LIMITS.DEFAULT.window))) {
     return res.status(429).json({ error: 'Too many requests.' });
   }
 

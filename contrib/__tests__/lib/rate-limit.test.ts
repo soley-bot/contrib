@@ -1,48 +1,40 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Mock @upstash/redis before importing rate-limit
+vi.mock('@upstash/redis', () => ({
+  Redis: vi.fn(() => ({})),
+}));
+
+// Mock @upstash/ratelimit
+const mockLimit = vi.fn();
+vi.mock('@upstash/ratelimit', () => ({
+  Ratelimit: Object.assign(
+    vi.fn(() => ({ limit: mockLimit })),
+    { slidingWindow: vi.fn(() => 'sliding-window-config') },
+  ),
+}));
+
 import { rateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit';
 
 describe('rateLimit', () => {
   beforeEach(() => {
-    // Use a unique key prefix per test to avoid cross-test pollution
-    vi.restoreAllMocks();
+    mockLimit.mockReset();
   });
 
-  it('allows requests within the limit', () => {
-    const key = `test-allow-${Date.now()}`;
-    for (let i = 0; i < 5; i++) {
-      expect(rateLimit(key, 5, 60_000)).toBe(true);
-    }
+  it('returns true when under the limit', async () => {
+    mockLimit.mockResolvedValue({ success: true });
+    expect(await rateLimit('test-key', 5, 60_000)).toBe(true);
+    expect(mockLimit).toHaveBeenCalledWith('test-key');
   });
 
-  it('blocks after exceeding the limit', () => {
-    const key = `test-block-${Date.now()}`;
-    for (let i = 0; i < 3; i++) {
-      rateLimit(key, 3, 60_000);
-    }
-    expect(rateLimit(key, 3, 60_000)).toBe(false);
+  it('returns false when over the limit', async () => {
+    mockLimit.mockResolvedValue({ success: false });
+    expect(await rateLimit('test-key', 5, 60_000)).toBe(false);
   });
 
-  it('resets after the window expires', () => {
-    const key = `test-reset-${Date.now()}`;
-    vi.useFakeTimers();
-
-    // Exhaust the limit
-    for (let i = 0; i < 2; i++) {
-      rateLimit(key, 2, 1_000);
-    }
-    expect(rateLimit(key, 2, 1_000)).toBe(false);
-
-    // Advance past the window
-    vi.advanceTimersByTime(1_001);
-    expect(rateLimit(key, 2, 1_000)).toBe(true);
-
-    vi.useRealTimers();
-  });
-
-  it('uses default limit and window when not specified', () => {
-    const key = `test-default-${Date.now()}`;
-    // Default is 20 requests / 60s — first call should be allowed
-    expect(rateLimit(key)).toBe(true);
+  it('uses default limit and window when not specified', async () => {
+    mockLimit.mockResolvedValue({ success: true });
+    expect(await rateLimit('test-default')).toBe(true);
   });
 });
 
