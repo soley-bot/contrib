@@ -48,8 +48,15 @@ export default function NavShell({ profile, homeRoute, sectionLabel, defaultBack
         setMenuOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMenuOpen(false);
+    }
     document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [menuOpen]);
 
   return (
@@ -87,6 +94,8 @@ export default function NavShell({ profile, homeRoute, sectionLabel, defaultBack
             onClick={() => setMenuOpen((o) => !o)}
             className="w-11 h-11 flex items-center justify-center flex-shrink-0 active:opacity-80"
             aria-label="Open profile menu"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
           >
             <span className="w-7 h-7 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center">
               {initials}
@@ -94,8 +103,8 @@ export default function NavShell({ profile, homeRoute, sectionLabel, defaultBack
           </button>
           {menuOpen && (
             <div
-              className="fixed right-4 w-44 bg-white border border-border rounded-xl shadow-dropdown py-1 z-[200]"
-              style={{ top: 56 }}
+              role="menu"
+              className="absolute right-0 top-full mt-1 w-44 bg-white border border-border rounded-xl shadow-dropdown py-1 z-[200]"
             >
               {profile && (
                 <div className="px-3 py-2 border-b border-[#F3F4F6]">
@@ -103,18 +112,21 @@ export default function NavShell({ profile, homeRoute, sectionLabel, defaultBack
                 </div>
               )}
               <button
+                role="menuitem"
                 onClick={() => { setMenuOpen(false); router.push('/profile'); }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted hover:bg-brand-light transition-colors"
               >
                 Profile
               </button>
               <button
+                role="menuitem"
                 onClick={() => { setMenuOpen(false); setShowEdit(true); }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted hover:bg-brand-light transition-colors"
               >
                 Edit profile
               </button>
               <button
+                role="menuitem"
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted hover:bg-brand-light transition-colors"
               >

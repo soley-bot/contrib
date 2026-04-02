@@ -162,7 +162,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
               {(c.author_id === userId || isLead) && (
                 <button
                   onClick={() => handleDelete(c.id)}
-                  className="ml-auto opacity-0 group-hover:opacity-100 text-text-tertiary hover:text-red-500 transition-opacity p-0.5"
+                  className="ml-auto opacity-0 group-hover:opacity-100 text-text-tertiary hover:text-red-500 transition-opacity p-2 -m-1"
                   aria-label="Delete comment"
                 >
                   <IconTrash size={12} />
@@ -194,7 +194,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
         <button
           onClick={handleSubmit}
           disabled={saving || !content.trim()}
-          className="w-8 h-8 rounded-lg bg-brand hover:bg-brand-hover text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 transition-colors"
+          className="w-9 h-9 rounded-lg bg-brand hover:bg-brand-hover text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 transition-colors"
           aria-label="Send comment"
         >
           {saving ? (
@@ -206,7 +206,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
           )}
         </button>
       </div>
-      {formError && <p className="text-[11px] text-red-600 mt-1">{formError}</p>}
+      {formError && <p role="alert" className="text-[11px] text-red-600 mt-1">{formError}</p>}
     </div>
   );
 }

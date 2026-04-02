@@ -80,7 +80,7 @@ export default function Login() {
     </Head>
     <div className="min-h-dvh bg-bg">
       <div className={`max-w-[440px] mx-auto px-5 pt-8 pb-20 transition-opacity ${redirecting ? 'opacity-60 pointer-events-none' : ''}`}>
-        <div className="flex items-center gap-2 mb-8">
+        <Link href="/" className="flex items-center gap-2 mb-8 w-fit">
           <svg width="28" height="28" viewBox="0 0 160 160" fill="none" className="flex-shrink-0">
             <line x1="58" y1="18" x2="58" y2="142" stroke="#1A56E8" strokeWidth="3" opacity="0.15"/>
             <circle cx="58" cy="128" r="6" fill="#1A56E8" opacity="0.18"/>
@@ -90,7 +90,7 @@ export default function Login() {
             <circle cx="122" cy="46" r="4" fill="#1A56E8"/>
           </svg>
           <span className="text-xl font-extrabold text-brand">Contrib</span>
-        </div>
+        </Link>
         <h1 className="text-[22px] font-bold mb-1">Your work. On record.</h1>
         <p className="text-sm text-muted mb-7">Welcome back.</p>
 

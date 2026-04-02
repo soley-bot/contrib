@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { useToast } from '@/components/toast-provider';
 import type { Group, GroupMember } from '@/types';
 
@@ -17,6 +18,8 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
   const [newLeadId, setNewLeadId] = useState(others[0]?.profile_id ?? '');
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, onClose);
 
   if (others.length === 0) {
     return (
@@ -66,7 +69,7 @@ export default function TransferLeadModal({ group, members, userId, onClose, onU
       className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}
     >
-      <div role="dialog" aria-modal="true" aria-label="Transfer group lead" className="w-full max-w-[400px] bg-white rounded-xl">
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Transfer group lead" className="w-full max-w-[400px] bg-white rounded-xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-base font-semibold text-text">Transfer Lead</h2>
           <button onClick={onClose} aria-label="Close" className="text-text-secondary hover:text-text p-1">

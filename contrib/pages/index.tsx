@@ -417,6 +417,20 @@ export default function Landing() {
     return () => window.removeEventListener('keydown', onKey);
   }, [activeSlide, goTo]);
 
+  // Convert vertical wheel to horizontal scroll on desktop
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollBy({ left: e.deltaY, behavior: 'auto' });
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
   return (
     <div className="min-h-dvh bg-white overflow-hidden">
       <Head>
@@ -448,15 +462,19 @@ export default function Landing() {
       </div>
 
       {/* Tap zones — mobile edge navigation */}
-      <div
-        className="fixed top-0 left-0 w-12 h-full z-40 md:hidden"
+      <button
+        className="fixed top-0 left-0 w-12 h-full z-40 md:hidden bg-transparent border-none"
         onClick={() => goTo(activeSlide - 1)}
         style={{ opacity: activeSlide > 0 ? 1 : 0, pointerEvents: activeSlide > 0 ? 'auto' : 'none' }}
+        aria-label="Previous slide"
+        tabIndex={-1}
       />
-      <div
-        className="fixed top-0 right-0 w-12 h-full z-40 md:hidden"
+      <button
+        className="fixed top-0 right-0 w-12 h-full z-40 md:hidden bg-transparent border-none"
         onClick={() => goTo(activeSlide + 1)}
         style={{ opacity: activeSlide < totalSlides - 1 ? 1 : 0, pointerEvents: activeSlide < totalSlides - 1 ? 'auto' : 'none' }}
+        aria-label="Next slide"
+        tabIndex={-1}
       />
 
       {/* Horizontal scroll container — full viewport */}
@@ -496,7 +514,7 @@ export default function Landing() {
                     {slide.label}
                   </div>
                   <h2
-                    className="font-extrabold mb-3 md:mb-5 transition-all duration-600"
+                    className="font-extrabold mb-3 md:mb-5 transition-all duration-600 max-w-lg"
                     style={{
                       color: slide.textColor,
                       fontSize: 'clamp(32px, 4.5vw, 52px)',
@@ -572,19 +590,22 @@ export default function Landing() {
 
           {/* Dots */}
           <div className="flex items-center gap-2">
-            {Array.from({ length: totalSlides }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                className="rounded-full transition-all duration-300"
-                style={{
-                  width: i === activeSlide ? 20 : 6,
-                  height: 6,
-                  background: i === activeSlide ? '#1A56E8' : 'rgba(0,0,0,0.15)',
-                }}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
+            {Array.from({ length: totalSlides }).map((_, i) => {
+              const label = i < SLIDES.length ? SLIDES[i].title : 'Get started';
+              return (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width: i === activeSlide ? 20 : 6,
+                    height: 6,
+                    background: i === activeSlide ? '#1A56E8' : 'rgba(0,0,0,0.15)',
+                  }}
+                  aria-label={`Go to slide: ${label}`}
+                />
+              );
+            })}
           </div>
 
           {/* Right arrow */}
@@ -607,8 +628,11 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Footer — always in DOM for search engines and Google OAuth verification */}
-      <footer className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-1.5 text-[11px] text-[#94A3B8]">
+      {/* Footer — visible only on CTA slide to avoid overlap with navigation chrome */}
+      <footer
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-1.5 text-[11px] text-[#94A3B8] transition-opacity duration-300"
+        style={{ opacity: activeSlide === totalSlides - 1 ? 1 : 0, pointerEvents: activeSlide === totalSlides - 1 ? 'auto' : 'none' }}
+      >
         <span>&copy; {new Date().getFullYear()} Contrib</span>
         <div className="flex items-center gap-3">
           <Link href="/privacy" className="hover:text-[#64748B] transition-colors">Privacy Policy</Link>

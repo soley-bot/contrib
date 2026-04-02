@@ -48,30 +48,30 @@ export default function BlockerModal({ groupId, onClose, onCreated }: BlockerMod
         aria-label="Declare a blocker"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#FEE2E2] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center">
               <IconBan size={14} />
             </div>
-            <h2 className="text-[15px] font-semibold text-[#0F172A]">Heads Up</h2>
+            <h2 className="text-[15px] font-semibold text-text">Heads Up</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#475569] transition-colors text-lg leading-none"
+            className="text-text-tertiary hover:text-text-secondary transition-colors p-2 -m-1"
             aria-label="Close"
           >
-            ×
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
         </div>
 
         {/* Body */}
         <form onSubmit={handleSubmit}>
           <div className="px-5 py-4 flex flex-col gap-3">
-            <p className="text-[13px] text-[#475569]">
+            <p className="text-[13px] text-text-secondary">
               Let your group know you&apos;re temporarily unavailable. No details required — just a brief note.
             </p>
             <textarea
-              className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2.5 text-[14px] text-[#0F172A] placeholder-[#CBD5E1] resize-none focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors"
+              className="w-full border border-border rounded-lg px-3 py-2.5 text-[14px] text-text placeholder-text-tertiary resize-none focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors"
               rows={3}
               placeholder="e.g. Busy with exams this week, back on Friday"
               value={reason}
@@ -81,19 +81,19 @@ export default function BlockerModal({ groupId, onClose, onCreated }: BlockerMod
             />
             <div className="flex items-center justify-between">
               {error
-                ? <p className="text-[12px] text-[#DC2626]">{error}</p>
+                ? <p role="alert" className="text-[12px] text-red">{error}</p>
                 : <span />
               }
-              <p className="text-[11px] text-[#CBD5E1] ml-auto">{reason.length}/500</p>
+              <p className="text-[11px] text-text-tertiary ml-auto">{reason.length}/500</p>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="px-5 py-3 border-t border-[#E2E8F0] flex justify-end gap-2">
+          <div className="px-5 py-3 border-t border-border flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="h-9 px-4 border border-[#E2E8F0] bg-white hover:bg-[#F1F5F9] text-[13px] font-medium rounded-md transition-colors"
+              className="h-9 px-4 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium rounded-md transition-colors"
             >
               Cancel
             </button>

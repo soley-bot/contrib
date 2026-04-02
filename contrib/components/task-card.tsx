@@ -55,7 +55,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
           {canEdit && (
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(task); }}
-              className="p-1.5 rounded-md text-text-tertiary hover:text-text-secondary hover:bg-bg-hover transition-colors"
+              className="p-2.5 -m-1 rounded-md text-text-tertiary hover:text-text-secondary hover:bg-bg-hover transition-colors"
               title="Edit task"
               aria-label="Edit task"
             >
@@ -65,7 +65,7 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
           {isLead && (
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(task); }}
-              className="p-1.5 rounded-md text-text-tertiary hover:text-red-500 hover:bg-red-50 transition-colors"
+              className="p-2.5 -m-1 rounded-md text-text-tertiary hover:text-red-500 hover:bg-red-50 transition-colors"
               title="Delete task"
               aria-label="Delete task"
             >

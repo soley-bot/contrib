@@ -8,6 +8,7 @@ interface ConfirmModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -18,6 +19,7 @@ export default function ConfirmModal({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   destructive = false,
+  loading = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -27,12 +29,12 @@ export default function ConfirmModal({
   return (
     <div
       className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center px-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !loading) onCancel(); }}
     >
       <div ref={modalRef} className="w-full max-w-[400px] bg-white rounded-xl p-5" role="dialog" aria-labelledby="confirm-modal-title">
         <div className="flex items-start justify-between mb-3">
           <h3 id="confirm-modal-title" className="text-[15px] font-semibold text-text">{title}</h3>
-          <button onClick={onCancel} aria-label="Close dialog" className="text-text-tertiary hover:text-text-secondary ml-2 p-0.5">
+          <button onClick={onCancel} disabled={loading} aria-label="Close dialog" className="text-text-tertiary hover:text-text-secondary ml-2 p-2 -m-1 disabled:opacity-40">
             <IconClose size={15} />
           </button>
         </div>
@@ -41,18 +43,20 @@ export default function ConfirmModal({
           {cancelLabel && (
             <button
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-text-secondary border border-border rounded-md hover:bg-bg-hover transition-colors"
+              disabled={loading}
+              className="px-4 py-2 text-sm font-medium text-text-secondary border border-border rounded-md hover:bg-bg-hover transition-colors disabled:opacity-40"
             >
               {cancelLabel}
             </button>
           )}
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+            disabled={loading}
+            className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors disabled:opacity-60 ${
               destructive ? 'bg-red-600 hover:bg-red-700' : 'bg-brand hover:bg-brand-hover'
             }`}
           >
-            {confirmLabel}
+            {loading ? 'Processing…' : confirmLabel}
           </button>
         </div>
       </div>

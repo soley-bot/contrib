@@ -77,8 +77,15 @@ export default function WhatsNew({ sidebar }: { sidebar?: boolean }) {
         setOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
     document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [open]);
 
   function handleOpen() {
@@ -94,17 +101,20 @@ export default function WhatsNew({ sidebar }: { sidebar?: boolean }) {
       <button
         onClick={handleOpen}
         className={sidebar
-          ? 'relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-brand-light transition-colors'
+          ? 'w-full flex items-center gap-2 px-2 py-2 rounded-md text-[13px] font-medium text-muted hover:bg-brand-light transition-colors'
           : 'relative w-11 h-11 flex items-center justify-center flex-shrink-0 active:opacity-80'
         }
         aria-label="What's new"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10 2l2.3 4.6 5 .7-3.6 3.5.8 5L10 13.4 5.5 15.8l.8-5L2.7 7.3l5-.7L10 2z" />
-        </svg>
-        {hasUnseen && (
-          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand" style={{ border: '2px solid white' }} />
-        )}
+        <span className="relative flex-shrink-0">
+          <svg width={sidebar ? 16 : 20} height={sidebar ? 16 : 20} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 2l2.3 4.6 5 .7-3.6 3.5.8 5L10 13.4 5.5 15.8l.8-5L2.7 7.3l5-.7L10 2z" />
+          </svg>
+          {hasUnseen && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-brand" style={{ border: '2px solid white' }} />
+          )}
+        </span>
+        {sidebar && 'What\u2019s new'}
       </button>
 
       {open && (

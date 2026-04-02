@@ -27,8 +27,15 @@ export default function GroupActionsMenu({
         setOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [open]);
 
   function handleAction(fn: () => void) {
@@ -43,40 +50,41 @@ export default function GroupActionsMenu({
         className="w-8 h-8 flex items-center justify-center text-text-tertiary hover:text-text-secondary hover:bg-bg-hover rounded-md transition-colors"
         title="Group actions"
         aria-label="Group actions"
+        aria-haspopup="menu"
         aria-expanded={open}
       >
         <IconMore size={16} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 w-52 bg-white border border-border rounded-lg shadow-dropdown z-50 py-1">
-          <button onClick={() => handleAction(onEditGroup)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
+        <div role="menu" className="absolute right-0 top-10 w-52 bg-white border border-border rounded-lg shadow-dropdown z-50 py-1">
+          <button role="menuitem" onClick={() => handleAction(onEditGroup)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
             <IconPencil size={14} /> Edit group
           </button>
           {inviteToken && (
-            <button onClick={() => handleAction(onCopyInvite)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
+            <button role="menuitem" onClick={() => handleAction(onCopyInvite)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
               <IconLink size={14} /> Copy invite link
             </button>
           )}
-          <div className="h-px bg-border mx-2 my-1" />
-          <button onClick={() => handleAction(onExport)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
+          <div className="h-px bg-border mx-2 my-1" role="separator" />
+          <button role="menuitem" onClick={() => handleAction(onExport)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
             <IconExport size={14} /> Export PDF
           </button>
-          <button onClick={() => handleAction(onShareReport)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
+          <button role="menuitem" onClick={() => handleAction(onShareReport)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
             <IconLink size={14} /> Share report
           </button>
-          <div className="h-px bg-border mx-2 my-1" />
+          <div className="h-px bg-border mx-2 my-1" role="separator" />
           {isLead && (
-            <button onClick={() => handleAction(onTransferLead)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
+            <button role="menuitem" onClick={() => handleAction(onTransferLead)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
               <IconCrown size={14} /> Transfer lead
             </button>
           )}
           {isLead ? (
-            <button onClick={() => handleAction(onDeleteGroup)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 transition-colors">
+            <button role="menuitem" onClick={() => handleAction(onDeleteGroup)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 transition-colors">
               <IconTrash size={14} /> Delete group
             </button>
           ) : (
-            <button onClick={() => handleAction(onLeaveGroup)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 transition-colors">
+            <button role="menuitem" onClick={() => handleAction(onLeaveGroup)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 transition-colors">
               <IconUsers size={14} /> Leave group
             </button>
           )}

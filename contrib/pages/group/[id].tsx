@@ -291,7 +291,40 @@ export default function GroupPage() {
   }, [anyModalOpen]);
 
   if (userLoading || groupLoading) {
-    return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;
+    return (
+      <div className="min-h-dvh bg-bg">
+        {/* Skeleton: mobile header */}
+        <div className="md:hidden h-14 bg-white border-b border-border" />
+        {/* Skeleton: desktop sidebar placeholder */}
+        <div className="hidden md:block fixed top-0 left-0 h-full w-[220px] bg-white border-r border-border" />
+        <div className="pt-16 md:pt-0 md:pl-[220px]">
+          {/* Skeleton: topbar */}
+          <div className="hidden md:flex items-center h-14 px-6 bg-white border-b border-border gap-3">
+            <div className="h-4 w-24 bg-border rounded animate-pulse" />
+            <div className="h-4 w-4 bg-bg-hover rounded animate-pulse" />
+            <div className="h-4 w-32 bg-border rounded animate-pulse" />
+          </div>
+          {/* Skeleton: tab bar */}
+          <div className="flex gap-4 px-5 py-3 border-b border-border bg-white md:hidden">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-4 w-16 bg-border rounded animate-pulse" />
+            ))}
+          </div>
+          {/* Skeleton: content cards */}
+          <div className="px-4 py-5 max-w-2xl mx-auto flex flex-col gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white border border-border rounded-xl p-4 flex items-start gap-3 animate-pulse">
+                <div className="w-5 h-5 rounded bg-border flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="h-4 w-48 bg-border rounded mb-2" />
+                  <div className="h-3 w-32 bg-bg-hover rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!user || !group || !isMember) {
@@ -476,6 +509,7 @@ export default function GroupPage() {
             : null;
           return (
             <button key={item.id} onClick={item.action}
+              aria-current={item.id === tab ? 'page' : undefined}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors relative ${
                 item.id === tab ? 'text-brand' : 'text-text-tertiary'
               }`}

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { IconClose } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
 import { useRoleLock } from '@/hooks/use-role-lock';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import RoleToggle from '@/components/role-toggle';
 import type { Profile, UserRole } from '@/types';
 
@@ -22,6 +23,8 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
   const [error, setError] = useState('');
   const { updateProfile, saving } = useProfile();
   const { locked: roleLocked, reason: lockReason, loading: lockLoading } = useRoleLock(profile.id, profile.role);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, onClose);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,9 +41,9 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
   return (
     <div
       className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}
     >
-      <div role="dialog" aria-modal="true" aria-label="Edit profile" className="w-full md:max-w-[400px] bg-white rounded-t-2xl md:rounded-xl">
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Edit profile" className="w-full md:max-w-[400px] bg-white rounded-t-2xl md:rounded-xl">
         <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-base font-semibold text-text">Edit Profile</h2>
@@ -96,7 +99,7 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
               )}
             </div>
           )}
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
           <div className="pt-1 border-t border-border flex gap-2">
             <button type="button" onClick={onClose}
               className="flex-1 h-11 border border-border text-text-secondary text-sm font-medium rounded-md hover:bg-bg-hover transition-colors">

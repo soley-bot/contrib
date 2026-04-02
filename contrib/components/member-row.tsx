@@ -47,8 +47,9 @@ export default function MemberRow({ member, tasks, isThisMemberLead, canRemove, 
       {canRemove && onRemove && (
         <button
           onClick={onRemove}
-          className="p-2 text-text-tertiary hover:text-red-500 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
+          className="p-2.5 text-text-tertiary hover:text-red-500 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
           title="Remove member"
+          aria-label={`Remove ${name}`}
         >
           <IconTrash size={15} />
         </button>

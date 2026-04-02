@@ -144,7 +144,7 @@ export default function Dashboard() {
         </div>
 
         {/* Content */}
-        <div className="pt-16 md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
+        <div className="pt-[72px] md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
           <InlineTip id="dashboard-telegram">Connect Telegram in your profile to get deadline reminders 24h before.</InlineTip>
           {contributionCounts.total > 0 && (
             <InlineTip id="dashboard-contribution">Your contribution summary shows completed work by type across all groups.</InlineTip>
@@ -255,7 +255,7 @@ export default function Dashboard() {
                   <div
                     key={group.id}
                     onClick={() => router.push(`/group/${group.id}`)}
-                    className="bg-white border border-border rounded-xl p-4 cursor-pointer hover:border-brand transition-colors shadow-sm"
+                    className="bg-white border border-border rounded-xl p-4 cursor-pointer hover:border-brand active:bg-bg-hover transition-colors shadow-sm"
                   >
                     <div className="flex items-center gap-3.5">
                       <div className="w-10 h-10 rounded-xl bg-brand-light text-brand font-bold text-base flex items-center justify-center flex-shrink-0">

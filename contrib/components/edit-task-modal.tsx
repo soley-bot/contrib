@@ -95,7 +95,7 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
         className="w-full md:max-w-[480px] bg-white rounded-t-2xl md:rounded-xl max-h-[90dvh] overflow-y-auto animate-slide-up"
         role="dialog" aria-labelledby="edit-task-title"
       >
-        <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
+        <div className="w-10 h-1 rounded-full bg-border mx-auto mt-2.5 md:hidden" />
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 id="edit-task-title" className="text-base font-semibold text-text">Edit Task</h2>
           <button onClick={() => { if (!saving) onClose(); }} className="text-text-secondary hover:text-text p-1">
@@ -105,8 +105,9 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="p-5 flex flex-col gap-4">
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Title</label>
+            <label htmlFor="edit-task-title" className="text-[13px] font-medium text-text-secondary mb-1.5 block">Title</label>
             <input
+              id="edit-task-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={300}
@@ -114,10 +115,11 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
             />
           </div>
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">
+            <label htmlFor="edit-task-description" className="text-[13px] font-medium text-text-secondary mb-1.5 block">
               Description <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
             <textarea
+              id="edit-task-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -125,7 +127,7 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
             />
           </div>
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Type</label>
+            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block" id="edit-task-type-label">Type</label>
             <div className="flex flex-wrap gap-1.5">
               {CONTRIBUTION_TYPES.map((t) => (
                 <button
@@ -144,8 +146,9 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
             </div>
           </div>
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Assignee</label>
+            <label htmlFor="edit-task-assignee" className="text-[13px] font-medium text-text-secondary mb-1.5 block">Assignee</label>
             <select
+              id="edit-task-assignee"
               value={assigneeId}
               onChange={(e) => setAssigneeId(e.target.value)}
               className="w-full border border-border rounded-md px-3 py-2 text-sm text-text focus:border-brand outline-none bg-white"
@@ -156,10 +159,11 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
             </select>
           </div>
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">
+            <label htmlFor="edit-task-due-date" className="text-[13px] font-medium text-text-secondary mb-1.5 block">
               Due date <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
             <input
+              id="edit-task-due-date"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}

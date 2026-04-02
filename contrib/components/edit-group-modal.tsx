@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import type { Group } from '@/types';
 
 interface EditGroupModalProps {
@@ -17,6 +18,8 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
   const [saving, setSaving] = useState(false);
 
   const [error, setError] = useState('');
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, onClose);
 
   async function handleSave() {
     if (!name.trim() || !subject.trim()) return;
@@ -53,7 +56,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
       className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4"
       onClick={(e) => { if (e.target === e.currentTarget && !saving) onClose(); }}
     >
-      <div className="w-full max-w-[440px] bg-white rounded-xl" role="dialog" aria-labelledby="edit-group-title">
+      <div ref={modalRef} className="w-full max-w-[440px] bg-white rounded-xl" role="dialog" aria-labelledby="edit-group-title">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 id="edit-group-title" className="text-base font-semibold text-text">Edit Group</h2>
           <button onClick={onClose} aria-label="Close dialog" className="text-text-secondary hover:text-text p-1">
@@ -62,26 +65,29 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
         </div>
         <div className="p-5 flex flex-col gap-4">
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Group name</label>
+            <label htmlFor="edit-group-name" className="text-[13px] font-medium text-text-secondary mb-1.5 block">Group name</label>
             <input
+              id="edit-group-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full border border-border rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">Subject code</label>
+            <label htmlFor="edit-group-subject" className="text-[13px] font-medium text-text-secondary mb-1.5 block">Subject code</label>
             <input
+              id="edit-group-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="w-full border border-border rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>
           <div>
-            <label className="text-[13px] font-medium text-text-secondary mb-1.5 block">
+            <label htmlFor="edit-group-due-date" className="text-[13px] font-medium text-text-secondary mb-1.5 block">
               Due date <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
             <input
+              id="edit-group-due-date"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
@@ -90,7 +96,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
           </div>
         </div>
         <div className="px-5 py-3 border-t border-border">
-          {error && <p className="text-[13px] text-red-600 mb-2">{error}</p>}
+          {error && <p role="alert" className="text-[13px] text-red-600 mb-2">{error}</p>}
           <button
             onClick={handleSave}
             disabled={saving || !name.trim() || !subject.trim()}

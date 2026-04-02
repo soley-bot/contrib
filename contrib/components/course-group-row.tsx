@@ -96,6 +96,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
               className="h-8 w-8 border border-border bg-white hover:bg-brand-light hover:border-brand-border text-text-tertiary hover:text-brand-dark rounded-md flex items-center justify-center transition-colors"
               title="Edit group"
+              aria-label="Edit group"
             >
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2l2 2-7 7H2V9l7-7z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
@@ -105,6 +106,7 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
               className="h-8 w-8 border border-border bg-white hover:bg-red-50 hover:border-red-200 text-text-tertiary hover:text-red-500 rounded-md flex items-center justify-center transition-colors"
               title="Delete group"
+              aria-label="Delete group"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M11.5 3.5l-.7 7.7a1 1 0 01-1 .8H4.2a1 1 0 01-1-.8L2.5 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>

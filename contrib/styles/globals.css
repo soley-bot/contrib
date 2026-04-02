@@ -36,6 +36,8 @@
   --text-secondary: #475569;
   --text-tertiary: #94A3B8;
   --bg-hover: #F1F5F9;
+
+  /* Z-index scale: fab/footer=40, nav/chrome=50, modal=100, dropdown=200 */
 }
 
 * {
@@ -89,6 +91,21 @@ select {
   font-size: 16px;
 }
 
+/* Show focus rings only for keyboard users */
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+  border-color: var(--border);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(26, 86, 232, 0.15);
+}
+
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
@@ -115,4 +132,13 @@ select {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
