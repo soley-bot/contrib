@@ -5,6 +5,49 @@ import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { createServerClient } from '@/lib/supabase-server';
 
+// ─── Shared utilities ────────────────────────────────────────────────────────
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return reduced;
+}
+
+function CountUp({ target, active, delay, duration = 700, suffix = '%' }: {
+  target: number; active: boolean; delay: number; duration?: number; suffix?: string;
+}) {
+  const [value, setValue] = useState(0);
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (!active) { setValue(0); return; }
+    if (reduced || target === 0) { setValue(target); return; }
+
+    const startTime = performance.now() + delay * 1000;
+    let raf: number;
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      if (elapsed < 0) { raf = requestAnimationFrame(tick); return; }
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - (1 - progress) * (1 - progress);
+      setValue(Math.round(eased * target));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, target, delay, duration, reduced]);
+
+  return <>{value}{suffix}</>;
+}
+
 // ─── Logo ────────────────────────────────────────────────────────────────────
 
 function Logo() {
@@ -60,7 +103,23 @@ function Slide1Visual({ active }: { active: boolean }) {
               <div>
                 <div className="text-[10px] text-text-tertiary mb-0.5">{m.name}</div>
                 <div className="text-[13px] text-text bg-bg-hover rounded-lg px-3 py-2 inline-block">
-                  {m.msg}
+                  {m.done ? m.msg : (
+                    <span className="inline-flex items-center gap-[3px] h-[16px] px-0.5">
+                      {[0, 1, 2].map(dot => (
+                        <span
+                          key={dot}
+                          className="block w-[5px] h-[5px] rounded-full bg-[#94A3B8]"
+                          style={{
+                            animationName: active ? 'typingBounce' : 'none',
+                            animationDuration: '1.4s',
+                            animationTimingFunction: 'ease-in-out',
+                            animationIterationCount: 'infinite',
+                            animationDelay: `${dot * 0.2}s`,
+                          }}
+                        />
+                      ))}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -82,6 +141,19 @@ function Slide1Visual({ active }: { active: boolean }) {
 
 function Slide2Visual({ active }: { active: boolean }) {
   const scores = [5, 5, 4, 5, 5, 4, 5, 5];
+  const [filledRows, setFilledRows] = useState(0);
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (!active) { setFilledRows(0); return; }
+    if (reduced) { setFilledRows(4); return; }
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (let i = 0; i < 4; i++) {
+      timers.push(setTimeout(() => setFilledRows(i + 1), 600 + i * 200));
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [active, reduced]);
+
   return (
     <div className="w-full max-w-[420px] mx-auto relative">
       <div
@@ -107,7 +179,11 @@ function Slide2Visual({ active }: { active: boolean }) {
                   <td className="py-2 text-center">
                     <div className="flex justify-center gap-0.5">
                       {[1,2,3,4,5].map(star => (
-                        <div key={star} className={`w-3 h-3 rounded-sm ${star <= scores[i] ? 'bg-[#F59E0B]' : 'bg-border'}`}/>
+                        <div
+                          key={star}
+                          className="w-3 h-3 rounded-sm transition-colors duration-150"
+                          style={{ background: (i < filledRows && star <= scores[i]) ? '#F59E0B' : '#E2E8F0' }}
+                        />
                       ))}
                     </div>
                   </td>
@@ -186,8 +262,8 @@ function Slide3Visual({ active }: { active: boolean }) {
                 />
               </div>
               <div className="w-8 text-right text-[11px] font-semibold text-muted"
-                style={{ opacity: active ? 1 : 0, transition: 'opacity 0.3s', transitionDelay: active ? `${1.3 + i * 0.15}s` : '0s' }}>
-                {m.pct}%
+                style={{ opacity: active ? 1 : 0, transition: 'opacity 0.2s', transitionDelay: active ? `${0.9 + i * 0.15}s` : '0s' }}>
+                <CountUp target={m.pct} active={active} delay={0.9 + i * 0.15} />
               </div>
             </div>
           ))}
@@ -198,6 +274,7 @@ function Slide3Visual({ active }: { active: boolean }) {
 }
 
 function Slide4Visual({ active }: { active: boolean }) {
+  const reduced = useReducedMotion();
   const grades = [
     { name: 'Dara', grade: 'A', color: '#16A34A', bg: '#DCFCE7', border: '#BBF7D0', delay: 0.3 },
     { name: 'Sokha', grade: 'B+', color: '#1A56E8', bg: '#EBF0FF', border: '#93B4FF', delay: 0.55 },
@@ -207,26 +284,62 @@ function Slide4Visual({ active }: { active: boolean }) {
   return (
     <div className="w-full max-w-[420px] mx-auto">
       <div className="grid grid-cols-2 gap-3">
-        {grades.map((g) => (
+        {grades.map((g) => reduced ? (
           <div
             key={g.name}
-            className="rounded-2xl border p-4 text-center transition-all duration-500"
-            style={{
-              background: g.bg,
-              borderColor: g.border,
-              opacity: active ? 1 : 0,
-              transform: active ? 'scale(1)' : 'scale(0.85)',
-              transitionDelay: active ? `${g.delay}s` : '0s',
-            }}
+            className="rounded-2xl border p-4 text-center"
+            style={{ background: g.bg, borderColor: g.border, opacity: active ? 1 : 0 }}
           >
             <div className="text-[11px] font-bold text-muted mb-2">{g.name}</div>
             <div className="text-[40px] font-extrabold leading-none" style={{ color: g.color }}>{g.grade}</div>
+          </div>
+        ) : (
+          <div
+            key={g.name}
+            style={{
+              perspective: '600px',
+              opacity: active ? 1 : 0,
+              transition: 'opacity 0.5s',
+              transitionDelay: active ? `${g.delay}s` : '0s',
+            }}
+          >
+            <div
+              className="relative"
+              style={{
+                transformStyle: 'preserve-3d',
+                transition: 'transform 0.6s',
+                transitionDelay: active ? `${g.delay + 0.15}s` : '0s',
+                transform: active ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              }}
+            >
+              {/* Front face — "?" */}
+              <div
+                className="rounded-2xl border p-4 text-center"
+                style={{ background: '#F1F5F9', borderColor: '#E2E8F0', backfaceVisibility: 'hidden' }}
+              >
+                <div className="text-[11px] font-bold text-muted mb-2">{g.name}</div>
+                <div className="text-[40px] font-extrabold leading-none text-[#CBD5E1]">?</div>
+              </div>
+              {/* Back face — actual grade */}
+              <div
+                className="rounded-2xl border p-4 text-center absolute inset-0"
+                style={{
+                  background: g.bg,
+                  borderColor: g.border,
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)',
+                }}
+              >
+                <div className="text-[11px] font-bold text-muted mb-2">{g.name}</div>
+                <div className="text-[40px] font-extrabold leading-none" style={{ color: g.color }}>{g.grade}</div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
       <div
         className="mt-3 text-center text-[12px] text-muted transition-all duration-500"
-        style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.4s' : '0s' }}
+        style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.8s' : '0s' }}
       >
         Grades based on evidence, not memory.
       </div>
@@ -236,9 +349,9 @@ function Slide4Visual({ active }: { active: boolean }) {
 
 function Slide5Visual({ active }: { active: boolean }) {
   const stats = [
-    { value: '237K', label: 'university students in Cambodia', delay: 0.3 },
-    { value: '189', label: 'higher education institutions', delay: 0.6 },
-    { value: '0', label: 'tools built for fair group work', delay: 0.9 },
+    { target: 237, suffix: 'K', label: 'university students in Cambodia', delay: 0.3 },
+    { target: 189, suffix: '', label: 'higher education institutions', delay: 0.6 },
+    { target: 0, suffix: '', label: 'tools built for fair group work', delay: 0.9 },
   ];
   return (
     <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4">
@@ -252,7 +365,9 @@ function Slide5Visual({ active }: { active: boolean }) {
             transitionDelay: active ? `${s.delay}s` : '0s',
           }}
         >
-          <div className="text-[42px] font-extrabold text-text leading-none w-24 flex-shrink-0">{s.value}</div>
+          <div className="text-[42px] font-extrabold text-text leading-none w-24 flex-shrink-0">
+            <CountUp target={s.target} active={active} delay={s.delay + 0.3} duration={800} suffix={s.suffix} />
+          </div>
           <div className="text-[14px] text-muted">{s.label}</div>
         </div>
       ))}
@@ -448,7 +563,7 @@ export default function Landing() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <nav className="h-14 bg-white/95 backdrop-blur-sm border-b border-border">
           <div className="max-w-none px-5 h-full flex items-center justify-between">
-            <Logo />
+            <Link href="/" aria-label="Contrib home"><Logo /></Link>
             <div className="flex gap-2">
               <Link href="/login" className="h-8 px-3 flex items-center text-sm text-[#6B7280] hover:text-[#111827] font-medium rounded-md transition-colors">
                 Log in
