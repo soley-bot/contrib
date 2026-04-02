@@ -39,7 +39,10 @@ export function useEvaluation(
     if (submitting) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.from('evaluations').insert(entries);
+      // Filter out any self-reviews (evaluator === evaluatee) as a client-side guard
+      const filtered = entries.filter((e) => e.evaluator_id !== e.evaluatee_id);
+      if (filtered.length === 0) return;
+      const { error } = await supabase.from('evaluations').insert(filtered);
       if (error) throw error;
       setTick((t) => t + 1);
     } finally {

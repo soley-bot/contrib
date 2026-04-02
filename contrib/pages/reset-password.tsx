@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 export default function ResetPassword() {
   const router = useRouter();
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
@@ -34,12 +35,26 @@ export default function ResetPassword() {
       setError('Password must be at least 8 characters.');
       return;
     }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     setLoading(true);
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) {
       setError(updateError.message);
       setLoading(false);
       return;
+    }
+    // Redirect based on role
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles').select('role').eq('id', user.id).single();
+      if (profile?.role === 'teacher') {
+        router.push('/teacher');
+        return;
+      }
     }
     router.push('/dashboard');
   }
@@ -84,11 +99,25 @@ export default function ResetPassword() {
                 />
               </div>
 
+              <div className="flex flex-col gap-1">
+                <label className="text-[13px] font-medium text-text-secondary">Confirm password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                />
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-sm text-red-500 mt-1">Passwords do not match.</p>
+                )}
+              </div>
+
               {error && <p className="text-sm text-red">{error}</p>}
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (!!confirmPassword && password !== confirmPassword)}
                 className="h-12 bg-brand hover:bg-brand-hover text-white text-[15px] font-medium rounded-md transition-colors disabled:opacity-60 mt-1"
               >
                 {loading ? 'Saving…' : 'Set password'}

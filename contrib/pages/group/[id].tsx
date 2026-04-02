@@ -212,7 +212,7 @@ export default function GroupPage() {
   }
 
   async function executeResetEvaluation() {
-    if (!groupId) return;
+    if (!groupId || !isLead) return;
     try {
       await resetEvaluation(groupId);
       refreshEvalSession();

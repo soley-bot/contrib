@@ -32,14 +32,23 @@ export default function Signup() {
 
   async function handleGoogleSignIn() {
     setLoading(true);
-    const returnTo = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-    const callbackUrl = returnTo
-      ? `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
-      : `${window.location.origin}/auth/callback`;
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: callbackUrl },
-    });
+    try {
+      const returnTo = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
+      const callbackUrl = returnTo
+        ? `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
+        : `${window.location.origin}/auth/callback`;
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl },
+      });
+      if (oauthError) {
+        setError(oauthError.message);
+      }
+    } catch {
+      setError('Google sign-in failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Auth redirect handled by getServerSideProps below

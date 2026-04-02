@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
+import * as Sentry from '@sentry/nextjs';
 import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { notifyGroupMembers } from '@/lib/notify';
@@ -39,7 +40,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!membership) return res.status(403).json({ error: 'Not a member of this group.' });
 
-  await notifyGroupMembers(groupId, message, type, user.id);
+  try {
+    await notifyGroupMembers(groupId, message, type, user.id);
+  } catch (err) {
+    Sentry.captureException(err);
+    return res.status(500).json({ error: 'Failed to send notifications.' });
+  }
 
   return res.status(200).json({ ok: true });
 }

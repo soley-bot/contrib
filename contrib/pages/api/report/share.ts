@@ -83,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = generateInviteToken();
     const { error: insertError } = await adminClient
       .from('report_shares')
-      .insert({ group_id, token, created_by: user.id });
+      .insert({ group_id, token, created_by: user.id, expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() });
 
     if (insertError) {
       // Handle duplicate key (race condition: concurrent POSTs)
