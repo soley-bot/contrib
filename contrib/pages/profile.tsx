@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import StudentNav from '@/components/student-nav';
 import RoleToggle from '@/components/role-toggle';
@@ -232,6 +233,9 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-dvh bg-bg">
+      <Head>
+        <title>Profile — Contrib</title>
+      </Head>
       <StudentNav profile={profile} onProfileUpdate={refreshProfile} />
 
       <div className="md:pl-[220px]">

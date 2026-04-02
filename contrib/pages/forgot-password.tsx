@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -42,6 +43,9 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-dvh bg-bg">
+      <Head>
+        <title>Forgot password — Contrib</title>
+      </Head>
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
 import { requireAuth } from '@/lib/supabase-server';
@@ -86,6 +87,9 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-dvh bg-bg">
+      <Head>
+        <title>Welcome — Contrib</title>
+      </Head>
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-6">Contrib</div>
 

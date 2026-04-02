@@ -420,13 +420,14 @@ export default function Landing() {
   return (
     <div className="min-h-dvh bg-white overflow-hidden">
       <Head>
-        <title>Contrib - Make group contributions visible</title>
-        <meta name="description" content="Track individual contributions in group projects. Students log tasks and review each other. Teachers get a live Contribution Record for every group." />
-        <meta property="og:title" content="Contrib - Make group contributions visible" />
-        <meta property="og:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
+        <title>Contrib — Make individual effort visible in group work</title>
+        <meta name="description" content="Contrib turns invisible individual contributions visible in group projects. Track tasks, log evidence, peer review, and export contribution records." />
+        <meta property="og:title" content="Contrib — Make individual effort visible in group work" />
+        <meta property="og:description" content="Track tasks, log evidence, peer review, and export contribution records for group projects." />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://joincontrib.com" />
-        <meta name="twitter:title" content="Contrib - Make group contributions visible" />
-        <meta name="twitter:description" content="Track individual contributions in group projects. Students log work, review each other, and teachers grade with evidence." />
+        <meta property="og:image" content="https://joincontrib.com/api/og" />
+        <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href="https://joincontrib.com" />
       </Head>
       {/* Nav — always visible for branding (Google OAuth verification requires app name on homepage) */}

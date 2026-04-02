@@ -99,7 +99,7 @@ export default function Signup() {
   return (
     <>
     <Head>
-      <title>Sign up - Contrib</title>
+      <title>Sign up — Contrib</title>
       <meta name="description" content="Create your free Contrib account. Track individual contributions in group projects." />
     </Head>
     <div className="min-h-dvh bg-bg">

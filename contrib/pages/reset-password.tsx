@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import { supabase } from '@/lib/supabase';
 
 export default function ResetPassword() {
@@ -61,6 +62,9 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-dvh bg-bg">
+      <Head>
+        <title>Reset password — Contrib</title>
+      </Head>
       <div className="max-w-[440px] mx-auto px-5 pt-8 pb-20">
         <div className="text-xl font-extrabold text-brand mb-8">Contrib</div>
 

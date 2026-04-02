@@ -75,7 +75,7 @@ export default function Login() {
   return (
     <>
     <Head>
-      <title>Log in - Contrib</title>
+      <title>Log in — Contrib</title>
       <meta name="description" content="Log in to Contrib. Track your group contributions and export your Contribution Record." />
     </Head>
     <div className="min-h-dvh bg-bg">

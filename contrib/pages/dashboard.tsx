@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import StudentNav from '@/components/student-nav';
 import { IconPlus, IconChevronRight } from '@/components/icons';
@@ -118,6 +119,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-dvh bg-bg">
+      <Head>
+        <title>Dashboard — Contrib</title>
+      </Head>
       <StudentNav profile={profile} />
 
       {/* Desktop layout */}

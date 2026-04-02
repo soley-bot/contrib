@@ -4,7 +4,7 @@ Individual effort is invisible in group work. Contrib turns it on.
 
 ## Current Priority
 
-Phase 5 complete. Task comments shipped. Next: email notifications, mobile PWA.
+Pre-production QA complete. P0-P2 done. Next: P3 final sweep, then public launch.
 
 ## Tech Stack
 
@@ -82,6 +82,8 @@ pages/
 | `/api/telegram/connect` | POST | Generate verification code | Required |
 | `/api/telegram/disconnect` | POST | Remove Telegram link | Required |
 | `/api/telegram/webhook` | POST | Incoming Telegram messages | Webhook secret |
+| `/api/auth/forgot-password` | POST | Rate-limited password reset | None |
+| `/api/courses/[id]/delete` | DELETE | Cascade delete course + groups | Required (teacher) |
 | `/api/telegram/setup` | GET | Register webhook (run once) | Secret param |
 
 ## Database (15 tables)
@@ -98,7 +100,9 @@ Key details:
 ## What's Built
 
 - **Student:** groups, tasks (kanban + contribution types), evidence (immutable+versioned), task comments (flat discussion threads), timeline (realtime), peer review, PDF export (6 themes), shareable report links, blocker declarations, in-app + Telegram notifications, course enrollment
-- **Teacher:** courses, group creation (auto-transfers lead to first student), group list + progress, drill-down (read-only), course analytics, ungrouped students view
+- **Teacher:** courses, group creation (auto-transfers lead to first student), group list + progress, drill-down (read-only), course analytics, ungrouped students view, course deletion (cascade)
+- **UX:** Notification preferences (4 toggles per user), error boundary + custom 404 page
+- **CI/CD:** GitHub Actions pipeline (type check, tests, build)
 - **Real-time:** tasks, activity_log, group_members, evaluation_sessions, evaluations, evidence, task_comments, courses, notifications
 - **Telegram:** 6 notification types (task created, task reassigned, evidence logged, peer review opened, member joined, blocker declared). Bot responds to /start, /help, and non-code messages.
 
@@ -116,7 +120,7 @@ Key details:
 
 - **Auth:** `lib/supabase-server.ts` — `requireAuth()`, `requireStudent()`, `requireTeacher()`. All API routes use `getUser()` (not `getSession()`).
 - **Validation:** Zod schemas for all user inputs
-- **Rate limiting:** In-memory (`lib/rate-limit.ts`) — adequate for current scale, migrate to Upstash Redis before scaling
+- **Rate limiting:** Upstash Redis (`@upstash/ratelimit`) — distributed, survives cold starts
 - **RLS:** All 15 tables. Known gaps: `profiles` SELECT is overly broad, `courses` SELECT exposes invite tokens, `notifications` INSERT is too permissive — fix before scaling.
 - **CSP:** Defined in `next.config.ts` only (removed from `vercel.json`)
 
@@ -177,7 +181,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 | `lib/supabase-server.ts` | `getUserFromApiRoute(req, res)` | Extract authenticated user from API route cookies |
 | `lib/supabase-server.ts` | `createServerClient(ctx)` | Supabase client for `getServerSideProps` |
 | `lib/supabase.ts` | `supabase` | Client-side Supabase (respects RLS) |
-| `lib/rate-limit.ts` | `rateLimit(key, limit, window)` | In-memory rate limiter |
+| `lib/rate-limit.ts` | `rateLimit(key, limit, window)` | Upstash Redis rate limiter |
 | `lib/rate-limit.ts` | `RATE_LIMITS` | Named constants (`SIGNUP`, `JOIN_LOOKUP`, `REPORT_LOOKUP`, `REPORT_SHARE`, `DEFAULT`) |
 | `lib/rate-limit.ts` | `getClientIp(headers)` | Extract client IP from request headers |
 | `lib/validation.ts` | Zod schemas | Input validation for all user inputs |
@@ -287,7 +291,6 @@ When shipping any user-facing feature, add an entry to the `CHANGELOG` array in 
 
 ## Deferred Work
 
-- Rate limiting → Upstash Redis (before scaling)
 - RLS tightening: profiles, courses, notifications tables
 - Email notifications (fallback for users without Telegram)
 - Mobile PWA (manifest + service worker + offline caching)
