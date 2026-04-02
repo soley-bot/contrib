@@ -192,7 +192,16 @@ export default function Onboarding() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { redirect } = await requireAuth(ctx);
+  const { redirect, profile } = await requireAuth(ctx);
   if (redirect) return { redirect };
+  // Already onboarded — send to appropriate dashboard
+  if (profile) {
+    return {
+      redirect: {
+        destination: profile.role === 'teacher' ? '/teacher' : '/dashboard',
+        permanent: false,
+      },
+    };
+  }
   return { props: {} };
 };

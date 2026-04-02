@@ -109,6 +109,7 @@ export default function EditTaskModal({ task, members, userId, groupName, onClos
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              maxLength={300}
               className="w-full border border-border rounded-md px-3 py-2 text-sm focus:border-brand outline-none"
             />
           </div>

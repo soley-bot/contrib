@@ -68,6 +68,20 @@ export async function requireAuth(ctx: GetServerSidePropsContext) {
     .eq('id', user.id)
     .single();
 
+  // User exists in auth but hasn't completed onboarding
+  if (!profile) {
+    // Allow access to /onboarding itself (avoid redirect loop)
+    const path = ctx.resolvedUrl?.split('?')[0] ?? '';
+    if (path === '/onboarding') {
+      return { redirect: null, user, profile: null };
+    }
+    return {
+      redirect: { destination: '/onboarding', permanent: false } as const,
+      user,
+      profile: null,
+    };
+  }
+
   return { redirect: null, user, profile };
 }
 

@@ -7,7 +7,7 @@ import { IconPlus, IconExport, IconList, IconActivity, IconCheck, IconLink, Icon
 import type { Task, TaskStatus, GroupMember, EvaluationSummary } from '@/types';
 
 const PDF_THEMES: { label: string; color: [number, number, number] }[] = [
-  { label: 'Coral',  color: [255, 88,  65]  },
+  { label: 'Blue',   color: [26,  86,  232] },
   { label: 'Navy',   color: [30,  64,  175] },
   { label: 'Forest', color: [22,  101, 52]  },
   { label: 'Slate',  color: [71,  85,  105] },

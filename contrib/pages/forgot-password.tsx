@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -16,11 +15,25 @@ export default function ForgotPassword() {
       return;
     }
     setLoading(true);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: window.location.origin + '/reset-password',
-    });
-    if (resetError) {
-      setError(resetError.message);
+    try {
+      const resp = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (resp.status === 429) {
+        setError('Too many requests. Please wait a moment.');
+        setLoading(false);
+        return;
+      }
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({ error: 'Something went wrong.' }));
+        setError(data.error || 'Something went wrong.');
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setError('Network error. Please try again.');
       setLoading(false);
       return;
     }

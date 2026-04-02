@@ -59,7 +59,8 @@ export default function Login() {
     if (hasReturnTo) { router.push(raw); return; }
     const { data: profile } = await supabase
       .from('profiles').select('role').eq('id', authData.user.id).single();
-    router.push(profile?.role === 'teacher' ? '/teacher' : '/dashboard');
+    if (!profile) { router.push('/onboarding'); return; }
+    router.push(profile.role === 'teacher' ? '/teacher' : '/dashboard');
   }
 
   return (

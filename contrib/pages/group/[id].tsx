@@ -90,6 +90,8 @@ export default function GroupPage() {
     if (!taskToDelete || !user || actionInFlight.current) return;
     actionInFlight.current = true;
     try {
+      const { error } = await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('id', taskToDelete.id);
+      if (error) throw error;
       await supabase.from('activity_log').insert({
         group_id: taskToDelete.group_id,
         actor_id: user.id,
@@ -97,8 +99,6 @@ export default function GroupPage() {
         task_id: taskToDelete.id,
         meta: { task_title: taskToDelete.title },
       });
-      const { error } = await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('id', taskToDelete.id);
-      if (error) throw error;
       setTaskToDelete(null);
       refreshTasks();
       refreshActivity();
