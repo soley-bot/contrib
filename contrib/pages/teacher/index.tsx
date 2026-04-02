@@ -113,11 +113,20 @@ export default function TeacherDashboard() {
   async function handleDelete() {
     if (!confirmDeleteId) return;
     setDeleting(true);
-    const { error } = await supabase.from('courses').delete().eq('id', confirmDeleteId);
-    setDeleting(false);
-    if (error) { showToast('Failed to delete course.', 'error'); return; }
-    setConfirmDeleteId(null);
-    refreshCourses();
+    try {
+      const resp = await fetch(`/api/courses/${confirmDeleteId}/delete`, { method: 'DELETE' });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({ error: 'Failed to delete course.' }));
+        showToast(body.error ?? 'Failed to delete course.', 'error');
+        return;
+      }
+      setConfirmDeleteId(null);
+      refreshCourses();
+    } catch {
+      showToast('Failed to delete course.', 'error');
+    } finally {
+      setDeleting(false);
+    }
   }
 
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" style={{ borderTopColor: '#1240C4' }} /></div>;

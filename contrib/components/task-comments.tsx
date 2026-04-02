@@ -44,15 +44,18 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const savingRef = useRef(false);
   const deletingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function handleSubmit() {
-    if (saving) return;
+    if (savingRef.current) return;
+    savingRef.current = true;
     setFormError('');
     const parsed = taskCommentSchema.safeParse({ content });
     if (!parsed.success) {
       setFormError(parsed.error.issues[0].message);
+      savingRef.current = false;
       return;
     }
     setSaving(true);
@@ -66,6 +69,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
     if (insertError) {
       setFormError('Failed to post comment. Please try again.');
       setSaving(false);
+      savingRef.current = false;
       return;
     }
 
@@ -107,6 +111,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
       textareaRef.current.style.height = '52px';
     }
     setSaving(false);
+    savingRef.current = false;
   }
 
   async function handleDelete(commentId: string) {

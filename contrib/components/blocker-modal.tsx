@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { IconBan } from '@/components/icons';
 
 interface BlockerModalProps {
@@ -11,10 +11,12 @@ export default function BlockerModal({ groupId, onClose, onCreated }: BlockerMod
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (submitting) return;
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setError(null);
     setSubmitting(true);
     try {
@@ -31,6 +33,7 @@ export default function BlockerModal({ groupId, onClose, onCreated }: BlockerMod
       setError('Failed to save. Please try again.');
     } finally {
       setSubmitting(false);
+      submittingRef.current = false;
     }
   }
 

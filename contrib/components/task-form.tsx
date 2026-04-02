@@ -24,12 +24,16 @@ export default function TaskForm({ groupId, groupName, members, userId, onCreate
   const [contributionType, setContributionType] = useState<ContributionType>('task');
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
+  const creatingRef = useRef(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (creatingRef.current) return;
+    creatingRef.current = true;
     setError('');
-    if (!title.trim() || !assignee) { setError('Title and assignee are required.'); return; }
+    if (!title.trim() || !assignee) { setError('Title and assignee are required.'); creatingRef.current = false; return; }
     setCreating(true);
+    try {
 
     const { data: task, error: taskError } = await supabase
       .from('tasks')
@@ -71,6 +75,9 @@ export default function TaskForm({ groupId, groupName, members, userId, onCreate
 
     onCreated();
     onClose();
+    } finally {
+      creatingRef.current = false;
+    }
   }
 
   return (
@@ -89,7 +96,7 @@ export default function TaskForm({ groupId, groupName, members, userId, onCreate
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-3.5">
           <div className="flex flex-col gap-1">
             <label htmlFor="task-title" className="text-[13px] font-medium text-text-secondary">Task title</label>
-            <input id="task-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Write executive summary"
+            <input id="task-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={300} placeholder="e.g. Write executive summary"
               aria-describedby="task-form-error"
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
           </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { EvidenceType } from '@/types';
 
@@ -23,15 +23,22 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const savingRef = useRef(false);
 
   const activeType = TYPES.find((t) => t.value === type)!;
 
   async function handleSubmit() {
-    if (saving) return;
+    if (savingRef.current) return;
+    savingRef.current = true;
     setError('');
-    if (!content.trim()) { setError('Content is required.'); return; }
+    if (!content.trim()) { setError('Content is required.'); savingRef.current = false; return; }
+    if (!activeType.isText && !/^https?:\/\//i.test(content.trim())) {
+      setError('Please enter a valid URL starting with http:// or https://');
+      savingRef.current = false;
+      return;
+    }
     setSaving(true);
-
+    try {
     const { error: insertError } = await supabase.from('evidence').insert({
       task_id: taskId, uploaded_by: userId, type, content: content.trim(), version_number: nextVersion,
     });
@@ -51,6 +58,9 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
     }).catch(() => {});
 
     onSaved();
+    } finally {
+      savingRef.current = false;
+    }
   }
 
   return (
@@ -68,11 +78,11 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
       </div>
 
       {activeType.isText ? (
-        <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3}
+        <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3} maxLength={2000}
           placeholder={activeType.placeholder}
           className="w-full border border-border rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none resize-none bg-white" />
       ) : (
-        <input type="url" value={content} onChange={(e) => setContent(e.target.value)}
+        <input type="url" value={content} onChange={(e) => setContent(e.target.value)} maxLength={2000}
           placeholder={activeType.placeholder}
           className="w-full border border-border rounded-md px-3 py-2 text-[14px] focus:border-brand outline-none bg-white" />
       )}

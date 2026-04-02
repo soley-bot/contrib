@@ -119,8 +119,26 @@ export default function GroupPage() {
     if (!user || !group || actionInFlight.current) return;
     actionInFlight.current = true;
     const myMembership = members.find((m) => m.profile_id === user.id);
-    if (!myMembership) return;
+    if (!myMembership) { actionInFlight.current = false; return; }
     try {
+      if (isLead) {
+        const otherMembers = members.filter((m) => m.profile_id !== user.id);
+        if (otherMembers.length > 0) {
+          showToast('Transfer leadership before leaving. Go to Members and assign a new lead.', 'error');
+          setShowLeaveConfirm(false);
+          return;
+        }
+        // Only member — delete the group entirely
+        // Soft-delete all tasks
+        await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('group_id', group.id);
+        // Remove group members
+        await supabase.from('group_members').delete().eq('group_id', group.id);
+        // Delete the group
+        const { error } = await supabase.from('groups').delete().eq('id', group.id);
+        if (error) throw error;
+        router.push('/dashboard');
+        return;
+      }
       await supabase.from('activity_log').insert({
         group_id: group.id,
         actor_id: user.id,

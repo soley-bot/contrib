@@ -1,12 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { z } from 'zod';
 import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { notifyGroupMembers } from '@/lib/notify';
 import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
-type NotificationType = 'contributions' | 'blockers' | 'deadlines';
-
-const ALLOWED_TYPES: NotificationType[] = ['contributions', 'blockers', 'deadlines'];
+const notifyBodySchema = z.object({
+  groupId: z.string().uuid('Invalid group ID.'),
+  message: z.string().trim().min(1, 'Message is required.').max(500, 'Message must be 500 characters or less.'),
+  type: z.enum(['contributions', 'blockers', 'deadlines'], { message: 'Invalid notification type.' }),
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -19,19 +22,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const user = await getUserFromApiRoute(req, res);
   if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
-  const { groupId, message, type } = req.body as {
-    groupId?: string;
-    message?: string;
-    type?: string;
-  };
-
-  if (!groupId || !message || !type) {
-    return res.status(400).json({ error: 'Missing groupId, message, or type.' });
+  const parsed = notifyBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
-  if (!ALLOWED_TYPES.includes(type as NotificationType)) {
-    return res.status(400).json({ error: 'Invalid notification type.' });
-  }
+  const { groupId, message, type } = parsed.data;
 
   // Verify user is a member of this group
   const { data: membership } = await adminClient
@@ -43,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!membership) return res.status(403).json({ error: 'Not a member of this group.' });
 
-  await notifyGroupMembers(groupId, message, type as NotificationType, user.id);
+  await notifyGroupMembers(groupId, message, type, user.id);
 
   return res.status(200).json({ ok: true });
 }
