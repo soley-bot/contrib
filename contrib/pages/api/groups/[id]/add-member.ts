@@ -145,6 +145,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Non-fatal — member was added, just log the error
   }
 
+  // Auto-transfer lead from teacher to first student added
+  const { data: leadProfile } = await adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', group.lead_id)
+    .single();
+
+  if (leadProfile?.role === 'teacher') {
+    await adminClient
+      .from('groups')
+      .update({ lead_id: profileId })
+      .eq('id', groupId);
+
+    await adminClient.from('activity_log').insert({
+      group_id: groupId,
+      actor_id: user.id,
+      action: 'lead_transferred',
+      meta: { newLeadName: addedName },
+    });
+
+    await adminClient.from('notifications').insert({
+      recipient_id: profileId,
+      group_id: groupId,
+      type: 'lead_transferred',
+      title: 'You are now the group lead',
+      meta: { groupName: group.name ?? null },
+    });
+  }
+
   // Send notification to the added student
   const { error: notifyError } = await adminClient
     .from('notifications')

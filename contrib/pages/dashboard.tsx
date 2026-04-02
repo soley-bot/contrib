@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
@@ -40,7 +40,7 @@ export default function Dashboard() {
   const [formError, setFormError] = useState('');
   const courseTokenRef = useRef<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeModal = () => { if (!creating) setShowModal(false); };
+  const closeModal = useCallback(() => { if (!creating) setShowModal(false); }, [creating]);
   useFocusTrap(modalRef, closeModal);
 
   useEffect(() => {

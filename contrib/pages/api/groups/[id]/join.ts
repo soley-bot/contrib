@@ -127,14 +127,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const callerName = profile.name ?? 'A new member';
 
-    // Notify the group lead
-    await adminClient.from('notifications').insert({
-      recipient_id: group.lead_id,
-      group_id: groupId,
-      type: 'member_joined',
-      title: callerName + ' joined your group',
-      meta: { memberName: callerName, groupName: group.name },
-    });
+    // Auto-transfer lead from teacher to first student joining
+    const { data: leadProfile } = await adminClient
+      .from('profiles')
+      .select('role')
+      .eq('id', group.lead_id)
+      .single();
+
+    if (leadProfile?.role === 'teacher') {
+      await adminClient
+        .from('groups')
+        .update({ lead_id: user.id })
+        .eq('id', groupId);
+
+      await adminClient.from('activity_log').insert({
+        group_id: groupId,
+        actor_id: user.id,
+        action: 'lead_transferred',
+        meta: { newLeadName: callerName },
+      });
+
+      await adminClient.from('notifications').insert({
+        recipient_id: user.id,
+        group_id: groupId,
+        type: 'lead_transferred',
+        title: 'You are now the group lead',
+        meta: { groupName: group.name },
+      });
+    } else {
+      // Notify the group lead (skip if teacher — they just lost lead status)
+      await adminClient.from('notifications').insert({
+        recipient_id: group.lead_id,
+        group_id: groupId,
+        type: 'member_joined',
+        title: callerName + ' joined your group',
+        meta: { memberName: callerName, groupName: group.name },
+      });
+    }
 
     // If group has a course, upsert course membership
     if (group.course_id) {

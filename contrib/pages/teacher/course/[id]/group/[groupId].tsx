@@ -192,6 +192,16 @@ export default function TeacherGroupDetail() {
           </button>
         </div>
 
+        {/* Temp-lead info banner */}
+        {group.lead_id === user?.id && (
+          <div className="max-w-5xl mx-auto px-4 pt-3">
+            <div className="bg-[#FEF3C7] border border-[#FDE68A] rounded-lg px-3 py-2 flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p className="text-[12px] text-[#92400E] font-medium">No student lead yet. The first student to join will become the lead.</p>
+            </div>
+          </div>
+        )}
+
         {/* ── TASKS TAB ── */}
         {tab === 'tasks' && (
           <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-4">

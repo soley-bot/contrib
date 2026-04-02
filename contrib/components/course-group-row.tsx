@@ -19,6 +19,7 @@ interface CourseGroupRowProps {
   healthStatus?: GroupHealthStatus;
   peerReviewLabel?: string;
   peerReviewColor?: string;
+  teacherIsLead?: boolean;
 }
 
 function formatDueDate(dateStr: string): string {
@@ -34,7 +35,7 @@ const HEALTH_COLORS: Record<string, string> = {
   red: '#DC2626',
 };
 
-export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onEdit, onDelete, healthStatus, peerReviewLabel, peerReviewColor }: CourseGroupRowProps) {
+export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount, members, inviteLink, onDownloadPdf, downloading, onClick, onEdit, onDelete, healthStatus, peerReviewLabel, peerReviewColor, teacherIsLead }: CourseGroupRowProps) {
   const [copied, setCopied] = useState(false);
 
   const today = new Date();
@@ -62,6 +63,9 @@ export default function CourseGroupRow({ group, taskTotal, taskDone, memberCount
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <p className="text-[14px] font-semibold text-text truncate">{group.name}</p>
+              {teacherIsLead && (
+                <span className="flex-shrink-0 text-[10px] font-medium bg-[#FEF3C7] text-[#92400E] px-1.5 py-0.5 rounded-full border border-[#FDE68A]">Waiting for student lead</span>
+              )}
               {isOverdue && (
                 <span className="flex-shrink-0 text-[10px] font-semibold bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full border border-red-100">Overdue</span>
               )}

@@ -28,16 +28,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Determine who becomes the group lead
   let lead_id = user.id;
+  let teacherIsTempLead = false;
 
   if (courseId) {
+    // Fetch course to check ownership
+    const { data: course } = await adminClient
+      .from('courses')
+      .select('id, teacher_id')
+      .eq('id', courseId)
+      .single();
+
     if (leadId) {
       // Teacher flow: caller must be the course teacher, and leadId must be in course_members
-      const { data: course } = await adminClient
-        .from('courses')
-        .select('id, teacher_id')
-        .eq('id', courseId)
-        .single();
-
       if (!course) return res.status(404).json({ error: 'Course not found.' });
       if (course.teacher_id !== user.id) {
         return res.status(403).json({ error: 'Only the course teacher can assign a lead.' });
@@ -55,6 +57,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       lead_id = leadId;
+    } else if (course && course.teacher_id === user.id) {
+      // Teacher creating group without picking a student lead — teacher is temp lead
+      lead_id = user.id;
+      teacherIsTempLead = true;
     } else {
       // Student flow: caller must be in course_members
       const { data: callerMembership } = await adminClient
@@ -69,16 +75,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // One-group-per-course check: lead must not already be in another group in this course
-    const { data: existingMembership } = await adminClient
-      .from('group_members')
-      .select('group_id, groups!inner(course_id)')
-      .eq('profile_id', lead_id)
-      .eq('groups.course_id', courseId)
-      .limit(1);
+    // One-group-per-course check (skip for teacher temp lead — they aren't a real member)
+    if (!teacherIsTempLead) {
+      const { data: existingMembership } = await adminClient
+        .from('group_members')
+        .select('group_id, groups!inner(course_id)')
+        .eq('profile_id', lead_id)
+        .eq('groups.course_id', courseId)
+        .limit(1);
 
-    if (existingMembership && existingMembership.length > 0) {
-      return res.status(409).json({ error: 'This member is already in a group for this course.' });
+      if (existingMembership && existingMembership.length > 0) {
+        return res.status(409).json({ error: 'This member is already in a group for this course.' });
+      }
     }
   }
 
@@ -104,14 +112,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to create group.' });
   }
 
-  // 2. Insert group member
-  const { error: memberError } = await adminClient
-    .from('group_members')
-    .insert({ group_id: group.id, profile_id: lead_id });
+  // 2. Insert group member (skip for teacher temp lead — they access via course ownership RLS)
+  if (!teacherIsTempLead) {
+    const { error: memberError } = await adminClient
+      .from('group_members')
+      .insert({ group_id: group.id, profile_id: lead_id });
 
-  if (memberError) {
-    Sentry.captureMessage(`[groups/create] insert group_members error: ${memberError.message}`, { level: 'error', tags: { route: 'groups-create' } });
-    return res.status(500).json({ error: 'Failed to add lead to group.' });
+    if (memberError) {
+      Sentry.captureMessage(`[groups/create] insert group_members error: ${memberError.message}`, { level: 'error', tags: { route: 'groups-create' } });
+      return res.status(500).json({ error: 'Failed to add lead to group.' });
+    }
   }
 
   // 3. Insert activity log
@@ -123,8 +133,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     Sentry.captureException(activityError, { tags: { route: 'groups-create' } });
   }
 
-  // 4. If courseId, upsert into course_members for the lead
-  if (courseId) {
+  // 4. If courseId, upsert into course_members for the lead (skip for teacher temp lead)
+  if (courseId && !teacherIsTempLead) {
     const { error: courseMemberError } = await adminClient
       .from('course_members')
       .upsert({ course_id: courseId, profile_id: lead_id }, { onConflict: 'course_id,profile_id' });

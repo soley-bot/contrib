@@ -217,7 +217,6 @@ export default function CourseDetail() {
     if (creating) return;
     setFormError('');
     if (!groupName.trim() || !subject.trim()) { setFormError('Group name and subject are required.'); return; }
-    if (!selectedLeadId) { setFormError('Please select a group lead.'); return; }
     setCreating(true);
     try {
       const resp = await fetch('/api/groups/create', {
@@ -228,7 +227,7 @@ export default function CourseDetail() {
           subject: subject.trim(),
           dueDate: dueDate || null,
           courseId: courseId,
-          leadId: selectedLeadId,
+          ...(selectedLeadId ? { leadId: selectedLeadId } : {}),
         }),
       });
       const data = await resp.json();
@@ -520,6 +519,7 @@ export default function CourseDetail() {
                       healthStatus={health}
                       peerReviewLabel={prInfo.label}
                       peerReviewColor={prInfo.color}
+                      teacherIsLead={group.lead_id === user?.id}
                     />
                   );
                 })
@@ -638,20 +638,26 @@ export default function CourseDetail() {
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[13px] font-medium text-text-secondary">Group lead</label>
-                <select
-                  value={selectedLeadId}
-                  onChange={(e) => setSelectedLeadId(e.target.value)}
-                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
-                >
-                  <option value="">Select a student...</option>
-                  {enrolledStudents.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name} — {s.university}</option>
-                  ))}
-                </select>
-                <p className="text-[11px] text-text-tertiary">This student will manage the group.</p>
-              </div>
+              {enrolledStudents.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <label className="text-[13px] font-medium text-text-secondary">Group lead <span className="font-normal text-text-tertiary">(optional)</span></label>
+                  <select
+                    value={selectedLeadId}
+                    onChange={(e) => setSelectedLeadId(e.target.value)}
+                    className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                  >
+                    <option value="">No lead yet — assign later</option>
+                    {enrolledStudents.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name} — {s.university}</option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-text-tertiary">{selectedLeadId ? 'This student will manage the group.' : 'The first student to join will become the lead.'}</p>
+                </div>
+              ) : (
+                <div className="bg-brand-light rounded-md px-3 py-2.5 border border-[#C5D5FF]">
+                  <p className="text-[12px] text-[#3B5BCC]">You'll be the temporary lead until a student joins or is added.</p>
+                </div>
+              )}
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-border">
                 <button onClick={handleCreateGroup} disabled={creating}
