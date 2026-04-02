@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 interface Props {
   children: ReactNode;
@@ -19,33 +20,69 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ErrorBoundary]', error, info.componentStack);
+    Sentry.captureException(error, {
+      contexts: { react: { componentStack: info.componentStack ?? undefined } },
+    });
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-dvh flex items-center justify-center bg-bg px-6">
-          <div className="text-center max-w-md">
-            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-[#FEE2E2] flex items-center justify-center">
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#F8FAFF',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
+            padding: '0 24px',
+          }}
+        >
+          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                margin: '0 auto 20px',
+                borderRadius: '50%',
+                backgroundColor: '#FEE2E2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-text mb-2">Something went wrong</h1>
-            <p className="text-sm text-muted mb-6">
-              An unexpected error occurred. Please try refreshing the page.
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A', margin: '0 0 8px' }}>
+              Something went wrong
+            </h1>
+            <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 24px', lineHeight: 1.5 }}>
+              An unexpected error occurred. Please try again.
             </p>
             <button
               onClick={() => {
                 this.setState({ hasError: false });
                 window.location.reload();
               }}
-              className="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition-colors"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '10px 20px',
+                borderRadius: 8,
+                backgroundColor: '#1A56E8',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
             >
-              Refresh page
+              Try again
             </button>
           </div>
         </div>
