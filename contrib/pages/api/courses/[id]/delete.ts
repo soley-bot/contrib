@@ -52,19 +52,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .in('group_id', groupIds);
 
     if (taskIds.length > 0) {
-      // Delete task_comments for these tasks
+      // Soft-delete task_comments for these tasks
       const { error: commentsErr } = await adminClient
         .from('task_comments')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .in('task_id', taskIds);
       if (commentsErr) {
         Sentry.captureMessage(`[course-delete] task_comments error: ${commentsErr.message}`, { level: 'error', tags: { route: 'course-delete' } });
       }
 
-      // Delete evidence for these tasks
+      // Soft-delete evidence for these tasks
       const { error: evidenceErr } = await adminClient
         .from('evidence')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .in('task_id', taskIds);
       if (evidenceErr) {
         Sentry.captureMessage(`[course-delete] evidence error: ${evidenceErr.message}`, { level: 'error', tags: { route: 'course-delete' } });
@@ -87,10 +87,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
-    // Delete the groups themselves
+    // Archive the groups
     const { error: groupsErr } = await adminClient
       .from('groups')
-      .delete()
+      .update({ archived_at: new Date().toISOString() })
       .in('id', groupIds);
     if (groupsErr) {
       Sentry.captureMessage(`[course-delete] groups error: ${groupsErr.message}`, { level: 'error', tags: { route: 'course-delete' } });

@@ -211,8 +211,11 @@ export default function ProfilePage() {
     }
   }
 
+  const ALLOWED_PREF_COLUMNS = ['notify_contributions', 'notify_blockers', 'notify_deadlines', 'notify_weekly_digest'];
+
   async function handleTogglePref(column: string, value: boolean) {
     if (!user?.id) return;
+    if (!ALLOWED_PREF_COLUMNS.includes(column)) return;
     setPrefsSaving(true);
     const { error: err } = await supabase
       .from('telegram_subscriptions')

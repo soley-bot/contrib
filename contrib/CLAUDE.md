@@ -51,7 +51,7 @@ pages/
   teacher/course/[id]/group/[groupId].tsx  — group drill-down (read-only)
 ```
 
-## API Routes (18)
+## API Routes (22)
 
 | Route | Method | Auth |
 |---|---|---|
@@ -61,8 +61,12 @@ pages/
 | `/api/report/lookup` | GET | None (20/min) |
 | `/api/report/share` | GET/POST/DELETE | Required (10/min) |
 | `/api/groups/[id]/blockers` | POST | Required |
+| `/api/groups/create` | POST | Required |
+| `/api/groups/[id]/join` | POST | Required (student) |
+| `/api/groups/[id]/add-member` | POST | Required (teacher/lead) |
+| `/api/groups/[id]/remove-member` | POST | Required (teacher) |
+| `/api/groups/[id]/eligible-members` | GET | Required (teacher/lead) |
 | `/api/groups/[id]/reset-invite` | POST | Required (lead) |
-| `/api/groups/[id]/auto-transfer-lead` | POST | Required |
 | `/api/groups/[id]/archive` | POST | Required (lead) |
 | `/api/groups/[id]/transfer-lead` | POST | Required (lead) |
 | `/api/courses/[id]/reset-invite` | POST | Required (teacher) |
@@ -80,6 +84,16 @@ pages/
 
 All tables have RLS. Known gaps: `profiles` SELECT overly broad, `courses` SELECT exposes invite tokens — fix before scaling.
 
+### Database Change Rules (never skip these)
+
+1. **Single source of truth:** `database/rls-policies-live.sql` is the canonical reference for all RLS policies. Every policy change MUST update this file.
+2. **Verify after applying:** After running any SQL migration, query `pg_policies` to confirm the change took effect. Never assume a migration succeeded.
+3. **One helper function:** Use `user_is_group_member()` only. No aliases (`auth_is_group_member` etc.).
+4. **No scattered migration files:** Old files in `database/` are historical. New changes go in a dated file AND update `rls-policies-live.sql`.
+5. **Multi-table mutations need all inserts:** When creating a group, ALWAYS insert into both `groups` AND `group_members` (+ `activity_log`). This applies to both student and teacher flows.
+6. **Course-group linkage:** When creating a group linked to a course, ensure the creator is also in `course_members` (upsert).
+7. **Teacher visibility pattern:** Every table that teachers need to read MUST have a SELECT policy with the course ownership check: `EXISTS (SELECT 1 FROM groups g JOIN courses c ON c.id = g.course_id WHERE g.id = <table>.group_id AND c.teacher_id = auth.uid())`.
+
 ## What's Built
 
 - **Student:** groups, tasks (kanban + 5 contribution types), evidence (immutable+versioned), task comments, timeline (realtime), peer review, PDF export (6 themes), shareable reports (30-day expiry), blocker declarations, in-app + Telegram notifications, course enrollment
@@ -92,7 +106,9 @@ All tables have RLS. Known gaps: `profiles` SELECT overly broad, `courses` SELEC
 
 **Flow 1 (student-driven):** Teacher creates course → shares link → student joins → creates group → invites members
 
-**Flow 2 (teacher-driven):** Teacher creates group in course (temp lead) → shares group link → first student joins → auto-becomes lead
+**Flow 2 (teacher-driven):** Teacher creates group in course → picks student lead from enrolled roster → shares group link → students join
+
+**Flow 3 (direct add):** Teacher assigns ungrouped students to groups from course page, or group lead adds enrolled students via "Add from course" button
 
 ## Shared Modules
 

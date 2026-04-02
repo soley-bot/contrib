@@ -109,10 +109,10 @@ export default function GroupPage() {
     if (!group || !isLead || actionInFlight.current) return;
     actionInFlight.current = true;
     try {
-      const { error } = await supabase.from('groups').delete().eq('id', group.id);
+      const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', group.id);
       if (error) throw error;
       router.push('/dashboard');
-    } catch { showToast('Failed to delete group. Please try again.'); } finally { actionInFlight.current = false; }
+    } catch { showToast('Failed to archive group. Please try again.'); } finally { actionInFlight.current = false; }
   }
 
   async function executeLeaveGroup() {
@@ -128,13 +128,10 @@ export default function GroupPage() {
           setShowLeaveConfirm(false);
           return;
         }
-        // Only member — delete the group entirely
-        // Soft-delete all tasks
+        // Only member — archive the group
         await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('group_id', group.id);
-        // Remove group members
         await supabase.from('group_members').delete().eq('group_id', group.id);
-        // Delete the group
-        const { error } = await supabase.from('groups').delete().eq('id', group.id);
+        const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', group.id);
         if (error) throw error;
         router.push('/dashboard');
         return;

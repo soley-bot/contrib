@@ -11,8 +11,6 @@ import { useDashboardSummary } from '@/hooks/use-dashboard-summary';
 import { useCourseMemberships } from '@/hooks/use-course-memberships';
 import { useContributionSummary } from '@/hooks/use-contribution-summary';
 import ContributionSummary from '@/components/contribution-summary';
-import { supabase } from '@/lib/supabase';
-import { generateInviteToken } from '@/lib/invite';
 import { formatDueDate } from '@/lib/date';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 import InlineTip from '@/components/inline-tip';
@@ -83,36 +81,28 @@ export default function Dashboard() {
       return;
     }
     setCreating(true);
-    const token = generateInviteToken();
-    const courseId = selectedCourseId || null;
-    const { data: group, error } = await supabase
-      .from('groups')
-      .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token, course_id: courseId })
-      .select().single();
-
-    if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
-
-    const { error: joinError } = await supabase.from('group_members').insert({ group_id: group.id, profile_id: user!.id });
-    if (joinError) { setFormError(joinError.message); setCreating(false); return; }
-
-    await supabase.from('activity_log').insert({ group_id: group.id, actor_id: user!.id, action: 'member_joined', meta: {} });
-
-    if (!courseId && courseTokenRef.current) {
-      const { data: course } = await supabase
-        .from('courses')
-        .select('id')
-        .eq('invite_token', courseTokenRef.current)
-        .single();
-      if (course) {
-        await supabase.from('groups').update({ course_id: course.id }).eq('id', group.id);
-      }
-      courseTokenRef.current = null;
+    try {
+      const resp = await fetch('/api/groups/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: groupName.trim(),
+          subject: subject.trim(),
+          dueDate: dueDate || null,
+          courseId: selectedCourseId || null,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) { setFormError(data.error ?? 'Failed to create group.'); setCreating(false); creatingRef.current = false; return; }
+      refreshGroups();
+      setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setSelectedCourseId(''); setCreating(false);
+      creatingRef.current = false;
+      router.push(`/group/${data.group.id}`);
+    } catch {
+      setFormError('Failed to create group.');
+      setCreating(false);
+      creatingRef.current = false;
     }
-
-    refreshGroups();
-    setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setSelectedCourseId(''); setCreating(false);
-    creatingRef.current = false;
-    router.push(`/group/${group.id}`);
   }
 
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><div className="spinner" /></div>;

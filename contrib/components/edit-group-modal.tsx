@@ -31,7 +31,7 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
       name: name.trim(),
       subject: subject.trim(),
       due_date: dueDate || null,
-    }).eq('id', group.id);
+    }).eq('id', group.id).eq('lead_id', userId);
 
     if (updateError) {
       setError('Failed to update group. Please try again.');

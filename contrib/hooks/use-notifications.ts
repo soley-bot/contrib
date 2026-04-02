@@ -45,7 +45,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
   async function fetchNotifications(uid: string) {
     const { data, error: fetchError } = await supabase
       .from('notifications')
-      .select('*')
+      .select('id, recipient_id, group_id, type, title, body, meta, read_at, created_at')
       .eq('recipient_id', uid)
       .order('created_at', { ascending: false })
       .limit(50);

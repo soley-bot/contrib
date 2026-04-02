@@ -19,6 +19,7 @@ export interface Group {
   lead_id: string;
   invite_token: string;
   course_id: string | null;
+  created_by: string | null;
   archived_at: string | null;
   created_at: string;
 }
@@ -68,6 +69,7 @@ export interface Evidence {
   type: EvidenceType;
   content: string;
   version_number: number;
+  deleted_at: string | null;
   created_at: string;
   uploader?: Profile;
 }
@@ -87,6 +89,7 @@ export type ActivityAction =
   | 'group_updated'
   | 'member_left'
   | 'member_removed'
+  | 'member_added'
   | 'lead_transferred'
   | 'evaluation_opened'
   | 'evaluation_submitted'

@@ -50,62 +50,27 @@ export default function JoinPage({ group }: PageProps) {
     }
     setStatus('joining');
 
-    const { count } = await supabase
-      .from('group_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('group_id', group.id);
-    if ((count ?? 0) >= 6) { setStatus('full'); return; }
-
-    const { error: insertError } = await supabase.from('group_members').insert({
-      group_id: group.id,
-      profile_id: user.id,
-    });
-    if (insertError) { setJoinError(insertError.message); setStatus('error'); return; }
-
-    supabase.from('activity_log').insert({
-      group_id: group.id,
-      actor_id: user.id,
-      action: 'member_joined',
-      meta: {},
-    }).then(null, () => {});
-
-    // Auto-transfer leadership if the current lead is a teacher (Flow 2)
-    if (group.leadIsTeacher) {
-      try {
-        await fetch(`/api/groups/${group.id}/auto-transfer-lead`, {
-          method: 'POST',
-          credentials: 'same-origin',
-        });
-      } catch {}
+    try {
+      const resp = await fetch(`/api/groups/${group.id}/join`, {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        if (resp.status === 409) {
+          if (data.error?.includes('already')) { setStatus('already'); return; }
+          setJoinError(data.error); setStatus('error'); return;
+        }
+        if (resp.status === 400 && data.error?.includes('full')) { setStatus('full'); return; }
+        setJoinError(data.error ?? 'Failed to join group.'); setStatus('error'); return;
+      }
+      setStatus('joined');
+      try { localStorage.setItem(`contrib_just_joined_${group.id}`, '1'); } catch {}
+      setTimeout(() => router.push(`/group/${group.id}`), 1200);
+    } catch {
+      setJoinError('Failed to join group.');
+      setStatus('error');
     }
-
-    setStatus('joined');
-
-    // Mark as just joined for welcome banner
-    try { localStorage.setItem(`contrib_just_joined_${group.id}`, '1'); } catch {}
-
-    // Notify group via Telegram (fire-and-forget)
-    fetch('/api/notify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ groupId: group.id, message: `A new member joined ${group.name}!`, type: 'contributions' }),
-    }).catch(() => {});
-
-    // Fire-and-forget notification
-    if (group.lead_id && group.lead_id !== user.id) {
-      (async () => {
-        const { data: joinerProfile } = await supabase
-          .from('profiles').select('name').eq('id', user.id).single();
-        supabase.from('notifications').insert({
-          recipient_id: group.lead_id!,
-          group_id: group.id,
-          type: 'member_joined',
-          title: `${joinerProfile?.name ?? 'Someone'} joined your group`,
-          meta: { memberName: joinerProfile?.name ?? null, groupName: group.name },
-        }).then(null, () => {});
-      })();
-    }
-    setTimeout(() => router.push(`/group/${group.id}`), 1200);
   }
 
   // Not found

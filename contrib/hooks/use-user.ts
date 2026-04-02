@@ -39,7 +39,7 @@ export function useUser(): UseUserResult {
   async function fetchProfile(id: string) {
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, name, university, faculty, year_of_study, avatar_url, role, created_at')
       .eq('id', id)
       .single();
     setProfile(data ?? null);

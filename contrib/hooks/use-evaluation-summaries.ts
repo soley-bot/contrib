@@ -41,7 +41,7 @@ export function useEvaluationSummaries(
   async function fetchSummaries(id: string) {
     const { data, error } = await supabase
       .from('evaluation_summaries')
-      .select('*')
+      .select('group_id, evaluatee_id, avg_contribution, avg_collaboration, eval_count, comments')
       .eq('group_id', id);
     if (error) {
       console.error('Failed to load evaluation summaries:', error);

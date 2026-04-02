@@ -55,7 +55,7 @@ export function useCourseAnalytics(groupIds: string[]): UseCourseAnalyticsResult
     const [sessionsRes, evalsRes, activityRes, scoresRes] = await Promise.all([
       supabase
         .from('evaluation_sessions')
-        .select('*')
+        .select('id, group_id, opened_by, opened_at')
         .in('group_id', ids),
       supabase
         .from('evaluations')

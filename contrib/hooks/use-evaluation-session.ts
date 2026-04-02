@@ -44,7 +44,7 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
   async function fetchSession(id: string) {
     const { data, error } = await supabase
       .from('evaluation_sessions')
-      .select('*')
+      .select('id, group_id, opened_by, opened_at')
       .eq('group_id', id)
       .maybeSingle();
     if (error) { Sentry.captureMessage(`Failed to load session: ${error.message}`, { level: 'error' }); if (mountedRef.current) setError('Failed to load data.'); return; }

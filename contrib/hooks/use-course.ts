@@ -27,7 +27,7 @@ export function useCourse(courseId: string | undefined, userId: string | undefin
 
   async function fetchAll(id: string) {
     const [{ data: courseData, error: courseError }, { data: groupData, error: groupError }] = await Promise.all([
-      supabase.from('courses').select('id, name, subject, teacher_id, invite_token, created_at').eq('id', id).single(),
+      supabase.from('courses').select('id, name, subject, teacher_id, created_at').eq('id', id).single(),
       supabase.from('groups').select('id, name, subject, due_date, lead_id, course_id, created_at').eq('course_id', id).order('created_at', { ascending: false }),
     ]);
     if (courseError) {

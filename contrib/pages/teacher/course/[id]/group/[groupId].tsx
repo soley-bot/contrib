@@ -7,6 +7,7 @@ import FeedItem from '@/components/feed-item';
 import MemberRow from '@/components/member-row';
 import EvaluationResults from '@/components/evaluation-results';
 import { IconExport, IconBoard, IconActivity, IconUsers, IconList, IconCheck } from '@/components/icons';
+import { useToast } from '@/components/toast-provider';
 import { useUser } from '@/hooks/use-user';
 import { useGroup } from '@/hooks/use-group';
 import { useTasks } from '@/hooks/use-tasks';
@@ -33,7 +34,7 @@ export default function TeacherGroupDetail() {
   const groupId = typeof router.query.groupId === 'string' ? router.query.groupId : undefined;
 
   const { user, profile, loading: userLoading, refreshProfile } = useUser();
-  const { group, members, loading: groupLoading } = useGroup(groupId, user?.id);
+  const { group, members, loading: groupLoading, refresh } = useGroup(groupId, user?.id);
   const { tasks } = useTasks(groupId);
   const { activity } = useActivity(groupId);
   const taskIds = tasks.map((t) => t.id);
@@ -41,11 +42,14 @@ export default function TeacherGroupDetail() {
   const { session: evalSession } = useEvaluationSession(groupId);
   const { summaries: evalSummaries } = useEvaluationSummaries(groupId, !!evalSession);
 
+  const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('tasks');
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [courseName, setCourseName] = useState('');
   const [isOwner, setIsOwner] = useState(false);
   const [ownerLoading, setOwnerLoading] = useState(true);
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userLoading && !user) { router.replace('/login'); return; }
@@ -84,6 +88,30 @@ export default function TeacherGroupDetail() {
       courseName || undefined,
     );
     setDownloadingPdf(false);
+  }
+
+  async function handleRemoveMember() {
+    if (!confirmRemoveId) return;
+    setRemovingMemberId(confirmRemoveId);
+    try {
+      const resp = await fetch(`/api/groups/${groupId}/remove-member`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileId: confirmRemoveId }),
+      });
+      if (!resp.ok) {
+        const data = await resp.json();
+        showToast(data.error ?? 'Failed to remove member.', 'error');
+        return;
+      }
+      showToast('Member removed.');
+      refresh();
+    } catch {
+      showToast('Failed to remove member.', 'error');
+    } finally {
+      setRemovingMemberId(null);
+      setConfirmRemoveId(null);
+    }
   }
 
   if (userLoading || groupLoading || ownerLoading) {
@@ -301,14 +329,42 @@ export default function TeacherGroupDetail() {
               {members.length} member{members.length !== 1 ? 's' : ''}
             </p>
             {members.map((m) => (
-              <MemberRow
-                key={m.id}
-                member={m}
-                tasks={tasks}
-                isThisMemberLead={m.profile_id === group.lead_id}
-                canRemove={false}
-              />
+              <div key={m.id} className="flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <MemberRow
+                    member={m}
+                    tasks={tasks}
+                    isThisMemberLead={m.profile_id === group.lead_id}
+                    canRemove={false}
+                  />
+                </div>
+                {m.profile_id !== group.lead_id && (
+                  <button
+                    onClick={() => setConfirmRemoveId(m.profile_id)}
+                    disabled={removingMemberId === m.profile_id}
+                    className="text-red-500 hover:text-red-600 text-[12px] font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    {removingMemberId === m.profile_id ? 'Removing...' : 'Remove'}
+                  </button>
+                )}
+              </div>
             ))}
+          </div>
+        )}
+
+        {/* Remove member confirmation modal */}
+        {confirmRemoveId && (
+          <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4">
+            <div className="w-full max-w-[360px] bg-white rounded-xl p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
+              <h2 className="text-[15px] font-semibold text-text mb-1">Remove member?</h2>
+              <p className="text-sm text-text-secondary mb-5">Their tasks will be reassigned to the group lead.</p>
+              <div className="flex gap-2">
+                <button onClick={() => setConfirmRemoveId(null)} className="flex-1 h-10 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium text-text-secondary rounded-md transition-colors">Cancel</button>
+                <button onClick={handleRemoveMember} disabled={!!removingMemberId} className="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60">
+                  {removingMemberId ? 'Removing...' : 'Remove'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

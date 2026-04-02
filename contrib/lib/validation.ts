@@ -27,6 +27,26 @@ export const createGroupSchema = z.object({
   course_id: z.string().uuid().nullable().optional(),
 });
 
+// ── Group creation API (server-side) ───────────────────────────────────────
+
+export const createGroupApiSchema = z.object({
+  name: z.string().trim().min(1, 'Group name is required.').max(200, 'Group name must be 200 characters or less.'),
+  subject: z.string().trim().min(1, 'Subject is required.').max(200, 'Subject must be 200 characters or less.'),
+  dueDate: z.string().nullable().optional(),
+  courseId: z.string().uuid().nullable().optional(),
+  leadId: z.string().uuid().optional(),
+});
+
+// ── Group member management ────────────────────────────────────────────────
+
+export const addMemberSchema = z.object({
+  profileId: z.string().uuid('Invalid profile ID.'),
+});
+
+export const removeMemberSchema = z.object({
+  profileId: z.string().uuid('Invalid profile ID.'),
+});
+
 // ── Task creation / editing ─────────────────────────────────────────────────
 
 export const createTaskSchema = z.object({

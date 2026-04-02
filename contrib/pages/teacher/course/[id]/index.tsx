@@ -7,13 +7,14 @@ import CourseGroupRow from '@/components/course-group-row';
 import InlineTip from '@/components/inline-tip';
 import type { GroupHealthStatus } from '@/components/course-group-row';
 import { IconPlus } from '@/components/icons';
+import AssignGroupModal from '@/components/assign-group-modal';
 import { useUser } from '@/hooks/use-user';
 import { useToast } from '@/components/toast-provider';
 import { requireTeacher } from '@/lib/supabase-server';
 import { useCourse } from '@/hooks/use-course';
 import { useCourseAnalytics } from '@/hooks/use-course-analytics';
 import { supabase } from '@/lib/supabase';
-import { generateInviteToken } from '@/lib/invite';
+
 import { generateReport } from '@/lib/pdf';
 import type { Group, GroupMember, Profile, Task, ActivityLog, Evidence, EvaluationSummary } from '@/types';
 
@@ -42,6 +43,9 @@ export default function CourseDetail() {
   const [filterMode, setFilterMode] = useState<'all' | 'attention'>('all');
   const [courseResetState, setCourseResetState] = useState<'idle' | 'confirm' | 'resetting' | 'done'>('idle');
   const [ungroupedStudents, setUngroupedStudents] = useState<Profile[]>([]);
+  const [selectedLeadId, setSelectedLeadId] = useState('');
+  const [enrolledStudents, setEnrolledStudents] = useState<Profile[]>([]);
+  const [assigningStudent, setAssigningStudent] = useState<Profile | null>(null);
   const [blockerCounts, setBlockerCounts] = useState<Record<string, number>>({});
   const { showToast } = useToast();
 
@@ -63,16 +67,34 @@ export default function CourseDetail() {
     const ids = groups.map(({ group }) => group.id);
     supabase
       .from('group_members')
-      .select('*, profile:profiles(*)')
+      .select('id, group_id, profile_id, joined_at, profile:profiles!group_members_profile_id_fkey(id, name, university, faculty, year_of_study, avatar_url, role)')
       .in('group_id', ids)
       .order('joined_at', { ascending: true })
       .then(({ data }) => {
         const map: Record<string, GroupMember[]> = {};
         ids.forEach((id) => { map[id] = []; });
-        (data as GroupMember[] ?? []).forEach((m) => { map[m.group_id]?.push(m); });
+        ((data as unknown as GroupMember[]) ?? []).forEach((m) => { map[m.group_id]?.push(m); });
         setGroupMembers(map);
       });
   }, [groups]);
+
+  useEffect(() => {
+    if (!courseId || courseLoading || !course) return;
+    (async () => {
+      const { data: members } = await supabase
+        .from('course_members')
+        .select('profile_id')
+        .eq('course_id', courseId);
+      if (!members || members.length === 0) { setEnrolledStudents([]); return; }
+      const memberIds = members.map((m: { profile_id: string }) => m.profile_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, name, university, faculty, year_of_study, avatar_url, role, created_at')
+        .in('id', memberIds)
+        .eq('role', 'student');
+      setEnrolledStudents((profiles as Profile[]) ?? []);
+    })();
+  }, [courseId, courseLoading, course]);
 
   // Fetch enrolled students who haven't joined a group in this course
   useEffect(() => {
@@ -103,7 +125,7 @@ export default function CourseDetail() {
 
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, name, university, faculty, year_of_study, avatar_url, role, created_at')
         .in('id', ungroupedIds);
       setUngroupedStudents((profiles as Profile[]) ?? []);
     })();
@@ -159,7 +181,7 @@ export default function CourseDetail() {
   async function handleDeleteGroup() {
     if (!confirmDeleteGroupId) return;
     setDeletingGroupId(confirmDeleteGroupId);
-    const { error } = await supabase.from('groups').delete().eq('id', confirmDeleteGroupId);
+    const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', confirmDeleteGroupId);
     setDeletingGroupId(null);
     if (error) { showToast('Failed to delete group.', 'error'); return; }
     setConfirmDeleteGroupId(null);
@@ -177,9 +199,9 @@ export default function CourseDetail() {
     const taskIds = ((tasksRes.data as Task[]) ?? []).map((t) => t.id);
     const [evidenceRes, evalRes] = await Promise.all([
       taskIds.length > 0
-        ? supabase.from('evidence').select('*, uploader:profiles(name)').in('task_id', taskIds)
+        ? supabase.from('evidence').select('id, task_id, uploaded_by, type, content, version_number, created_at, uploader:profiles(name)').in('task_id', taskIds)
         : Promise.resolve({ data: [] as Evidence[], error: null }),
-      supabase.from('evaluation_summaries').select('*').eq('group_id', group.id),
+      supabase.from('evaluation_summaries').select('group_id, evaluatee_id, avg_contribution, avg_collaboration, eval_count, comments').eq('group_id', group.id),
     ]);
     if (evidenceRes.error || evalRes.error) { showToast('Failed to load evidence or evaluations for PDF.', 'error'); setDownloadingId(null); return; }
     const evidenceByTask: Record<string, Evidence[]> = {};
@@ -195,15 +217,28 @@ export default function CourseDetail() {
     if (creating) return;
     setFormError('');
     if (!groupName.trim() || !subject.trim()) { setFormError('Group name and subject are required.'); return; }
+    if (!selectedLeadId) { setFormError('Please select a group lead.'); return; }
     setCreating(true);
-    const token = generateInviteToken();
-    const { data: group, error } = await supabase
-      .from('groups')
-      .insert({ name: groupName.trim(), subject: subject.trim(), due_date: dueDate || null, lead_id: user!.id, invite_token: token, course_id: courseId })
-      .select().single();
-    if (error || !group) { setFormError(error?.message ?? 'Failed to create group.'); setCreating(false); return; }
-    refresh();
-    setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setCreating(false);
+    try {
+      const resp = await fetch('/api/groups/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: groupName.trim(),
+          subject: subject.trim(),
+          dueDate: dueDate || null,
+          courseId: courseId,
+          leadId: selectedLeadId,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) { setFormError(data.error ?? 'Failed to create group.'); setCreating(false); return; }
+      refresh();
+      setShowModal(false); setGroupName(''); setSubject(''); setDueDate(''); setSelectedLeadId(''); setCreating(false);
+    } catch {
+      setFormError('Failed to create group.');
+      setCreating(false);
+    }
   }
 
   const { evalSessions, evalCounts, evalScores, latestActivity, loading: analyticsLoading } = useCourseAnalytics(groupIds);
@@ -368,12 +403,14 @@ export default function CourseDetail() {
               <p className="text-[11px] text-text-tertiary mb-2.5">These students have joined the course but haven&apos;t been added to a group yet.</p>
               <div className="flex flex-wrap gap-2">
                 {ungroupedStudents.map((s) => (
-                  <div key={s.id} className="flex items-center gap-2 bg-bg rounded-lg px-2.5 py-1.5">
-                    <div className="w-6 h-6 rounded-full bg-brand-light text-brand text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                      {s.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <span className="text-[13px] text-text">{s.name}</span>
-                  </div>
+                  <button
+                    key={s.id}
+                    onClick={() => setAssigningStudent(s)}
+                    className="inline-flex items-center gap-1.5 bg-brand-light text-brand text-[12px] font-medium px-2.5 py-1 rounded-full hover:bg-[#D6E4FF] transition-colors"
+                  >
+                    {s.name}
+                    <span className="text-[10px] opacity-70">+</span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -563,16 +600,25 @@ export default function CourseDetail() {
         </div>
       )}
 
+      {assigningStudent && (
+        <AssignGroupModal
+          student={{ id: assigningStudent.id, name: assigningStudent.name }}
+          groups={groups.map(({ group, memberCount }) => ({ id: group.id, name: group.name, memberCount }))}
+          onClose={() => setAssigningStudent(null)}
+          onAssigned={() => { setAssigningStudent(null); refresh(); }}
+        />
+      )}
+
       {showModal && (
         <div
           className="fixed inset-0 z-[100] bg-black/40 flex items-end md:items-center md:justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget && !creating) setShowModal(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !creating) { setShowModal(false); setSelectedLeadId(''); } }}
         >
           <div className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <h2 className="text-base font-semibold text-text">New Group</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 text-text-secondary hover:text-text transition-colors">
+              <button onClick={() => { setShowModal(false); setSelectedLeadId(''); }} className="p-1 text-text-secondary hover:text-text transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
@@ -591,6 +637,20 @@ export default function CourseDetail() {
                 <label className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[13px] font-medium text-text-secondary">Group lead</label>
+                <select
+                  value={selectedLeadId}
+                  onChange={(e) => setSelectedLeadId(e.target.value)}
+                  className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
+                >
+                  <option value="">Select a student...</option>
+                  {enrolledStudents.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} — {s.university}</option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-text-tertiary">This student will manage the group.</p>
               </div>
               {formError && <p className="text-sm text-red-500">{formError}</p>}
               <div className="pt-1 border-t border-border">

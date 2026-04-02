@@ -259,7 +259,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ── Task-level reminders ────────────────────────────────────────────────────
   const { data: tasks, error: tasksError } = await adminClient
     .from('tasks')
-    .select('id, title, group_id, groups(name)')
+    .select('id, title, assignee_id, group_id, groups(name)')
     .eq('due_date', tomorrow)
     .neq('status', 'done')
     .is('deleted_at', null);
@@ -275,15 +275,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const groupName = (Array.isArray(groupsRel) ? groupsRel[0]?.name : groupsRel?.name) ?? 'your group';
 
       // In-app notification for the task assignee
-      const { data: taskData } = await adminClient
-        .from('tasks')
-        .select('assignee_id')
-        .eq('id', task.id)
-        .single();
+      const assigneeId = (task as unknown as { assignee_id: string | null }).assignee_id;
 
-      if (taskData?.assignee_id) {
+      if (assigneeId) {
         const { error: notifError } = await adminClient.from('notifications').insert({
-          recipient_id: taskData.assignee_id,
+          recipient_id: assigneeId,
           group_id: task.group_id,
           type: 'deadline_approaching' as const,
           title: `Task "${task.title}" in ${groupName} is due tomorrow`,
