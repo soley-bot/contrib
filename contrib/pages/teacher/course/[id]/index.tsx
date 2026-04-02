@@ -316,7 +316,7 @@ export default function CourseDetail() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New group
           </button>
@@ -512,17 +512,17 @@ export default function CourseDetail() {
               <button onClick={() => setEditingGroup(null)} className="text-text-secondary hover:text-text p-1">✕</button>
             </div>
             <form onSubmit={handleEditGroupSave} className="p-5 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Group name</label>
                 <input type="text" value={editGroupName} onChange={(e) => setEditGroupName(e.target.value)} placeholder="e.g. Team Alpha"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input type="text" value={editGroupSubject} onChange={(e) => setEditGroupSubject(e.target.value)} placeholder="e.g. MGT 402"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
                 <input type="date" value={editGroupDueDate} onChange={(e) => setEditGroupDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
@@ -577,17 +577,17 @@ export default function CourseDetail() {
               </button>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Group name</label>
                 <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Team Alpha"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />

@@ -131,7 +131,7 @@ export default function TeacherGroupDetail() {
           <button
             onClick={handleDownloadPdf}
             disabled={downloadingPdf}
-            className="h-8 px-3 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            className="h-9 px-3 border border-border bg-white hover:bg-bg-hover text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <IconExport size={14} /> {downloadingPdf ? 'Exporting…' : 'Export Contribution Record'}
           </button>

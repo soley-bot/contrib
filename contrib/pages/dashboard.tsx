@@ -121,7 +121,7 @@ export default function Dashboard() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New group
           </button>
@@ -140,10 +140,10 @@ export default function Dashboard() {
             if (coursesLoading || ungroupedCourses.length === 0) return null;
             return (
               <div className="mb-4">
-                <p className="text-[13px] font-semibold text-text-secondary mb-2">Your courses</p>
+                <p className="text-[13px] font-semibold text-text-secondary mb-3">Your courses</p>
                 <div className="flex flex-col gap-2">
                   {ungroupedCourses.map((c) => (
-                    <div key={c.id} className="bg-brand-light border border-[#93B4FF] rounded-xl p-3.5 flex items-center gap-3">
+                    <div key={c.id} className="bg-brand-light border border-[#93B4FF] rounded-xl p-4 flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-brand text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
                         {c.name.slice(0, 2).toUpperCase()}
                       </div>
@@ -153,7 +153,7 @@ export default function Dashboard() {
                       </div>
                       <button
                         onClick={() => { setSelectedCourseId(c.id); setShowModal(true); }}
-                        className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[12px] font-medium rounded-md transition-colors flex-shrink-0"
+                        className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[12px] font-medium rounded-md transition-colors flex-shrink-0"
                       >
                         Create group
                       </button>
@@ -291,7 +291,7 @@ export default function Dashboard() {
                         <div
                           key={group.id}
                           onClick={() => router.push(`/group/${group.id}`)}
-                          className="bg-white border border-border rounded-xl p-3.5 cursor-pointer hover:border-brand/40 transition-colors opacity-70"
+                          className="bg-white border border-border rounded-xl p-4 cursor-pointer hover:border-brand/40 transition-colors opacity-70"
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-bg-hover text-text-tertiary font-bold text-sm flex items-center justify-center flex-shrink-0">
@@ -338,25 +338,25 @@ export default function Dashboard() {
               </button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="p-5 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="group-name" className="text-[13px] font-medium text-text-secondary">Group name</label>
                 <input id="group-name" type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
                   aria-describedby="group-form-error"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="group-subject" className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input id="group-subject" type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
                   aria-describedby="group-form-error"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="group-due-date" className="text-[13px] font-medium text-text-secondary">Due date <span className="font-normal text-text-tertiary">(optional)</span></label>
                 <input id="group-due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               {enrolledCourses.length > 0 && (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="group-course" className="text-[13px] font-medium text-text-secondary">Link to course <span className="font-normal text-text-tertiary">(optional)</span></label>
                   <select
                     id="group-course"

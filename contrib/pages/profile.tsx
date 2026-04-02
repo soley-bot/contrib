@@ -265,22 +265,22 @@ export default function ProfilePage() {
             {/* Edit form */}
             {editing ? (
               <div className="flex flex-col gap-3.5 border-t border-border pt-4">
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <label className="text-[13px] font-medium text-text-secondary">Name</label>
                   <input type="text" value={name} onChange={(e) => setName(e.target.value)}
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <label className="text-[13px] font-medium text-text-secondary">University <span className="font-normal text-text-tertiary">(optional)</span></label>
                   <input type="text" value={university} onChange={(e) => setUniversity(e.target.value)}
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <label className="text-[13px] font-medium text-text-secondary">Faculty <span className="font-normal text-text-tertiary">(optional)</span></label>
                   <input type="text" value={faculty} onChange={(e) => setFaculty(e.target.value)} placeholder="e.g. Business"
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none" />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <label className="text-[13px] font-medium text-text-secondary">Year of study <span className="font-normal text-text-tertiary">(optional)</span></label>
                   <select value={yearOfStudy} onChange={(e) => setYearOfStudy(e.target.value)}
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white">
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                   </select>
                 </div>
                 {!lockLoading && roleLocked ? (
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-2">
                     <label className="text-[13px] font-medium text-text-secondary">Role</label>
                     <div className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] text-text bg-bg">
                       {profile.role === 'teacher' ? 'Teacher' : 'Student'}
@@ -335,7 +335,7 @@ export default function ProfilePage() {
           {/* Stats (student only) */}
           {isStudent && (
             <div className="mt-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-2.5">Your stats</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">Your stats</p>
               <div className="grid grid-cols-3 gap-2.5">
                 {!statsLoaded ? (
                   [1, 2, 3].map((i) => (
@@ -364,9 +364,9 @@ export default function ProfilePage() {
             <InlineTip id="profile-telegram">Connecting Telegram lets you receive task reminders and team notifications on your phone.</InlineTip>
           )}
           <div className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-2.5">Notifications</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">Notifications</p>
             {tgStatus === 'disconnected' && (
-              <div className="bg-[#EBF0FF] border-l-3 border-l-brand rounded-lg px-4 py-3 mb-3 flex items-start gap-3">
+              <div className="bg-[#EBF0FF] border-l-3 border-l-brand rounded-lg px-5 py-4 mb-3 flex items-start gap-3">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5"><circle cx="8" cy="8" r="7" stroke="#1A56E8" strokeWidth="1.5"/><path d="M8 7v4" stroke="#1A56E8" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="5" r="0.75" fill="#1A56E8"/></svg>
                 <p className="text-[13px] text-text-secondary">Connect Telegram to receive notifications about your group.</p>
               </div>
@@ -493,7 +493,7 @@ export default function ProfilePage() {
               {/* Notification preferences — only when connected */}
               {tgStatus === 'connected' && (
                 <div className="mt-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-2.5">What to notify me about</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-3">What to notify me about</p>
                   <div className="bg-white border border-[#E2E8F0] rounded-xl divide-y divide-[#E2E8F0] shadow-sm">
                     {([
                       { key: 'notify_contributions', label: 'Contributions', desc: 'Tasks created, completed, or reassigned', value: notifyContributions, setter: setNotifyContributions },

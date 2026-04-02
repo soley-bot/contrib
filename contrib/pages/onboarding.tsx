@@ -109,7 +109,7 @@ export default function Onboarding() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <InlineTip id="onboarding-role">Your role determines which dashboard you see. Students track group work. Teachers monitor courses.</InlineTip>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label className="text-[13px] font-medium text-text-secondary">Full name</label>
             <input
               type="text"
@@ -119,7 +119,7 @@ export default function Onboarding() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label className="text-[13px] font-medium text-text-secondary">
               University <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
@@ -131,7 +131,7 @@ export default function Onboarding() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label className="text-[13px] font-medium text-text-secondary">
               Faculty / Major <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
@@ -151,7 +151,7 @@ export default function Onboarding() {
           </div>
 
           {role === 'student' && (
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <label className="text-[13px] font-medium text-text-secondary">
                 Year of study <span className="font-normal text-text-tertiary">(optional)</span>
               </label>

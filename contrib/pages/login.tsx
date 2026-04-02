@@ -100,7 +100,7 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label htmlFor="login-email" className="text-[13px] font-medium text-muted">Email</label>
             <input
               id="login-email"
@@ -112,7 +112,7 @@ export default function Login() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <label htmlFor="login-password" className="text-[13px] font-medium text-muted">Password</label>
               <Link href="/forgot-password" className="text-[13px] text-brand font-medium">Forgot password?</Link>

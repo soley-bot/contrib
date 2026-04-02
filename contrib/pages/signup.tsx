@@ -125,7 +125,7 @@ export default function Signup() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label htmlFor="signup-name" className="text-[13px] font-medium text-muted">Full name</label>
             <input
               id="signup-name"
@@ -136,7 +136,7 @@ export default function Signup() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label htmlFor="signup-school" className="text-[13px] font-medium text-muted">University</label>
             <input
               id="signup-school"
@@ -154,7 +154,7 @@ export default function Signup() {
               This determines your experience. You can change it later in your profile — until you create your first group or course.
             </p>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label htmlFor="signup-email" className="text-[13px] font-medium text-muted">Email</label>
             <input
               id="signup-email"
@@ -166,7 +166,7 @@ export default function Signup() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label htmlFor="signup-password" className="text-[13px] font-medium text-muted">Password</label>
             <input
               id="signup-password"
@@ -178,7 +178,7 @@ export default function Signup() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label htmlFor="signup-confirm-password" className="text-[13px] font-medium text-muted">Confirm password</label>
             <input
               id="signup-confirm-password"

@@ -128,7 +128,7 @@ export default function TaskComments({ taskId, taskTitle, groupId, userId, userN
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-1.5">
+      <div className="flex items-center justify-between mb-3">
         <p className="text-[13px] font-medium text-text-secondary">
           Discussion {comments.length > 0 && <span className="font-normal text-brand">({comments.length})</span>}
         </p>

@@ -302,10 +302,10 @@ export default function GroupPage() {
             <span className="text-text-tertiary">{group.subject}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowBlockerModal(true)} className="h-8 px-3 border border-border bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[13px] font-medium text-text-secondary hover:text-[#DC2626] rounded-md flex items-center gap-1.5 transition-colors">
+            <button onClick={() => setShowBlockerModal(true)} className="h-9 px-3 border border-border bg-white hover:bg-[#FEF2F2] hover:border-[#FECACA] text-[13px] font-medium text-text-secondary hover:text-[#DC2626] rounded-md flex items-center gap-1.5 transition-colors">
               <IconAlertTriangle size={13} /> Heads Up
             </button>
-            <button onClick={() => setShowNewTask(true)} className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
+            <button onClick={() => setShowNewTask(true)} className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors">
               <IconPlus size={14} /> Add task
             </button>
             <GroupActionsMenu
@@ -356,7 +356,7 @@ export default function GroupPage() {
         {/* Welcome banner for new members */}
         {showWelcome && (
           <div className="max-w-5xl mx-auto px-4 pt-4">
-            <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-4 py-3 flex items-start justify-between gap-3">
+            <div className="bg-brand-light border border-[#93B4FF] rounded-xl px-5 py-4 flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-text mb-1">Welcome to {group.name}!</p>
                 <p className="text-[13px] text-text-secondary">

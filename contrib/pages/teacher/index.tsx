@@ -131,7 +131,7 @@ export default function TeacherDashboard() {
           <span className="text-base font-semibold text-text">My Courses</span>
           <button
             onClick={() => setShowModal(true)}
-            className="h-8 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
+            className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
             <IconPlus size={14} /> New course
           </button>
@@ -140,7 +140,7 @@ export default function TeacherDashboard() {
         <div className="pt-16 md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
           {courses.length === 0 ? (
             <div className="text-center py-14">
-              <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-5">
+              <svg viewBox="0 0 200 140" fill="none" className="w-48 mx-auto mb-6">
                 <ellipse cx="100" cy="128" rx="72" ry="8" fill="#EBF0FF"/>
                 <rect x="30" y="20" width="140" height="80" rx="6" fill="#1240C4"/>
                 <rect x="36" y="26" width="128" height="68" rx="4" fill="#0E3AAF"/>
@@ -157,7 +157,7 @@ export default function TeacherDashboard() {
                 <rect x="92" y="46" width="16" height="3" rx="1.5" fill="#0F172A"/>
                 <polygon points="100,42 110,47 100,52 90,47" fill="#0F172A"/>
               </svg>
-              <p className="text-[16px] font-bold text-text mb-1.5">No courses yet</p>
+              <p className="text-[16px] font-bold text-text mb-2">No courses yet</p>
               <p className="text-sm text-text-tertiary mb-6 max-w-xs mx-auto">Create your first course and share the invite link with your students.</p>
               <button onClick={() => setShowModal(true)} className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors">
                 <IconPlus size={16} /> Create your first course
@@ -231,12 +231,12 @@ export default function TeacherDashboard() {
               <button onClick={() => setEditingCourse(null)} className="text-text-secondary hover:text-text p-1">✕</button>
             </div>
             <form onSubmit={handleEditSave} className="p-5 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Course name</label>
                 <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="e.g. Business Management"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input type="text" value={editSubject} onChange={(e) => setEditSubject(e.target.value)} placeholder="e.g. MGT 402"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
@@ -268,12 +268,12 @@ export default function TeacherDashboard() {
               </button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="p-5 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Course name</label>
                 <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="e.g. Business Management"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-medium text-text-secondary">Subject code</label>
                 <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. MGT 402"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
