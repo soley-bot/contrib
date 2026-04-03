@@ -161,10 +161,10 @@ export default function Login() {
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const serverClient = createServerClient(ctx);
-  const { data: { session } } = await serverClient.auth.getSession();
-  if (session) {
+  const { data: { user } } = await serverClient.auth.getUser();
+  if (user) {
     const { data: profile } = await serverClient
-      .from('profiles').select('role').eq('id', session.user.id).single();
+      .from('profiles').select('role').eq('id', user.id).single();
     if (!profile) {
       return { redirect: { destination: '/onboarding', permanent: false } };
     }

@@ -23,15 +23,12 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   }
 
   const supabase = createServerClient(ctx);
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) {
+  const { data: exchangeData, error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error || !exchangeData.session) {
     return { props: {} }; // render fallback error UI
   }
 
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    return { redirect: { destination: '/login', permanent: false } };
-  }
+  const session = exchangeData.session;
 
   // Determine redirect destination
   const returnTo = typeof ctx.query.returnTo === 'string'

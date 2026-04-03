@@ -226,13 +226,13 @@ export default function Signup() {
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const serverClient = createServerClient(ctx);
-  const { data: { session } } = await serverClient.auth.getSession();
-  if (session) {
+  const { data: { user } } = await serverClient.auth.getUser();
+  if (user) {
     const returnTo = typeof ctx.query.returnTo === 'string'
       && ctx.query.returnTo.startsWith('/') && !ctx.query.returnTo.startsWith('//')
       ? ctx.query.returnTo : null;
     const { data: profile } = await serverClient
-      .from('profiles').select('role').eq('id', session.user.id).single();
+      .from('profiles').select('role').eq('id', user.id).single();
     if (!profile) {
       const dest = returnTo
         ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
