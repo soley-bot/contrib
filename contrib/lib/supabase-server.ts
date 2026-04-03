@@ -11,17 +11,29 @@ export function createServerClient(ctx: GetServerSidePropsContext) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+  // Track cookies written via setAll so getAll sees them in the same request.
+  // Without this, exchangeCodeForSession writes tokens to the response but
+  // subsequent PostgREST calls still read stale request cookies → auth.uid() is null.
+  const cookieStore = new Map<string, string>();
+
   return createSSRClient(url, anonKey, {
     cookies: {
       getAll() {
-        const cookieHeader = ctx.req.headers.cookie ?? '';
-        return cookieHeader.split(';').map((c) => {
+        const parsed = (ctx.req.headers.cookie ?? '').split(';').map((c) => {
           const [name, ...rest] = c.trim().split('=');
           return { name: name ?? '', value: decodeURIComponent(rest.join('=') || '') };
         }).filter((c) => c.name);
+
+        // Overlay cookies written via setAll during this request
+        const merged = new Map(parsed.map((c) => [c.name, c.value]));
+        for (const [name, value] of cookieStore) {
+          merged.set(name, value);
+        }
+        return Array.from(merged, ([name, value]) => ({ name, value }));
       },
       setAll(cookies) {
         cookies.forEach(({ name, value, options }) => {
+          cookieStore.set(name, value);
           const parts = [`${name}=${encodeURIComponent(value)}`];
           if (options?.path) parts.push(`Path=${options.path}`);
           if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);
@@ -118,16 +130,23 @@ export async function requireStudent(ctx: GetServerSidePropsContext) {
 export async function getUserFromApiRoute(req: NextApiRequest, res: NextApiResponse) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const cookieStore = new Map<string, string>();
   const client = createSSRClient(url, anonKey, {
     cookies: {
       getAll() {
-        return (req.headers.cookie ?? '').split(';').map((c) => {
+        const parsed = (req.headers.cookie ?? '').split(';').map((c) => {
           const [name, ...rest] = c.trim().split('=');
           return { name: name ?? '', value: decodeURIComponent(rest.join('=') || '') };
         }).filter((c) => c.name);
+        const merged = new Map(parsed.map((c) => [c.name, c.value]));
+        for (const [name, value] of cookieStore) {
+          merged.set(name, value);
+        }
+        return Array.from(merged, ([name, value]) => ({ name, value }));
       },
       setAll(cookies) {
         cookies.forEach(({ name, value, options }) => {
+          cookieStore.set(name, value);
           const parts = [`${name}=${encodeURIComponent(value)}`];
           if (options?.path) parts.push(`Path=${options.path}`);
           if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);

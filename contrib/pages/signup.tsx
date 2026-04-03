@@ -5,7 +5,6 @@ import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
-import { adminClient } from '@/lib/supabase-admin';
 import RoleToggle from '@/components/role-toggle';
 import type { UserRole } from '@/types';
 
@@ -232,8 +231,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     const returnTo = typeof ctx.query.returnTo === 'string'
       && ctx.query.returnTo.startsWith('/') && !ctx.query.returnTo.startsWith('//')
       ? ctx.query.returnTo : null;
-    // Use adminClient (bypasses RLS) — user identity already verified via getUser()
-    const { data: profile } = await adminClient
+    const { data: profile } = await serverClient
       .from('profiles').select('role').eq('id', user.id).single();
     if (!profile) {
       const dest = returnTo

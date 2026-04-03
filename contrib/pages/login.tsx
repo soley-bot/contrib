@@ -5,7 +5,6 @@ import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
-import { adminClient } from '@/lib/supabase-admin';
 
 function GoogleIcon() {
   return (
@@ -164,8 +163,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const serverClient = createServerClient(ctx);
   const { data: { user } } = await serverClient.auth.getUser();
   if (user) {
-    // Use adminClient (bypasses RLS) — user identity already verified via getUser()
-    const { data: profile } = await adminClient
+    const { data: profile } = await serverClient
       .from('profiles').select('role').eq('id', user.id).single();
     if (!profile) {
       return { redirect: { destination: '/onboarding', permanent: false } };

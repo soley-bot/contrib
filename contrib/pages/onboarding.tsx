@@ -38,7 +38,7 @@ export default function Onboarding() {
     if (!user) return;
     setLoading(true);
     const avatarUrl = user.user_metadata?.avatar_url ?? null;
-    const { error: insertError } = await supabase.from('profiles').insert({
+    const { error: insertError } = await supabase.from('profiles').upsert({
       id: user.id,
       name: nameVal.trim() || 'User',
       university: universityVal.trim() || '',
@@ -46,7 +46,7 @@ export default function Onboarding() {
       year_of_study: yearVal || null,
       avatar_url: avatarUrl,
       role,
-    });
+    }, { onConflict: 'id' });
     if (insertError) {
       setError(insertError.message);
       setLoading(false);
