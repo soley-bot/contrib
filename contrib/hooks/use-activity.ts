@@ -28,7 +28,7 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
   async function fetchPage(id: string, offset: number): Promise<ActivityLog[]> {
     const { data, error: fetchError } = await supabase
       .from('activity_log')
-      .select('*, actor:profiles!activity_log_actor_id_fkey(*)')
+      .select('id, group_id, actor_id, action, task_id, meta, created_at, actor:profiles!activity_log_actor_id_fkey(id, name, avatar_url)')
       .eq('group_id', id)
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1);
@@ -39,7 +39,7 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
       return [];
     }
     if (mountedRef.current) setError(null);
-    return (data as ActivityLog[]) ?? [];
+    return (data as unknown as ActivityLog[]) ?? [];
   }
 
   useEffect(() => {
@@ -64,14 +64,14 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
         const newEntry = payload.new as ActivityLog;
         supabase
           .from('activity_log')
-          .select('*, actor:profiles!activity_log_actor_id_fkey(*)')
+          .select('id, group_id, actor_id, action, task_id, meta, created_at, actor:profiles!activity_log_actor_id_fkey(id, name, avatar_url)')
           .eq('id', newEntry.id)
           .single()
           .then(({ data }) => {
             if (data && mountedRef.current) {
               setActivity((prev) => {
                 if (prev.some((a) => a.id === data.id)) return prev;
-                return [data as ActivityLog, ...prev];
+                return [data as unknown as ActivityLog, ...prev];
               });
             }
           });

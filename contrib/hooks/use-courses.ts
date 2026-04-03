@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Course } from '@/types';
 
@@ -42,7 +43,7 @@ export function useCourses(teacherId: string | undefined): UseCoursesResult {
       .eq('teacher_id', id)
       .order('created_at', { ascending: false });
     if (error) {
-      console.error('Failed to load courses:', error);
+      Sentry.captureMessage(`Failed to load courses: ${error.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }

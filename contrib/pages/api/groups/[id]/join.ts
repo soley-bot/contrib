@@ -27,12 +27,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch the group
     const { data: group, error: groupError } = await adminClient
       .from('groups')
-      .select('id, name, lead_id, course_id')
+      .select('id, name, lead_id, course_id, archived_at')
       .eq('id', groupId)
       .single();
 
     if (groupError || !group) {
       return res.status(404).json({ error: 'Group not found.' });
+    }
+
+    // Cannot join an archived group
+    if (group.archived_at) {
+      return res.status(410).json({ error: 'This group has been archived.' });
     }
 
     // Fetch caller's profile

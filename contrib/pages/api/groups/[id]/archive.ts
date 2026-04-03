@@ -15,8 +15,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const user = await getUserFromApiRoute(req, res);
   if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
-  const groupId = req.query.id as string;
-  if (!groupId) return res.status(400).json({ error: 'Missing group ID.' });
+  const groupId = req.query.id;
+  if (typeof groupId !== 'string') return res.status(400).json({ error: 'Missing group ID.' });
 
   const { data: group } = await adminClient
     .from('groups')

@@ -1,6 +1,6 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- RLS Policies — Canonical Live State
--- Last verified: 2026-04-02
+-- Last verified: 2026-04-03
 --
 -- THIS FILE IS THE SINGLE SOURCE OF TRUTH for what RLS policies exist in
 -- production. Every policy change MUST be reflected here. If this file
@@ -25,10 +25,31 @@ AS $$
 $$;
 
 -- ── profiles ─────────────────────────────────────────────────────────────────
--- TODO: SELECT using(true) is overly broad — tighten before scaling
 
-CREATE POLICY "Users can read all profiles"
-  ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Users can read relevant profiles"
+  ON public.profiles FOR SELECT USING (
+    id = auth.uid()
+    OR EXISTS (
+      SELECT 1 FROM public.group_members gm1
+      JOIN public.group_members gm2 ON gm1.group_id = gm2.group_id
+      WHERE gm1.profile_id = auth.uid() AND gm2.profile_id = profiles.id
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.course_members cm1
+      JOIN public.course_members cm2 ON cm1.course_id = cm2.course_id
+      WHERE cm1.profile_id = auth.uid() AND cm2.profile_id = profiles.id
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.courses c
+      JOIN public.course_members cm ON cm.course_id = c.id
+      WHERE c.teacher_id = profiles.id AND cm.profile_id = auth.uid()
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.courses c
+      JOIN public.course_members cm ON cm.course_id = c.id
+      WHERE c.teacher_id = auth.uid() AND cm.profile_id = profiles.id
+    )
+  );
 
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
@@ -38,8 +59,14 @@ CREATE POLICY "Users can update own profile"
 
 -- ── courses ──────────────────────────────────────────────────────────────────
 
-CREATE POLICY "Authenticated users can read courses"
-  ON public.courses FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Course teacher and members can read courses"
+  ON public.courses FOR SELECT USING (
+    teacher_id = auth.uid()
+    OR EXISTS (
+      SELECT 1 FROM public.course_members
+      WHERE course_members.course_id = courses.id AND course_members.profile_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Teachers can insert their courses"
   ON public.courses FOR INSERT WITH CHECK (

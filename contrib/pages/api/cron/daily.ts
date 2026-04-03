@@ -51,7 +51,8 @@ async function sendTeacherDigest(): Promise<number> {
       const { data: groups, error: groupsError } = await adminClient
         .from('groups')
         .select('id, name, due_date')
-        .eq('course_id', course.id);
+        .eq('course_id', course.id)
+        .is('archived_at', null);
 
       if (groupsError) {
         Sentry.captureMessage(`[cron/daily] sendTeacherDigest groups query error: ${groupsError.message}`, {
@@ -259,10 +260,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ── Task-level reminders ────────────────────────────────────────────────────
   const { data: tasks, error: tasksError } = await adminClient
     .from('tasks')
-    .select('id, title, assignee_id, group_id, groups(name)')
+    .select('id, title, assignee_id, group_id, groups!inner(name, archived_at)')
     .eq('due_date', tomorrow)
     .neq('status', 'done')
-    .is('deleted_at', null);
+    .is('deleted_at', null)
+    .is('groups.archived_at', null);
 
   if (tasksError) {
     Sentry.captureMessage(`[cron/daily] tasks query error: ${tasksError.message}`, {
@@ -309,7 +311,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { data: groups, error: groupsError } = await adminClient
     .from('groups')
     .select('id, name')
-    .eq('due_date', tomorrow);
+    .eq('due_date', tomorrow)
+    .is('archived_at', null);
 
   if (groupsError) {
     Sentry.captureMessage(`[cron/daily] groups query error: ${groupsError.message}`, {

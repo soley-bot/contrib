@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Course } from '@/types';
 
@@ -18,11 +19,11 @@ export function useCourseMemberships(userId: string | undefined): UseCourseMembe
     setLoading(true);
     supabase
       .from('course_members')
-      .select('course:courses(*)')
+      .select('course:courses(id, name, subject, teacher_id, created_at)')
       .eq('profile_id', userId)
       .then(({ data, error }) => {
         if (error) {
-          console.error('Failed to load course memberships:', error);
+          Sentry.captureMessage(`Failed to load course memberships: ${error.message}`, { level: 'error' });
         } else if (data) {
           setCourses(data.map((row: { course: unknown }) => row.course as Course).filter(Boolean));
         }

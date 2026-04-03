@@ -2,6 +2,12 @@
 
 Individual effort is invisible in group work. Contrib turns it on.
 
+## General Behavior
+
+- After completing a task or when sub-agents finish, immediately continue working on the next item without waiting for the user to say 'continue'.
+- When reporting task completion, verify claims are accurate. Do not say a fix is done unless the specific issue has been tested or the build confirms it.
+- Always run `npm run build` after making changes to verify no TypeScript errors before committing.
+
 ## Current Priority
 
 Pre-production QA complete (P0-P3). Ready for public launch.
@@ -82,7 +88,7 @@ pages/
 
 `profiles` · `groups` · `group_members` · `tasks` · `evidence` · `task_comments` · `activity_log` · `courses` · `course_members` · `evaluation_sessions` · `evaluations` · `blocker_declarations` · `telegram_subscriptions` · `report_shares` · `notifications`
 
-All tables have RLS. Known gaps: `profiles` SELECT overly broad, `courses` SELECT exposes invite tokens — fix before scaling.
+All tables have RLS. Profiles SELECT restricted to relevant users (co-members, course peers). Courses SELECT restricted to teacher + enrolled members.
 
 ### Database Change Rules (never skip these)
 
@@ -172,6 +178,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - CI: GitHub Actions (type check → vitest → build) on push/PR to main
 - Verify with `npm run build` before claiming done
 - Worktree safety: confirm path with `git rev-parse --show-toplevel`
+- When resolving merge conflicts, always verify the build passes (`npm run build` or `npx tsc --noEmit`) after resolution before reporting completion
+
+## File Structure
+
+- When making changes, always work in the correct directory. Verify file paths before writing.
+- The main app source is in `contrib/` under the project root's standard Next.js Pages Router structure.
 
 ## Dev Setup
 
@@ -183,13 +195,14 @@ cd contrib && npm install
 npm run dev
 ```
 
+- Do not start a new dev server if one is already running on port 3000. Check with `lsof -i :3000` or equivalent before attempting to start one.
+
 ## Cron Job
 
 `pages/api/cron/daily.ts` · `30 0 * * *` (7:30 AM Cambodia) · Deadline reminders (daily) + Teacher digest (Mondays) · Auth: `CRON_SECRET` · Config: `vercel.json`
 
 ## Deferred Work
 
-- RLS tightening: profiles SELECT, courses SELECT (invite tokens)
 - Email notifications (fallback for Telegram)
 - Mobile PWA
 - Task templates

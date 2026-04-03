@@ -316,7 +316,8 @@ export default function CourseDetail() {
   ).length;
 
   const totalBlockers = Object.values(blockerCounts).reduce((s, c) => s + c, 0);
-  const inactiveGroupCount = groups.filter(({ group }) => {
+  const inactiveGroupCount = groups.filter(({ group, taskTotal }) => {
+    if (taskTotal === 0) return false; // brand-new group with no tasks is not stale
     const lastAct = latestActivity[group.id];
     if (!lastAct) return true;
     return (todayDate.getTime() - new Date(lastAct).getTime()) >= THREE_DAYS_MS;
@@ -431,7 +432,7 @@ export default function CourseDetail() {
               <span className="text-[13px] text-[#92400E] font-medium">
                 {[
                   overdueCount > 0 ? `${overdueCount} group${overdueCount > 1 ? 's' : ''} overdue` : '',
-                  inactiveGroupCount > 0 ? `${inactiveGroupCount} group${inactiveGroupCount > 1 ? 's' : ''} inactive (7+ days)` : '',
+                  inactiveGroupCount > 0 ? `${inactiveGroupCount} group${inactiveGroupCount > 1 ? 's' : ''} inactive (3+ days)` : '',
                   totalBlockers > 0 ? `${totalBlockers} unresolved blocker${totalBlockers > 1 ? 's' : ''}` : '',
                 ].filter(Boolean).join(' \u00b7 ')}
               </span>
@@ -579,8 +580,8 @@ export default function CourseDetail() {
       {confirmDeleteGroupId && (
         <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4">
           <div className="w-full max-w-[360px] bg-white rounded-xl p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
-            <h2 className="text-[15px] font-semibold text-text mb-1">Delete group?</h2>
-            <p className="text-sm text-text-secondary mb-5">This will permanently delete the group and all its tasks, members, and activity. This cannot be undone.</p>
+            <h2 className="text-[15px] font-semibold text-text mb-1">Archive group?</h2>
+            <p className="text-sm text-text-secondary mb-5">This will archive the group. Students will no longer be able to access it. Tasks and activity history are preserved.</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDeleteGroupId(null)}
@@ -593,7 +594,7 @@ export default function CourseDetail() {
                 disabled={!!deletingGroupId}
                 className="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-60"
               >
-                {deletingGroupId ? 'Deleting…' : 'Delete group'}
+                {deletingGroupId ? 'Archiving…' : 'Archive group'}
               </button>
             </div>
           </div>

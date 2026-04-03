@@ -104,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       invite_token,
       course_id: courseId || null,
     })
-    .select('id, name, subject, due_date, lead_id, created_by, course_id, invite_token, archived_at, created_at')
+    .select('id, name, subject, due_date, lead_id, created_by, course_id, archived_at, created_at')
     .single();
 
   if (groupError || !group) {

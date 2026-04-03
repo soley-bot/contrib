@@ -45,7 +45,7 @@ export function useGroup(groupId: string | undefined, userId: string | undefined
   async function fetchAll(id: string) {
     const [groupResult, membersResult] = await Promise.all([
       supabase.from('groups').select('id, name, subject, due_date, lead_id, course_id, created_at').eq('id', id).single(),
-      supabase.from('group_members').select('*, profile:profiles(*)').eq('group_id', id).order('joined_at', { ascending: true }),
+      supabase.from('group_members').select('id, group_id, profile_id, joined_at, profile:profiles(id, name, university, faculty, year_of_study, avatar_url, role)').eq('group_id', id).order('joined_at', { ascending: true }),
     ]);
     if (groupResult.error || membersResult.error) {
       Sentry.captureMessage(`Failed to load group data: ${(groupResult.error || membersResult.error)?.message}`, { level: 'error' });
@@ -55,7 +55,7 @@ export function useGroup(groupId: string | undefined, userId: string | undefined
     if (!mountedRef.current) return;
     setError(null);
     setGroup((groupResult.data as Group) ?? null);
-    setMembers((membersResult.data as GroupMember[]) ?? []);
+    setMembers((membersResult.data as unknown as GroupMember[]) ?? []);
   }
 
   const isLead = !!group && group.lead_id === userId;

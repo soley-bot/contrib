@@ -18,7 +18,7 @@ export function useEvaluation(
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (!groupId || !userId) return;
+    if (!groupId || !userId) { setLoading(false); return; }
     setLoading(true);
     checkSubmitted(groupId, userId).finally(() => setLoading(false));
   }, [groupId, userId, tick]);

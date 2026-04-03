@@ -128,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .insert({
       recipient_id: profileId,
       group_id: groupId,
-      type: 'member_joined',
+      type: 'member_removed',
       title: 'You were removed from ' + group.name,
       meta: { groupName: group.name ?? null },
     });

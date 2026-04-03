@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { EvaluationSummary } from '@/types';
 
@@ -44,7 +45,7 @@ export function useEvaluationSummaries(
       .select('group_id, evaluatee_id, avg_contribution, avg_collaboration, eval_count, comments')
       .eq('group_id', id);
     if (error) {
-      console.error('Failed to load evaluation summaries:', error);
+      Sentry.captureMessage(`Failed to load evaluation summaries: ${error.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }

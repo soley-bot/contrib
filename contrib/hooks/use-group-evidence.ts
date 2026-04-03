@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Evidence } from '@/types';
 
@@ -19,18 +20,18 @@ export function useGroupEvidence(taskIds: string[]): UseGroupEvidenceResult {
     if (!taskIds.length) { setEvidenceByTask({}); return; }
     supabase
       .from('evidence')
-      .select('*, uploader:profiles!evidence_uploaded_by_fkey(*)')
+      .select('id, task_id, type, content, note, uploaded_by, version_number, deleted_at, created_at, uploader:profiles!evidence_uploaded_by_fkey(id, name, avatar_url)')
       .in('task_id', taskIds)
       .order('version_number', { ascending: true })
       .then(({ data, error: fetchError }) => {
         if (fetchError) {
-          console.error('Failed to load group evidence:', fetchError);
+          Sentry.captureMessage(`Failed to load group evidence: ${fetchError.message}`, { level: 'error' });
           setError('Failed to load data.');
           return;
         }
         setError(null);
         const byTask: Record<string, Evidence[]> = {};
-        ((data as Evidence[]) ?? []).forEach((e) => {
+        ((data as unknown as Evidence[]) ?? []).forEach((e) => {
           if (!byTask[e.task_id]) byTask[e.task_id] = [];
           byTask[e.task_id].push(e);
         });

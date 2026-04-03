@@ -71,18 +71,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Delete group_members, activity_log, notifications, blocker_declarations for these groups
+    // Delete group_members, activity_log, notifications, blocker_declarations, evaluations, eval sessions, report_shares for these groups
     const deleteOps = [
       adminClient.from('group_members').delete().in('group_id', groupIds),
       adminClient.from('activity_log').delete().in('group_id', groupIds),
       adminClient.from('notifications').delete().in('group_id', groupIds),
       adminClient.from('blocker_declarations').delete().in('group_id', groupIds),
+      adminClient.from('evaluations').delete().in('group_id', groupIds),
+      adminClient.from('evaluation_sessions').delete().in('group_id', groupIds),
+      adminClient.from('report_shares').delete().in('group_id', groupIds),
     ];
 
     const results = await Promise.all(deleteOps);
     results.forEach((result, i) => {
       if (result.error) {
-        const tables = ['group_members', 'activity_log', 'notifications', 'blocker_declarations'];
+        const tables = ['group_members', 'activity_log', 'notifications', 'blocker_declarations', 'evaluations', 'evaluation_sessions', 'report_shares'];
         Sentry.captureMessage(`[course-delete] ${tables[i]} error: ${result.error.message}`, { level: 'error', tags: { route: 'course-delete' } });
       }
     });

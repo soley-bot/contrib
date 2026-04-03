@@ -22,7 +22,7 @@ export function useEvaluationSession(groupId: string | undefined): UseEvaluation
 
   useEffect(() => {
     mountedRef.current = true;
-    if (!groupId) return;
+    if (!groupId) { setLoading(false); return; }
     setLoading(true);
     fetchSession(groupId).finally(() => { if (mountedRef.current) setLoading(false); });
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { Group } from '@/types';
 
@@ -38,10 +39,10 @@ export function useGroups(userId: string | undefined): UseGroupsResult {
   async function fetchGroups(id: string) {
     const { data, error } = await supabase
       .from('group_members')
-      .select('group:groups(*)')
+      .select('group:groups(id, name, subject, due_date, lead_id, course_id, archived_at, created_at)')
       .eq('profile_id', id);
     if (error) {
-      console.error('Failed to load groups:', error);
+      Sentry.captureMessage(`Failed to load groups: ${error.message}`, { level: 'error' });
       setError('Failed to load data.');
       return;
     }

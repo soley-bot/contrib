@@ -29,6 +29,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing newLeadId.' });
   }
 
+  // Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(newLeadId)) {
+    return res.status(400).json({ error: 'Invalid newLeadId.' });
+  }
+
   // Verify the group exists and caller is the current lead
   const { data: group } = await adminClient
     .from('groups')

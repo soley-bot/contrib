@@ -23,7 +23,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
 
   useEffect(() => {
     mountedRef.current = true;
-    if (!userId) return;
+    if (!userId) { setLoading(false); return; }
     setLoading(true);
     fetchNotifications(userId).finally(() => { if (mountedRef.current) setLoading(false); });
 
