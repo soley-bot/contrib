@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { GetServerSidePropsContext } from 'next';
 import { createServerClient } from '@/lib/supabase-server';
+import { adminClient } from '@/lib/supabase-admin';
 
 /**
  * OAuth callback — exchanges the PKCE code server-side and redirects.
@@ -35,7 +36,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     && ctx.query.returnTo.startsWith('/') && !ctx.query.returnTo.startsWith('//')
     ? ctx.query.returnTo : null;
 
-  const { data: profile } = await supabase
+  // Use adminClient (bypasses RLS) — user identity already verified via code exchange
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('id, role')
     .eq('id', session.user.id)

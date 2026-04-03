@@ -1,6 +1,7 @@
 import { createServerClient as createSSRClient } from '@supabase/ssr';
 import type { GetServerSidePropsContext } from 'next';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { adminClient } from './supabase-admin';
 
 /**
  * Create a Supabase client for server-side use in getServerSideProps.
@@ -61,8 +62,9 @@ export async function requireAuth(ctx: GetServerSidePropsContext) {
     return { redirect: redirectToLogin.redirect, user: null, profile: null };
   }
 
-  // Fetch profile for role check
-  const { data: profile } = await supabase
+  // Fetch profile for role check — use adminClient to bypass RLS
+  // (user identity already verified via getUser() above)
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('id, name, role')
     .eq('id', user.id)
