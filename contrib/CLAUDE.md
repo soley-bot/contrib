@@ -94,11 +94,13 @@ All tables have RLS. Profiles SELECT restricted to relevant users (co-members, c
 
 1. **Single source of truth:** `database/rls-policies-live.sql` is the canonical reference for all RLS policies. Every policy change MUST update this file.
 2. **Verify after applying:** After running any SQL migration, query `pg_policies` to confirm the change took effect. Never assume a migration succeeded.
-3. **One helper function:** Use `user_is_group_member()` only. No aliases (`auth_is_group_member` etc.).
+3. **RLS helper functions:** `user_is_group_member()` and `user_is_course_teacher()` are SECURITY DEFINER functions that bypass RLS to prevent recursion. No aliases.
 4. **No scattered migration files:** Old files in `database/` are historical. New changes go in a dated file AND update `rls-policies-live.sql`.
 5. **Multi-table mutations need all inserts:** When creating a group, ALWAYS insert into both `groups` AND `group_members` (+ `activity_log`). This applies to both student and teacher flows.
 6. **Course-group linkage:** When creating a group linked to a course, ensure the creator is also in `course_members` (upsert).
 7. **Teacher visibility pattern:** Every table that teachers need to read MUST have a SELECT policy with the course ownership check: `EXISTS (SELECT 1 FROM groups g JOIN courses c ON c.id = g.course_id WHERE g.id = <table>.group_id AND c.teacher_id = auth.uid())`.
+8. **No cross-table RLS without SECURITY DEFINER:** When an RLS policy on table A does `EXISTS (SELECT FROM table B)`, and table B's RLS does `EXISTS (SELECT FROM table A)`, PostgreSQL enters infinite recursion → 500 errors. Always use a SECURITY DEFINER function to break the cycle. Current pairs that need this: `groups`↔`group_members` (via `user_is_group_member`), `courses`↔`course_members` (via `user_is_course_teacher`).
+9. **Test RLS changes with anon key:** After modifying RLS policies, verify with a curl using the anon key (not service role) to catch recursion or permission errors that bypass-RLS queries hide.
 
 ## What's Built
 
@@ -163,6 +165,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - Changelog entry for user-facing features (`components/whats-new.tsx`)
 
 ### Never
+- Direct `EXISTS (SELECT FROM tableB)` in RLS when tableB's RLS references back — use SECURITY DEFINER
 - Banned colors (teal, coral, warm stone) or gradients
 - Old feature names (Activity, Evaluation, Export Report, Upload evidence)
 - Hard delete tasks or evidence
