@@ -24,6 +24,17 @@ AS $$
   );
 $$;
 
+CREATE OR REPLACE FUNCTION public.user_is_course_teacher(p_course_id uuid)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.courses
+    WHERE id = p_course_id AND teacher_id = auth.uid()
+  );
+$$;
+
 -- ── profiles ─────────────────────────────────────────────────────────────────
 
 CREATE POLICY "Users can read relevant profiles"
@@ -81,7 +92,7 @@ CREATE POLICY "Teacher can update own course"
 
 CREATE POLICY "Teachers can read course members"
   ON public.course_members FOR SELECT USING (
-    EXISTS (SELECT 1 FROM courses WHERE courses.id = course_members.course_id AND courses.teacher_id = auth.uid())
+    user_is_course_teacher(course_members.course_id)
   );
 
 CREATE POLICY "Users can read own memberships"
