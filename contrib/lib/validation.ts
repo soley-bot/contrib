@@ -104,7 +104,7 @@ export const onboardSchema = z.object({
   university: z.string().trim().max(200, 'University must be 200 characters or less.').optional().default(''),
   faculty: z.string().trim().max(200, 'Faculty must be 200 characters or less.').optional().default(''),
   year_of_study: z.enum(['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5 or above']).nullable().optional(),
-  role: z.enum(['student', 'teacher']),
+  role: z.enum(['student', 'teacher']).optional(),
 });
 
 // ── Blocker declaration ─────────────────────────────────────────

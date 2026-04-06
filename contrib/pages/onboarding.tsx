@@ -4,10 +4,8 @@ import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { supabase } from '@/lib/supabase';
 import { requireAuth } from '@/lib/supabase-server';
-import RoleToggle from '@/components/role-toggle';
 import InlineTip from '@/components/inline-tip';
 import type { User } from '@supabase/supabase-js';
-import type { UserRole } from '@/types';
 
 const YEAR_OPTIONS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5 or above'];
 
@@ -18,7 +16,6 @@ export default function Onboarding() {
   const [university, setUniversity] = useState('');
   const [faculty, setFaculty] = useState('');
   const [yearOfStudy, setYearOfStudy] = useState('');
-  const [role, setRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +43,7 @@ export default function Onboarding() {
           university: universityVal.trim(),
           faculty: facultyVal.trim(),
           year_of_study: yearVal || null,
-          role,
+          role: 'student',
         }),
       });
       const data = await resp.json();
@@ -69,7 +66,7 @@ export default function Onboarding() {
       const ok = await saveProfile(name, university, faculty, yearOfStudy);
       if (ok) {
         const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-        const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
+        const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard';
         router.push(dest);
       }
     } finally {
@@ -83,7 +80,7 @@ export default function Onboarding() {
       const ok = await saveProfile(name, '', '', '');
       if (ok) {
         const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
-        const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : role === 'teacher' ? '/teacher' : '/dashboard';
+        const dest = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard';
         router.push(dest);
       }
     } finally {
@@ -118,7 +115,7 @@ export default function Onboarding() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <InlineTip id="onboarding-role">Your role determines which dashboard you see. Students track group work. Teachers monitor courses.</InlineTip>
+          <InlineTip id="onboarding-profile">Fill in your details to get the most out of Contrib. You can update these later in your profile.</InlineTip>
           <div className="flex flex-col gap-2">
             <label className="text-[13px] font-medium text-text-secondary">Full name</label>
             <input
@@ -153,15 +150,7 @@ export default function Onboarding() {
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
           </div>
-          <div className="flex flex-col gap-0">
-            <RoleToggle value={role} onChange={setRole} />
-            <p className="text-[12px] text-muted mt-1.5 leading-snug">
-              This determines your experience. You can change it later in your profile — until you create your first group or course.
-            </p>
-          </div>
-
-          {role === 'student' && (
-            <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
               <label className="text-[13px] font-medium text-text-secondary">
                 Year of study <span className="font-normal text-text-tertiary">(optional)</span>
               </label>
@@ -176,7 +165,6 @@ export default function Onboarding() {
                 ))}
               </select>
             </div>
-          )}
 
           {error && <p className="text-sm text-red">{error}</p>}
 
@@ -208,7 +196,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   if (profile) {
     return {
       redirect: {
-        destination: profile.role === 'teacher' ? '/teacher' : '/dashboard',
+        destination: '/dashboard',
         permanent: false,
       },
     };
