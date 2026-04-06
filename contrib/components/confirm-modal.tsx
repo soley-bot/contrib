@@ -38,7 +38,7 @@ export default function ConfirmModal({
             <IconClose size={15} />
           </button>
         </div>
-        <p className="text-sm text-text-secondary mb-5 leading-relaxed">{message}</p>
+        <p className="text-sm text-text-secondary mb-5 leading-relaxed whitespace-pre-line">{message}</p>
         <div className="flex gap-2 justify-end">
           {cancelLabel && (
             <button
