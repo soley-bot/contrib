@@ -109,8 +109,12 @@ export default function GroupPage() {
     if (!group || !isLead || actionInFlight.current) return;
     actionInFlight.current = true;
     try {
-      const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', group.id);
-      if (error) throw error;
+      const res = await fetch(`/api/groups/${group.id}/archive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) throw new Error('archive failed');
       router.push('/dashboard');
     } catch { showToast('Failed to archive group. Please try again.'); } finally { actionInFlight.current = false; }
   }
@@ -128,11 +132,13 @@ export default function GroupPage() {
           setShowLeaveConfirm(false);
           return;
         }
-        // Only member — archive the group
-        await supabase.from('tasks').update({ deleted_at: new Date().toISOString() }).eq('group_id', group.id);
-        await supabase.from('group_members').delete().eq('group_id', group.id);
-        const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', group.id);
-        if (error) throw error;
+        // Only member — archive the group via API (runs with admin client to bypass RLS)
+        const res = await fetch(`/api/groups/${group.id}/archive`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (!res.ok) throw new Error('archive failed');
         router.push('/dashboard');
         return;
       }

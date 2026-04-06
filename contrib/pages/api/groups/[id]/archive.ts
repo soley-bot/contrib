@@ -20,12 +20,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { data: group } = await adminClient
     .from('groups')
-    .select('id, lead_id, archived_at')
+    .select('id, lead_id, archived_at, course_id')
     .eq('id', groupId)
     .single();
 
   if (!group) return res.status(404).json({ error: 'Group not found.' });
-  if (group.lead_id !== user.id) return res.status(403).json({ error: 'Only the group lead can archive.' });
+
+  // Allow either the group lead OR the teacher who owns the course this group belongs to
+  let authorized = group.lead_id === user.id;
+  if (!authorized && group.course_id) {
+    const { data: course } = await adminClient
+      .from('courses')
+      .select('teacher_id')
+      .eq('id', group.course_id)
+      .single();
+    if (course?.teacher_id === user.id) authorized = true;
+  }
+  if (!authorized) return res.status(403).json({ error: 'Only the group lead or course teacher can archive.' });
 
   const { action } = req.body as { action?: string };
   const archivedAt = action === 'unarchive' ? null : new Date().toISOString();

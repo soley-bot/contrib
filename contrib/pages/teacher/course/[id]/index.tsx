@@ -181,9 +181,13 @@ export default function CourseDetail() {
   async function handleDeleteGroup() {
     if (!confirmDeleteGroupId) return;
     setDeletingGroupId(confirmDeleteGroupId);
-    const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', confirmDeleteGroupId);
+    const res = await fetch(`/api/groups/${confirmDeleteGroupId}/archive`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
     setDeletingGroupId(null);
-    if (error) { showToast('Failed to delete group.', 'error'); return; }
+    if (!res.ok) { showToast('Failed to delete group.', 'error'); return; }
     setConfirmDeleteGroupId(null);
     refresh();
   }
