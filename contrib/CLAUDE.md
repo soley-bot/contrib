@@ -222,3 +222,4 @@ npm run dev
 - Feature spotlight tour
 - Dedicated changelog page
 - LMS integration (Google Classroom)
+- Role-lock TOCTOU hardening: `/api/profile/role` and similar check-then-update endpoints (`use-role-lock.ts` pattern) are not atomic. Low severity — self-race only, RLS does not gate on `profile.role` so no data leak. Fix requires a shared `SECURITY DEFINER` SQL function + sweep of all role-locked routes. Revisit at ~50 active users or on first Sentry report of role-state inconsistency.
