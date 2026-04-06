@@ -18,7 +18,14 @@
       "Bash(npm ls:*)",
       "Bash(node -e \"const ts = require\\(''typescript''\\); console.log\\(ts.version\\)\")",
       "Bash(npm install:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(rm -rf .next)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(git rm:*)",
+      "Bash(rm \"docs/superpowers/plans/2026-04-06-student-first-reframe.md\")",
+      "Bash(git add:*)"
     ]
   }
 }
