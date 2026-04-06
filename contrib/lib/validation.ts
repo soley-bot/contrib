@@ -91,6 +91,12 @@ export const createCourseSchema = z.object({
   subject: z.string().trim().min(1, 'Subject code is required.').max(100, 'Subject code must be 100 characters or less.'),
 });
 
+// ── Profile role change ─────────────────────────────────────────────────────
+
+export const roleChangeSchema = z.object({
+  role: z.enum(['student', 'teacher']),
+});
+
 // ── Onboarding ─────────────────────────────────────────────────────────────
 
 export const onboardSchema = z.object({

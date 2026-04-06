@@ -57,6 +57,7 @@ export const RATE_LIMITS = {
   JOIN_LOOKUP: { limit: 30, window: 60_000 },
   REPORT_LOOKUP: { limit: 20, window: 60_000 },
   REPORT_SHARE: { limit: 10, window: 60_000 },
+  PROFILE_ROLE: { limit: 5, window: 60_000 },
   DEFAULT: { limit: 10, window: 60_000 },
 } as const;
 

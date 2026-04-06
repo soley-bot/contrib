@@ -1,30 +1,24 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as Sentry from '@sentry/nextjs';
-import { z } from 'zod';
 import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
-import { rateLimit, getClientIp } from '@/lib/rate-limit';
-
-const bodySchema = z.object({
-  role: z.enum(['student', 'teacher']),
-});
+import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
+import { validate, roleChangeSchema } from '@/lib/validation';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const ip = getClientIp(req.headers);
-  if (!(await rateLimit(`profile-role:${ip}`, 5, 60_000))) {
+  if (!(await rateLimit(`profile-role:${ip}`, RATE_LIMITS.PROFILE_ROLE.limit, RATE_LIMITS.PROFILE_ROLE.window))) {
     return res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
   }
 
   const user = await getUserFromApiRoute(req, res);
   if (!user) return res.status(401).json({ error: 'Not authenticated.' });
 
-  const parsed = bodySchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ error: 'Invalid request body.' });
-  }
-  const { role: newRole } = parsed.data;
+  const { data: input, error: validationError } = validate(roleChangeSchema, req.body);
+  if (validationError || !input) return res.status(400).json({ error: validationError ?? 'Invalid input.' });
+  const { role: newRole } = input;
 
   try {
     // Fetch current role
