@@ -28,14 +28,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!profile) return res.status(403).json({ error: 'Profile not found. Complete onboarding first.' });
   if (profile.role !== 'student') return res.status(403).json({ error: 'Only students can join courses.' });
 
-  // Verify the course exists
+  // Require invite token — prevents joining by guessing course ID
+  const { inviteToken } = req.body ?? {};
+  if (typeof inviteToken !== 'string' || !inviteToken) {
+    return res.status(400).json({ error: 'Invite token is required.' });
+  }
+
+  // Verify the course exists and invite token matches
   const { data: course } = await adminClient
     .from('courses')
-    .select('id')
+    .select('id, invite_token')
     .eq('id', courseId)
     .single();
 
   if (!course) return res.status(404).json({ error: 'Course not found.' });
+  if (course.invite_token !== inviteToken) {
+    return res.status(403).json({ error: 'Invalid invite link.' });
+  }
 
   // Check if already a member
   const { data: existing } = await adminClient

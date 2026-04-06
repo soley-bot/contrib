@@ -29,7 +29,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (existingProfile) return res.status(409).json({ error: 'Profile already exists.' });
 
   // Get avatar URL from auth metadata
-  const { data: { user: authUser } } = await adminClient.auth.admin.getUserById(user.id);
+  const { data: { user: authUser }, error: authError } = await adminClient.auth.admin.getUserById(user.id);
+  if (authError) {
+    Sentry.captureMessage(`[profile/onboard] getUserById error: ${authError.message}`, { level: 'warning', tags: { route: 'profile-onboard' } });
+  }
   const avatarUrl = authUser?.user_metadata?.avatar_url ?? null;
 
   const { error: insertError } = await adminClient

@@ -40,6 +40,7 @@ export default function JoinCoursePage({ course }: PageProps) {
       const resp = await fetch(`/api/courses/${course.id}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviteToken: token }),
       });
       const data = await resp.json();
 
