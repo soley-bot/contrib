@@ -5,8 +5,6 @@ import Head from 'next/head';
 import type { GetServerSidePropsContext } from 'next';
 import { supabase } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
-import RoleToggle from '@/components/role-toggle';
-import type { UserRole } from '@/types';
 
 function GoogleIcon() {
   return (
@@ -26,7 +24,6 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -74,7 +71,7 @@ export default function Signup() {
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name, university, role }),
+      body: JSON.stringify({ email, password, name, university, role: 'student' }),
     });
     const json = await res.json();
     if (!res.ok) {
@@ -93,7 +90,7 @@ export default function Signup() {
 
     const raw = typeof router.query.returnTo === 'string' ? router.query.returnTo : '';
     const hasReturnTo = raw.startsWith('/') && !raw.startsWith('//');
-    router.push(hasReturnTo ? raw : role === 'teacher' ? '/teacher' : '/dashboard');
+    router.push(hasReturnTo ? raw : '/dashboard');
   }
 
   return (
@@ -156,12 +153,6 @@ export default function Signup() {
               aria-describedby="signup-error"
               className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
             />
-          </div>
-          <div className="flex flex-col gap-0">
-            <RoleToggle value={role} onChange={setRole} />
-            <p className="text-[12px] text-muted mt-1.5 leading-snug">
-              This determines your experience. You can change it later in your profile — until you create your first group or course.
-            </p>
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="signup-email" className="text-[13px] font-medium text-muted">Email</label>
