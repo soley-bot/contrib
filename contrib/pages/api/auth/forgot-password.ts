@@ -22,12 +22,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
+  // Per-email rate limit: 3 requests per hour
+  const emailKey = `forgot-password:email:${parsed.data.email.toLowerCase()}`;
+  if (!(await rateLimit(emailKey, 3, 3600_000))) {
+    // Still return 200 to prevent email enumeration
+    return res.status(200).json({ ok: true });
+  }
+
   try {
-    const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || '';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://joincontrib.com';
     // Use the admin client's non-admin auth to send the reset email via Supabase's built-in mailer
     const { error: resetError } = await adminClient.auth.resetPasswordForEmail(
       parsed.data.email,
-      { redirectTo: `${origin}/reset-password` },
+      { redirectTo: `${appUrl}/reset-password` },
     );
 
     if (resetError) {
