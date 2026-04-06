@@ -3,8 +3,8 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import StudentNav from '@/components/student-nav';
-import RoleToggle from '@/components/role-toggle';
 import { useUser } from '@/hooks/use-user';
+import TeacherModeSection from '@/components/teacher-mode-section';
 import { requireAuth } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
 import { useProfile } from '@/hooks/use-profile';
@@ -12,7 +12,6 @@ import { useRoleLock } from '@/hooks/use-role-lock';
 import { supabase } from '@/lib/supabase';
 import { IconCopy, IconCheck } from '@/components/icons';
 import InlineTip from '@/components/inline-tip';
-import type { UserRole } from '@/types';
 
 type TelegramStatus = 'loading' | 'disconnected' | 'pending' | 'connected';
 
@@ -28,7 +27,6 @@ export default function ProfilePage() {
   const [university, setUniversity] = useState('');
   const [faculty, setFaculty] = useState('');
   const [yearOfStudy, setYearOfStudy] = useState('');
-  const [role, setRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
 
   const [tasksDone, setTasksDone] = useState(0);
@@ -61,7 +59,6 @@ export default function ProfilePage() {
       setUniversity(profile.university ?? '');
       setFaculty(profile.faculty ?? '');
       setYearOfStudy(profile.year_of_study ?? '');
-      setRole(profile.role ?? 'student');
     }
   }, [profile]);
 
@@ -202,13 +199,10 @@ export default function ProfilePage() {
     if (!profile) return;
     if (!name.trim()) { setError('Name is required.'); return; }
     setError('');
-    const err = await updateProfile(profile.id, name, university, role, faculty, yearOfStudy);
+    const err = await updateProfile(profile.id, name, university, profile.role, faculty, yearOfStudy);
     if (err) { setError(err); return; }
     refreshProfile();
     setEditing(false);
-    if (role !== profile.role) {
-      router.push(role === 'teacher' ? '/teacher' : '/dashboard');
-    }
   }
 
   const ALLOWED_PREF_COLUMNS = ['notify_contributions', 'notify_blockers', 'notify_deadlines', 'notify_weekly_digest'];
@@ -299,26 +293,6 @@ export default function ProfilePage() {
                     <option value="Year 5 or above">Year 5 or above</option>
                   </select>
                 </div>
-                {!lockLoading && roleLocked ? (
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[13px] font-medium text-text-secondary">Role</label>
-                    <div className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] text-text bg-bg">
-                      {profile.role === 'teacher' ? 'Teacher' : 'Student'}
-                    </div>
-                    <p className="text-[12px] text-muted leading-snug">
-                      Your role is locked because you have active {lockReason === 'courses' ? 'courses' : 'groups'}. Contact support to change it.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-0">
-                    <RoleToggle value={role} onChange={setRole} />
-                    {role !== profile.role && (
-                      <p className="text-[12px] text-amber bg-[#FEF3C7] rounded px-2 py-1.5 mt-1.5 leading-snug">
-                        Switching to {role === 'teacher' ? 'teacher' : 'student'} will change your dashboard and features. This can be changed until you create your first {role === 'teacher' ? 'course' : 'group'}.
-                      </p>
-                    )}
-                  </div>
-                )}
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <div className="flex gap-2 pt-1 border-t border-border">
                   <button onClick={() => { setEditing(false); setError(''); }}
@@ -533,6 +507,16 @@ export default function ProfilePage() {
                 </div>
               )}
           </div>
+          {profile && (
+            <div className="mt-6">
+              <TeacherModeSection
+                profile={profile}
+                locked={roleLocked}
+                lockReason={lockReason}
+                onRoleChanged={refreshProfile}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
