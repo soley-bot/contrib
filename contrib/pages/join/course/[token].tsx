@@ -36,24 +36,30 @@ export default function JoinCoursePage({ course }: PageProps) {
     if (!course || !user) return;
     setStatus('joining');
 
-    const { error } = await supabase.from('course_members').insert({
-      course_id: course.id,
-      profile_id: user.id,
-    });
+    try {
+      const resp = await fetch(`/api/courses/${course.id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await resp.json();
 
-    if (error) {
-      if (error.code === '23505') {
-        // Already a member (unique constraint)
+      if (!resp.ok) {
+        setErrorMsg(data.error || 'Failed to join course.');
+        setStatus('error');
+        return;
+      }
+
+      if (data.already) {
         setStatus('already');
         return;
       }
-      setErrorMsg(error.message);
-      setStatus('error');
-      return;
-    }
 
-    setStatus('joined');
-    setTimeout(() => router.push('/dashboard'), 1200);
+      setStatus('joined');
+      setTimeout(() => router.push('/dashboard'), 1200);
+    } catch {
+      setErrorMsg('Network error. Please try again.');
+      setStatus('error');
+    }
   }
 
   if (status === 'error') {
