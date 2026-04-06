@@ -83,6 +83,16 @@ export const createCourseSchema = z.object({
   subject: z.string().trim().min(1, 'Subject code is required.').max(100, 'Subject code must be 100 characters or less.'),
 });
 
+// ── Onboarding ─────────────────────────────────────────────────────────────
+
+export const onboardSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required.').max(100, 'Name must be 100 characters or less.'),
+  university: z.string().trim().max(200, 'University must be 200 characters or less.').optional().default(''),
+  faculty: z.string().trim().max(200, 'Faculty must be 200 characters or less.').optional().default(''),
+  year_of_study: z.enum(['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5 or above']).nullable().optional(),
+  role: z.enum(['student', 'teacher']),
+});
+
 // ── Blocker declaration ─────────────────────────────────────────
 
 export const createBlockerSchema = z.object({
