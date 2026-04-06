@@ -39,7 +39,7 @@ export function useCourses(teacherId: string | undefined): UseCoursesResult {
   async function fetchCourses(id: string) {
     const { data, error } = await supabase
       .from('courses')
-      .select('id, name, subject, teacher_id, invite_token, created_at')
+      .select('id, name, subject, teacher_id, created_at')
       .eq('teacher_id', id)
       .order('created_at', { ascending: false });
     if (error) {

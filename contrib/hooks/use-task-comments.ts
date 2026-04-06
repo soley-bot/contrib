@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
+import { PROFILE_SELECT } from '@/lib/columns';
 import type { TaskComment } from '@/types';
 
 interface UseTaskCommentsResult {
@@ -42,7 +43,7 @@ export function useTaskComments(taskId: string | undefined): UseTaskCommentsResu
   async function fetchComments(id: string) {
     const { data, error: fetchError } = await supabase
       .from('task_comments')
-      .select('*, author:profiles!task_comments_author_id_fkey(*)')
+      .select(`id, task_id, author_id, content, deleted_at, created_at, author:profiles!task_comments_author_id_fkey(${PROFILE_SELECT})`)
       .eq('task_id', id)
       .is('deleted_at', null)
       .order('created_at', { ascending: true });
@@ -53,7 +54,7 @@ export function useTaskComments(taskId: string | undefined): UseTaskCommentsResu
     }
     if (!mountedRef.current) return;
     setError(null);
-    setComments((data as TaskComment[]) ?? []);
+    setComments((data as unknown as TaskComment[]) ?? []);
   }
 
   return { comments, loading, error, refresh: () => setTick((t) => t + 1) };

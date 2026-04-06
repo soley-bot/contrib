@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
+import { PROFILE_SELECT } from '@/lib/columns';
 import type { Task } from '@/types';
 
 interface UseTasksResult {
@@ -42,7 +43,7 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
   async function fetchTasks(id: string) {
     const { data, error } = await supabase
       .from('tasks')
-      .select('*, assignee:profiles!tasks_assignee_id_fkey(*)')
+      .select(`id, group_id, title, description, assignee_id, status, due_date, evidence_url, completed_at, contribution_type, deleted_at, created_at, assignee:profiles!tasks_assignee_id_fkey(${PROFILE_SELECT})`)
       .eq('group_id', id)
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
@@ -53,7 +54,7 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
     }
     if (!mountedRef.current) return;
     setError(null);
-    setTasks((data as Task[]) ?? []);
+    setTasks((data as unknown as Task[]) ?? []);
   }
 
   return { tasks, loading, error, refresh: () => setTick((t) => t + 1) };

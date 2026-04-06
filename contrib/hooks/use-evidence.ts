@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
+import { PROFILE_SELECT } from '@/lib/columns';
 import type { Evidence } from '@/types';
 
 interface UseEvidenceResult {
@@ -39,7 +40,7 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
   async function fetchEvidence(id: string) {
     const { data, error: fetchError } = await supabase
       .from('evidence')
-      .select('*, uploader:profiles!evidence_uploaded_by_fkey(*)')
+      .select(`id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, uploader:profiles!evidence_uploaded_by_fkey(${PROFILE_SELECT})`)
       .eq('task_id', id)
       .order('version_number', { ascending: true });
     if (fetchError) {
@@ -49,7 +50,7 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
     }
     if (!mountedRef.current) return;
     setError(null);
-    setEvidence((data as Evidence[]) ?? []);
+    setEvidence((data as unknown as Evidence[]) ?? []);
   }
 
   return { evidence, error, refresh: () => setTick((t) => t + 1) };
