@@ -1,11 +1,8 @@
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/router';
 import { IconClose } from '@/components/icons';
 import { useProfile } from '@/hooks/use-profile';
-import { useRoleLock } from '@/hooks/use-role-lock';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
-import RoleToggle from '@/components/role-toggle';
-import type { Profile, UserRole } from '@/types';
+import type { Profile } from '@/types';
 
 interface EditProfileModalProps {
   profile: Profile;
@@ -14,28 +11,22 @@ interface EditProfileModalProps {
 }
 
 export default function EditProfileModal({ profile, onSaved, onClose }: EditProfileModalProps) {
-  const router = useRouter();
   const [name, setName] = useState(profile.name ?? '');
   const [university, setUniversity] = useState(profile.university ?? '');
   const [faculty, setFaculty] = useState(profile.faculty ?? '');
   const [yearOfStudy, setYearOfStudy] = useState(profile.year_of_study ?? '');
-  const [role, setRole] = useState<UserRole>(profile.role ?? 'student');
   const [error, setError] = useState('');
   const { updateProfile, saving } = useProfile();
-  const { locked: roleLocked, reason: lockReason, loading: lockLoading } = useRoleLock(profile.id, profile.role);
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, onClose);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError('Name is required.'); return; }
-    const err = await updateProfile(profile.id, name, university, role, faculty, yearOfStudy);
+    const err = await updateProfile(profile.id, name, university, profile.role, faculty, yearOfStudy);
     if (err) { setError(err); return; }
     onSaved();
     onClose();
-    if (role !== profile.role) {
-      router.push(role === 'teacher' ? '/teacher' : '/dashboard');
-    }
   }
 
   return (
@@ -79,26 +70,6 @@ export default function EditProfileModal({ profile, onSaved, onClose }: EditProf
               <option value="Year 5 or above">Year 5 or above</option>
             </select>
           </div>
-          {!lockLoading && roleLocked ? (
-            <div className="flex flex-col gap-1">
-              <label className="text-[13px] font-medium text-text-secondary">Role</label>
-              <div className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] text-text bg-bg">
-                {profile.role === 'teacher' ? 'Teacher' : 'Student'}
-              </div>
-              <p className="text-[12px] text-muted leading-snug">
-                Your role is locked because you have active {lockReason === 'courses' ? 'courses' : 'groups'}. Contact support to change it.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-0">
-              <RoleToggle value={role} onChange={setRole} />
-              {role !== profile.role && (
-                <p className="text-[12px] text-amber bg-[#FEF3C7] rounded px-2 py-1.5 mt-1.5 leading-snug">
-                  Switching to {role === 'teacher' ? 'teacher' : 'student'} will change your dashboard and features. This can be changed until you create your first {role === 'teacher' ? 'course' : 'group'}.
-                </p>
-              )}
-            </div>
-          )}
           {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
           <div className="pt-1 border-t border-border flex gap-2">
             <button type="button" onClick={onClose}
