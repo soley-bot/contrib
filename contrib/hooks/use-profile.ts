@@ -17,26 +17,17 @@ export function useProfile() {
 
     if (fetchErr) { setSaving(false); return fetchErr.message; }
 
-    // If role is changing, verify user has no active groups or courses
+    // If role is changing, delegate validation and update to the server-side API
     if (current && current.role !== role) {
-      const { count: groupCount } = await supabase
-        .from('group_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('profile_id', id);
-
-      if ((groupCount ?? 0) > 0) {
+      const roleRes = await fetch('/api/profile/role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      });
+      if (!roleRes.ok) {
+        const json = await roleRes.json().catch(() => ({}));
         setSaving(false);
-        return 'Your role is locked because you have active groups or courses.';
-      }
-
-      const { count: courseCount } = await supabase
-        .from('courses')
-        .select('id', { count: 'exact', head: true })
-        .eq('teacher_id', id);
-
-      if ((courseCount ?? 0) > 0) {
-        setSaving(false);
-        return 'Your role is locked because you have active groups or courses.';
+        return json.error ?? 'Could not change role.';
       }
     }
 
