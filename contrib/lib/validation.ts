@@ -37,6 +37,14 @@ export const createGroupApiSchema = z.object({
   leadId: z.string().uuid().optional(),
 });
 
+// ── Group edit (name / subject / due date) ────────────────────────────────
+
+export const editGroupSchema = z.object({
+  name: z.string().trim().min(1, 'Group name is required.').max(200, 'Group name must be 200 characters or less.'),
+  subject: z.string().trim().min(1, 'Subject is required.').max(200, 'Subject must be 200 characters or less.'),
+  dueDate: z.string().nullable().optional(),
+});
+
 // ── Group member management ────────────────────────────────────────────────
 
 export const addMemberSchema = z.object({

@@ -1,5 +1,6 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import * as Sentry from '@sentry/nextjs';
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
@@ -28,6 +29,13 @@ function getLimiter(limit: number, windowMs: number): Ratelimit {
 
 /**
  * Check if a request should be allowed.
+ *
+ * Fails open on infrastructure errors: if Redis is unreachable (missing env
+ * vars in local dev, or a production Upstash outage), the request is allowed
+ * and the error is logged to Sentry. A broken rate limiter must never return
+ * 500 across all API routes — it's better to temporarily skip rate limiting
+ * than to take the site down.
+ *
  * @param key - Unique identifier (e.g., "signup:192.168.1.1")
  * @param limit - Max requests allowed in the window (default: 20)
  * @param windowMs - Time window in milliseconds (default: 60s)
@@ -35,8 +43,13 @@ function getLimiter(limit: number, windowMs: number): Ratelimit {
  */
 export async function rateLimit(key: string, limit = 20, windowMs = 60_000): Promise<boolean> {
   const limiter = getLimiter(limit, windowMs);
-  const { success } = await limiter.limit(key);
-  return success;
+  try {
+    const { success } = await limiter.limit(key);
+    return success;
+  } catch (err) {
+    Sentry.captureException(err, { tags: { component: 'rate-limit' } });
+    return true;
+  }
 }
 
 export const RATE_LIMITS = {

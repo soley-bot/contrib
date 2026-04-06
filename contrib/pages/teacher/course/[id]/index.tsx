@@ -168,12 +168,28 @@ export default function CourseDetail() {
     setEditGroupError('');
     if (!editGroupName.trim() || !editGroupSubject.trim()) { setEditGroupError('Name and subject are required.'); return; }
     setSavingGroup(true);
-    const { error } = await supabase
-      .from('groups')
-      .update({ name: editGroupName.trim(), subject: editGroupSubject.trim(), due_date: editGroupDueDate || null })
-      .eq('id', editingGroup.id);
+    try {
+      const res = await fetch(`/api/groups/${editingGroup.id}/edit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editGroupName.trim(),
+          subject: editGroupSubject.trim(),
+          dueDate: editGroupDueDate || null,
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setEditGroupError(json.error ?? 'Failed to update group.');
+        setSavingGroup(false);
+        return;
+      }
+    } catch {
+      setEditGroupError('Failed to update group.');
+      setSavingGroup(false);
+      return;
+    }
     setSavingGroup(false);
-    if (error) { setEditGroupError(error.message); return; }
     refresh();
     setEditingGroup(null);
   }
@@ -181,9 +197,13 @@ export default function CourseDetail() {
   async function handleDeleteGroup() {
     if (!confirmDeleteGroupId) return;
     setDeletingGroupId(confirmDeleteGroupId);
-    const { error } = await supabase.from('groups').update({ archived_at: new Date().toISOString() }).eq('id', confirmDeleteGroupId);
+    const res = await fetch(`/api/groups/${confirmDeleteGroupId}/archive`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
     setDeletingGroupId(null);
-    if (error) { showToast('Failed to delete group.', 'error'); return; }
+    if (!res.ok) { showToast('Failed to delete group.', 'error'); return; }
     setConfirmDeleteGroupId(null);
     refresh();
   }

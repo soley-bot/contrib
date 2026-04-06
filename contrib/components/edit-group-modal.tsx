@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
 import { IconClose, IconCheck } from '@/components/icons';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 import type { Group } from '@/types';
@@ -11,7 +10,7 @@ interface EditGroupModalProps {
   onUpdated: () => void;
 }
 
-export default function EditGroupModal({ group, userId, onClose, onUpdated }: EditGroupModalProps) {
+export default function EditGroupModal({ group, userId: _userId, onClose, onUpdated }: EditGroupModalProps) {
   const [name, setName] = useState(group.name);
   const [subject, setSubject] = useState(group.subject);
   const [dueDate, setDueDate] = useState(group.due_date ?? '');
@@ -27,25 +26,27 @@ export default function EditGroupModal({ group, userId, onClose, onUpdated }: Ed
     setSaving(true);
     setError('');
 
-    const { error: updateError } = await supabase.from('groups').update({
-      name: name.trim(),
-      subject: subject.trim(),
-      due_date: dueDate || null,
-    }).eq('id', group.id).eq('lead_id', userId);
-
-    if (updateError) {
+    try {
+      const res = await fetch(`/api/groups/${group.id}/edit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          subject: subject.trim(),
+          dueDate: dueDate || null,
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setError(json.error ?? 'Failed to update group. Please try again.');
+        setSaving(false);
+        return;
+      }
+    } catch {
       setError('Failed to update group. Please try again.');
       setSaving(false);
       return;
     }
-
-    await supabase.from('activity_log').insert({
-      group_id: group.id,
-      actor_id: userId,
-      action: 'group_updated',
-      task_id: null,
-      meta: null,
-    });
 
     setSaving(false);
     onUpdated();
