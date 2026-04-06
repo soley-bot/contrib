@@ -96,7 +96,8 @@ export type ActivityAction =
   | 'report_shared'
   | 'report_exported'
   | 'blocker_declared'
-  | 'comment_added';
+  | 'comment_added'
+  | 'group_created';
 
 export interface ActivityLog {
   id: string;
@@ -191,7 +192,7 @@ export interface ReportShare {
   expires_at: string | null;
 }
 
-export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'evidence_added' | 'blocker_declared' | 'deadline_approaching' | 'weekly_digest' | 'task_comment';
+export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'member_added' | 'lead_transferred' | 'evidence_added' | 'blocker_declared' | 'deadline_approaching' | 'weekly_digest' | 'task_comment';
 
 export interface Notification {
   id: string;

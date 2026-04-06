@@ -127,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // 3. Insert activity log
   const { error: activityError } = await adminClient
     .from('activity_log')
-    .insert({ group_id: group.id, actor_id: user.id, action: 'member_joined', meta: {} });
+    .insert({ group_id: group.id, actor_id: user.id, action: 'group_created', meta: { groupName: group.name } });
 
   if (activityError) {
     Sentry.captureException(activityError, { tags: { route: 'groups-create' } });
