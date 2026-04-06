@@ -165,6 +165,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - `npx tsc --noEmit` after multi-file changes
 - Sentry for errors, not console
 - Changelog entry for user-facing features (`components/whats-new.tsx`)
+- Use `PROFILE_SELECT` from `lib/columns.ts` for profile joins — never `profiles(*)`
+- All DB mutations go through API routes — never `supabase.from(...).insert/update/delete()` client-side
+- Hook select columns must match their TypeScript interface — if the type says `field: string`, the select must include `field`
 
 ### Never
 - Direct `EXISTS (SELECT FROM tableB)` in RLS when tableB's RLS references back — use SECURITY DEFINER
@@ -176,6 +179,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - Copy-paste `adminClient`, `getUser()`, or rate limit numbers
 - `console.error` in API routes
 - `select('*')` in hooks — use explicit columns to avoid leaking `invite_token`
+- Client-side `supabase.from().insert/update/delete()` for mutations — always use an API route with rate limiting, Zod validation, and role checks
+- `as Type[]` cast on Supabase results when the select doesn't include all required fields — the cast hides runtime `undefined` values
 
 ## Git & Deployment
 
