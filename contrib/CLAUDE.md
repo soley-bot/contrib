@@ -57,7 +57,7 @@ pages/
   teacher/course/[id]/group/[groupId].tsx  — group drill-down (read-only)
 ```
 
-## API Routes (24)
+## API Routes (25)
 
 | Route | Method | Auth |
 |---|---|---|
@@ -73,7 +73,8 @@ pages/
 | `/api/groups/[id]/remove-member` | POST | Required (teacher) |
 | `/api/groups/[id]/eligible-members` | GET | Required (teacher/lead) |
 | `/api/groups/[id]/reset-invite` | POST | Required (lead) |
-| `/api/groups/[id]/archive` | POST | Required (lead) |
+| `/api/groups/[id]/archive` | POST | Required (lead or teacher) |
+| `/api/groups/[id]/edit` | POST | Required (lead or teacher) |
 | `/api/groups/[id]/transfer-lead` | POST | Required (lead) |
 | `/api/courses/[id]/join` | POST | Required (student, 10/min) |
 | `/api/courses/[id]/reset-invite` | POST | Required (teacher) |
