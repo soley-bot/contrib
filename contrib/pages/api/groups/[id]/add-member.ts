@@ -101,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(409).json({ error: 'Student is already in another group in this course.' });
   }
 
-  // Group must not be full (max 6 members)
+  // Group must not be full (max 8 members)
   const { count, error: countError } = await adminClient
     .from('group_members')
     .select('id', { count: 'exact', head: true })
@@ -112,8 +112,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to check group capacity.' });
   }
 
-  if ((count ?? 0) >= 6) {
-    return res.status(400).json({ error: 'Group is full.' });
+  if ((count ?? 0) >= 8) {
+    return res.status(400).json({ error: 'Group is full. Groups can have up to 8 members.' });
   }
 
   // INSERT into group_members
