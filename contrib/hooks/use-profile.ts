@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { UserRole } from '@/types';
 
@@ -19,15 +20,21 @@ export function useProfile() {
 
     // If role is changing, delegate validation and update to the server-side API
     if (current && current.role !== role) {
-      const roleRes = await fetch('/api/profile/role', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role }),
-      });
-      if (!roleRes.ok) {
-        const json = await roleRes.json().catch(() => ({}));
+      try {
+        const roleRes = await fetch('/api/profile/role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role }),
+        });
+        if (!roleRes.ok) {
+          const json = await roleRes.json().catch(() => ({}));
+          setSaving(false);
+          return json.error ?? 'Could not change role.';
+        }
+      } catch (err) {
+        Sentry.captureException(err);
         setSaving(false);
-        return json.error ?? 'Could not change role.';
+        return 'Could not change role. Please check your connection and try again.';
       }
     }
 
