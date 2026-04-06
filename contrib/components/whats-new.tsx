@@ -13,6 +13,13 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: 5,
+    date: '2026-04-06',
+    items: [
+      { title: 'Bigger groups', description: 'Groups can now have up to 8 members, up from 6. More room for bigger team projects.' },
+    ],
+  },
+  {
     version: 4,
     date: '2026-04-02',
     items: [
