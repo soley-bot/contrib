@@ -76,7 +76,7 @@ export default function TeacherGroupDetail() {
       supabase.from('tasks').select('*, assignee:profiles!tasks_assignee_id_fkey(*)').eq('group_id', group.id).is('deleted_at', null).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('*, actor:profiles!activity_log_actor_id_fkey(*)').eq('group_id', group.id).order('created_at', { ascending: false }),
     ]);
-    generateReport(
+    await generateReport(
       group,
       (membersData as GroupMember[]) ?? [],
       (tasksData as Task[]) ?? [],

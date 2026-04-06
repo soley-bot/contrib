@@ -174,9 +174,9 @@ export default function GroupPage() {
     } catch { showToast('Failed to remove member. Please try again.'); } finally { actionInFlight.current = false; }
   }
 
-  function handleExport() {
+  async function handleExport() {
     if (!group) return;
-    generateReport(group, members, tasks, activity, evidenceByTask, [], pdfTheme, 'student');
+    await generateReport(group, members, tasks, activity, evidenceByTask, [], pdfTheme, 'student');
     if (user) {
       supabase.from('activity_log').insert({
         group_id: group.id, actor_id: user.id, action: 'report_exported',

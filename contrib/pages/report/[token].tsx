@@ -36,11 +36,11 @@ export default function PublicReportPage() {
     }
   }
 
-  function handleDownload() {
+  async function handleDownload() {
     if (!data || downloading) return;
     setDownloading(true);
     try {
-      generateReport(
+      await generateReport(
         data.group,
         data.members,
         data.tasks,
