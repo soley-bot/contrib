@@ -44,7 +44,7 @@ export function useGroup(groupId: string | undefined, userId: string | undefined
 
   async function fetchAll(id: string) {
     const [groupResult, membersResult] = await Promise.all([
-      supabase.from('groups').select('id, name, subject, due_date, lead_id, course_id, invite_token, created_at').eq('id', id).single(),
+      supabase.from('groups').select('id, name, subject, due_date, lead_id, course_id, invite_token, created_by, archived_at, created_at').eq('id', id).single(),
       supabase.from('group_members').select('id, group_id, profile_id, joined_at, profile:profiles(id, name, university, faculty, year_of_study, avatar_url, role)').eq('group_id', id).order('joined_at', { ascending: true }),
     ]);
     if (groupResult.error || membersResult.error) {

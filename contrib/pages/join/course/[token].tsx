@@ -33,7 +33,7 @@ export default function JoinCoursePage({ course }: PageProps) {
   }, [course, user, userLoading]);
 
   async function handleJoin() {
-    if (!course || !user) return;
+    if (!course || !user || typeof token !== 'string') return;
     setStatus('joining');
 
     try {
