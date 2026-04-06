@@ -75,17 +75,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // One-group-per-course check (skip for teacher temp lead — they aren't a real member)
+    // One-group-per-course check (skip for teacher temp lead — they aren't a real member).
+    // Archived groups do NOT count — a student whose previous group in this course was
+    // archived is free to create a new one. The membership row is kept for history, but
+    // it should not block the user from moving on.
     if (!teacherIsTempLead) {
       const { data: existingMembership } = await adminClient
         .from('group_members')
-        .select('group_id, groups!inner(course_id)')
+        .select('group_id, groups!inner(course_id, archived_at)')
         .eq('profile_id', lead_id)
         .eq('groups.course_id', courseId)
+        .is('groups.archived_at', null)
         .limit(1);
 
       if (existingMembership && existingMembership.length > 0) {
-        return res.status(409).json({ error: 'This member is already in a group for this course.' });
+        return res.status(409).json({ error: 'This member is already in an active group for this course.' });
       }
     }
   }

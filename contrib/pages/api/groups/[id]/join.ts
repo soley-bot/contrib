@@ -68,12 +68,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(409).json({ error: 'Already a member.' });
     }
 
-    // One-group-per-course check
+    // One-group-per-course check — archived groups do NOT count. A student whose
+    // previous group in this course was archived is free to join a new one.
     if (group.course_id) {
       const { data: courseGroups } = await adminClient
         .from('groups')
         .select('id')
-        .eq('course_id', group.course_id);
+        .eq('course_id', group.course_id)
+        .is('archived_at', null);
 
       const courseGroupIds = (courseGroups ?? []).map((g: { id: string }) => g.id);
 
@@ -86,7 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .maybeSingle();
 
         if (existing) {
-          return res.status(409).json({ error: 'You are already in a group for this course.' });
+          return res.status(409).json({ error: 'You are already in an active group for this course.' });
         }
       }
     }
