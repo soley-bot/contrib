@@ -20,7 +20,7 @@ export default function ProfilePage() {
   const { user, profile, loading, refreshProfile } = useUser();
   const { groups, loading: groupsLoading } = useGroups(user?.id);
   const { updateProfile, saving } = useProfile();
-  const { locked: roleLocked, reason: lockReason, loading: lockLoading } = useRoleLock(user?.id, profile?.role);
+  const { locked: roleLocked, reason: lockReason } = useRoleLock(user?.id, profile?.role);
 
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
