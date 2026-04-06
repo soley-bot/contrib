@@ -69,26 +69,26 @@ describe('generateReport', () => {
     expect(generateReport.length).toBe(4);
   });
 
-  it('does not throw with valid data', () => {
-    expect(() =>
+  it('does not throw with valid data', async () => {
+    await expect(
       generateReport(mockGroup, mockMembers, mockTasks, mockActivity, mockEvidence, mockEvalSummaries)
-    ).not.toThrow();
+    ).resolves.not.toThrow();
   });
 
-  it('does not throw with empty arrays', () => {
-    expect(() =>
+  it('does not throw with empty arrays', async () => {
+    await expect(
       generateReport(mockGroup, [], [], [], {}, [])
-    ).not.toThrow();
+    ).resolves.not.toThrow();
   });
 
-  it('does not throw with missing optional params', () => {
-    expect(() =>
+  it('does not throw with missing optional params', async () => {
+    await expect(
       generateReport(mockGroup, mockMembers, mockTasks, mockActivity)
-    ).not.toThrow();
+    ).resolves.not.toThrow();
   });
 
-  it('calls jsPDF save', () => {
-    generateReport(mockGroup, mockMembers, mockTasks, mockActivity);
+  it('calls jsPDF save', async () => {
+    await generateReport(mockGroup, mockMembers, mockTasks, mockActivity);
     expect(lastMockDoc).not.toBeNull();
     expect(lastMockDoc!.save).toHaveBeenCalled();
   });

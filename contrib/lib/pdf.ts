@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import type jsPDF from 'jspdf';
 import type { Group, Task, ActivityLog, GroupMember, Evidence, EvaluationSummary } from '@/types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ function checkPage(doc: jsPDF, y: number, needed = 12): { doc: jsPDF; y: number 
 
 export type PdfMode = 'student' | 'teacher';
 
-export function generateReport(
+export async function generateReport(
   group: Group,
   members: GroupMember[],
   tasks: Task[],
@@ -117,10 +117,14 @@ export function generateReport(
   themeColor: [number, number, number] = DEFAULT_PDF_THEME,
   mode: PdfMode = 'student',
   courseName?: string
-): void {
+): Promise<void> {
   const TC  = themeColor;
   const TCL = themeLight(TC);
 
+  // Dynamic import keeps jspdf (~300 KB) out of the initial bundle of every
+  // page that imports this module. This function is only called from click
+  // handlers, so the one-time load cost on first Export is acceptable.
+  const { default: jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   let y = 18;
 

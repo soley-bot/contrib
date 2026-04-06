@@ -191,6 +191,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - Verify with `npm run build` before claiming done
 - Worktree safety: confirm path with `git rev-parse --show-toplevel`
 - When resolving merge conflicts, always verify the build passes (`npm run build` or `npx tsc --noEmit`) after resolution before reporting completion
+- Fluid Compute: should be enabled in Vercel dashboard (Project → Settings → Functions). Default on for Next.js 16 projects — reuses function instances across concurrent requests, significantly reducing API route cold starts. Confirm if you ever see unusually slow first-request latency.
 
 ## File Structure
 
@@ -222,3 +223,4 @@ npm run dev
 - Feature spotlight tour
 - Dedicated changelog page
 - LMS integration (Google Classroom)
+- Role-lock TOCTOU hardening: `/api/profile/role` and similar check-then-update endpoints (`use-role-lock.ts` pattern) are not atomic. Low severity — self-race only, RLS does not gate on `profile.role` so no data leak. Fix requires a shared `SECURITY DEFINER` SQL function + sweep of all role-locked routes. Revisit at ~50 active users or on first Sentry report of role-state inconsistency.
