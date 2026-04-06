@@ -83,22 +83,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(409).json({ error: 'Student is already in this group.' });
   }
 
-  // Target must NOT be in any other group in the same course (one-group-per-course rule)
+  // Target must NOT be in any other ACTIVE group in the same course (one-group-per-course rule).
+  // Archived groups do NOT count — a student whose previous group in this course was archived
+  // is free to be added to a new one. The membership row is kept for history.
   const { data: otherGroups } = await adminClient
     .from('group_members')
-    .select('group_id, groups!inner(course_id)')
+    .select('group_id, groups!inner(course_id, archived_at)')
     .eq('profile_id', profileId);
 
   const alreadyInCourseGroup = (otherGroups ?? []).some(
     (row: unknown) => {
-      const r = row as { group_id: string; groups: { course_id: string | null } | { course_id: string | null }[] };
-      const courseId = Array.isArray(r.groups) ? r.groups[0]?.course_id : r.groups?.course_id;
-      return courseId === group.course_id;
+      const r = row as {
+        group_id: string;
+        groups:
+          | { course_id: string | null; archived_at: string | null }
+          | { course_id: string | null; archived_at: string | null }[];
+      };
+      const g = Array.isArray(r.groups) ? r.groups[0] : r.groups;
+      return g?.course_id === group.course_id && g?.archived_at === null;
     }
   );
 
   if (alreadyInCourseGroup) {
-    return res.status(409).json({ error: 'Student is already in another group in this course.' });
+    return res.status(409).json({ error: 'Student is already in another active group in this course.' });
   }
 
   // Group must not be full (max 8 members)

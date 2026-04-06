@@ -192,7 +192,7 @@ export interface ReportShare {
   expires_at: string | null;
 }
 
-export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'member_added' | 'lead_transferred' | 'evidence_added' | 'blocker_declared' | 'deadline_approaching' | 'weekly_digest' | 'task_comment';
+export type NotificationType = 'task_assigned' | 'task_reassigned' | 'evaluation_opened' | 'member_joined' | 'member_added' | 'lead_transferred' | 'evidence_added' | 'blocker_declared' | 'deadline_approaching' | 'weekly_digest' | 'task_comment' | 'group_created_in_course';
 
 export interface Notification {
   id: string;
