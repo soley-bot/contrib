@@ -347,34 +347,6 @@ function Slide4Visual({ active }: { active: boolean }) {
   );
 }
 
-function Slide5Visual({ active }: { active: boolean }) {
-  const stats = [
-    { target: 237, suffix: 'K', label: 'university students in Cambodia', delay: 0.3 },
-    { target: 189, suffix: '', label: 'higher education institutions', delay: 0.6 },
-    { target: 0, suffix: '', label: 'tools built for fair group work', delay: 0.9 },
-  ];
-  return (
-    <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4">
-      {stats.map((s) => (
-        <div
-          key={s.label}
-          className="rounded-2xl border border-border bg-white px-6 py-5 flex items-center gap-4 transition-all duration-600 shadow-sm"
-          style={{
-            opacity: active ? 1 : 0,
-            transform: active ? 'translateY(0)' : 'translateY(20px)',
-            transitionDelay: active ? `${s.delay}s` : '0s',
-          }}
-        >
-          <div className="text-[42px] font-extrabold text-text leading-none w-24 flex-shrink-0">
-            <CountUp target={s.target} active={active} delay={s.delay + 0.3} duration={800} suffix={s.suffix} />
-          </div>
-          <div className="text-[14px] text-muted">{s.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ─── Slide definitions ────────────────────────────────────────────────────────
 
 interface Slide {
@@ -433,17 +405,6 @@ const SLIDES: Slide[] = [
 
     Visual: Slide4Visual,
   },
-  {
-    id: 5,
-    label: 'Why this matters.',
-    title: 'No tool was built for this.',
-    body: "Cambodia\u2019s higher education is growing fast \u2014 but fair group assessment hasn\u2019t kept up. Contrib makes fair group grading possible.",
-    bg: '#F8FAFF',
-    textColor: '#0F172A',
-    labelColor: '#1A56E8',
-
-    Visual: Slide5Visual,
-  },
 ];
 
 // ─── CTA Slide ────────────────────────────────────────────────────────────────
@@ -470,9 +431,9 @@ function CTASlide({ active }: { active: boolean }) {
           </svg>
         </div>
         <h2 className="font-extrabold text-text mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
-          Your work.<br />On record.
+          See who did what. Fairly.
         </h2>
-        <p className="text-[16px] text-muted mb-8">Free for students and teachers.</p>
+        <p className="text-[16px] text-muted mb-8">Contrib helps student groups track contributions — so effort matches credit. Free to use.</p>
         <Link
           href="/signup"
           className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-brand hover:bg-brand-dark"
