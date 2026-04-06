@@ -82,13 +82,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       adminClient.from('report_shares').delete().in('group_id', groupIds),
     ];
 
+    const tables = ['group_members', 'activity_log', 'notifications', 'blocker_declarations', 'evaluations', 'evaluation_sessions', 'report_shares'];
     const results = await Promise.all(deleteOps);
-    results.forEach((result, i) => {
-      if (result.error) {
-        const tables = ['group_members', 'activity_log', 'notifications', 'blocker_declarations', 'evaluations', 'evaluation_sessions', 'report_shares'];
-        Sentry.captureMessage(`[course-delete] ${tables[i]} error: ${result.error.message}`, { level: 'error', tags: { route: 'course-delete' } });
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].error) {
+        Sentry.captureMessage(`[course-delete] ${tables[i]} error: ${results[i].error!.message}`, {
+          level: 'error',
+          tags: { route: 'course-delete' },
+          extra: { courseId, groupIds },
+        });
+        return res.status(500).json({ error: `Failed to delete course data (${tables[i]}).` });
       }
-    });
+    }
 
     // Archive the groups
     const { error: groupsErr } = await adminClient
