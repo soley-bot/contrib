@@ -29,12 +29,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Determine who becomes the group lead
   let lead_id = user.id;
   let teacherIsTempLead = false;
+  // Teacher to notify after successful creation (only when a student creates a
+  // group inside a course — null otherwise, including the teacher-creates-own
+  // flow where the teacher obviously does not need to notify themselves).
+  let teacherToNotifyId: string | null = null;
+  let courseNameForNotify: string | null = null;
 
   if (courseId) {
     // Fetch course to check ownership
     const { data: course } = await adminClient
       .from('courses')
-      .select('id, teacher_id')
+      .select('id, teacher_id, name')
       .eq('id', courseId)
       .single();
 
@@ -72,6 +77,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (!callerMembership) {
         return res.status(403).json({ error: 'You must be a member of this course.' });
+      }
+
+      // Student is creating a group inside a teacher's course — queue a
+      // notification for the teacher after the group is successfully inserted.
+      // Guarded: only fire if the teacher is a distinct user from the creator.
+      if (course && course.teacher_id && course.teacher_id !== user.id) {
+        teacherToNotifyId = course.teacher_id;
+        courseNameForNotify = course.name ?? null;
       }
     }
 
@@ -145,6 +158,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (courseMemberError) {
       Sentry.captureException(courseMemberError, { tags: { route: 'groups-create' } });
+    }
+  }
+
+  // 5. Notify the course teacher when a student creates a group in their course.
+  // Fire-and-forget — a notification failure must not roll back the group creation.
+  if (teacherToNotifyId && courseId) {
+    const { data: creatorProfile } = await adminClient
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+    const creatorName = creatorProfile?.name ?? 'A student';
+    const courseLabel = courseNameForNotify ?? 'your course';
+
+    const { error: notifyError } = await adminClient.from('notifications').insert({
+      recipient_id: teacherToNotifyId,
+      group_id: group.id,
+      type: 'group_created_in_course',
+      title: `${creatorName} created a new group in ${courseLabel}`,
+      meta: {
+        groupName: group.name,
+        studentName: creatorName,
+        courseId,
+        courseName: courseNameForNotify,
+      },
+    });
+
+    if (notifyError) {
+      Sentry.captureException(notifyError, { tags: { route: 'groups-create', step: 'notify-teacher' } });
     }
   }
 

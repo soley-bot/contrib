@@ -84,6 +84,15 @@ function NotificationTypeIcon({ type }: { type: NotificationType }) {
           <path d="M5 6h6M5 8.5h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
         </svg>
       );
+    case 'group_created_in_course':
+      return (
+        <svg className={cls} width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <circle cx="5.5" cy="6" r="2" stroke="currentColor" strokeWidth="1.4"/>
+          <circle cx="10.5" cy="6" r="2" stroke="currentColor" strokeWidth="1.4"/>
+          <path d="M2 13c0-2 1.5-3.5 3.5-3.5S9 11 9 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+          <path d="M12 9.5h2.5M13.25 8.25v2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+        </svg>
+      );
     default:
       return null;
   }
@@ -169,6 +178,16 @@ export default function NotificationBell({ userId, sidebar }: NotificationBellPr
 
   function handleNotificationClick(n: Notification) {
     markAsRead(n.id);
+    // Teacher-facing notification: route to the teacher drill-down, not the
+    // student group page (which teachers cannot access).
+    if (n.type === 'group_created_in_course' && n.group_id) {
+      const courseId = typeof n.meta?.courseId === 'string' ? n.meta.courseId : null;
+      if (courseId) {
+        router.push(`/teacher/course/${courseId}/group/${n.group_id}`);
+        setShowDropdown(false);
+        return;
+      }
+    }
     if (n.group_id) {
       router.push(`/group/${n.group_id}`);
     }

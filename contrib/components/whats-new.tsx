@@ -17,6 +17,7 @@ const CHANGELOG: ChangelogEntry[] = [
     date: '2026-04-06',
     items: [
       { title: 'Bigger groups', description: 'Groups can now have up to 8 members, up from 6. More room for bigger team projects.' },
+      { title: 'Teachers notified of new groups', description: 'When a student creates a new group inside your course, you get an in-app notification with a direct link to the group.' },
     ],
   },
   {
