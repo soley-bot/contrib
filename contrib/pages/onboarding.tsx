@@ -35,24 +35,30 @@ export default function Onboarding() {
   }, [router]);
 
   async function saveProfile(nameVal: string, universityVal: string, facultyVal: string, yearVal: string) {
-    if (!user) return;
+    if (!user) return false;
     setLoading(true);
-    const avatarUrl = user.user_metadata?.avatar_url ?? null;
-    const { error: insertError } = await supabase.from('profiles').upsert({
-      id: user.id,
-      name: nameVal.trim() || 'User',
-      university: universityVal.trim() || '',
-      faculty: facultyVal.trim() || '',
-      year_of_study: yearVal || null,
-      avatar_url: avatarUrl,
-      role,
-    }, { onConflict: 'id' });
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
+    try {
+      const resp = await fetch('/api/profile/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameVal.trim() || 'User',
+          university: universityVal.trim(),
+          faculty: facultyVal.trim(),
+          year_of_study: yearVal || null,
+          role,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        setError(data.error || 'Failed to create profile.');
+        return false;
+      }
+      return true;
+    } catch {
+      setError('Network error. Please try again.');
       return false;
     }
-    return true;
   }
 
   async function handleSubmit(e: React.FormEvent) {
