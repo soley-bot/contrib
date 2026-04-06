@@ -191,6 +191,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - Verify with `npm run build` before claiming done
 - Worktree safety: confirm path with `git rev-parse --show-toplevel`
 - When resolving merge conflicts, always verify the build passes (`npm run build` or `npx tsc --noEmit`) after resolution before reporting completion
+- Fluid Compute: should be enabled in Vercel dashboard (Project → Settings → Functions). Default on for Next.js 16 projects — reuses function instances across concurrent requests, significantly reducing API route cold starts. Confirm if you ever see unusually slow first-request latency.
 
 ## File Structure
 
