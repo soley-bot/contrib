@@ -10,7 +10,7 @@ Individual effort is invisible in group work. Contrib turns it on.
 
 ## Current Priority
 
-Pre-production QA complete (P0-P3). Ready for public launch.
+Pilot running with 2–3 pilot teachers on `joincontrib.com`. Product positioning is **student-first with teacher as opt-in layer** (shipped in the student-first reframe, 2026-04-06). North-star metric: of students who sign up this week, how many invite at least one teammate to a group within 48 hours. Next-up work is Phase 2 UX (Getting Started checklists, "What's next?" banners, invite-link CTA treatment) — the items most likely to move the north-star metric.
 
 ## Tech Stack
 
@@ -224,3 +224,6 @@ npm run dev
 - Dedicated changelog page
 - LMS integration (Google Classroom)
 - Role-lock TOCTOU hardening: `/api/profile/role` and similar check-then-update endpoints (`use-role-lock.ts` pattern) are not atomic. Low severity — self-race only, RLS does not gate on `profile.role` so no data leak. Fix requires a shared `SECURITY DEFINER` SQL function + sweep of all role-locked routes. Revisit at ~50 active users or on first Sentry report of role-state inconsistency.
+- Link existing standalone group to a course (retroactive teacher adoption): lets a student who created a standalone group later attach it to a teacher's course via a course invite token. Not urgent — pilot teachers are already using Contrib so students start groups inside courses, not standalone. Build when you see viral adoption signals (student asks "how do I show my teacher what we've done?" or a teacher signs up because a student told them to). Short-term substitute: `/api/report/share` 30-day link already works as a read-only teacher view.
+- Phase 2 cache work (SWR adoption + hook migrations): full plan at `contrib/docs/superpowers/plans/2026-04-06-cache-and-cold-start.md`. Build when user count >50 or when a pilot user explicitly says the app feels laggy.
+- Telegram push for `group_created_in_course` notification: in-app only today. Add Telegram delivery if teachers ask for it or if you find they are not checking the bell.
