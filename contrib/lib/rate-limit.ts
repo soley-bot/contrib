@@ -1,10 +1,16 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import * as Sentry from '@sentry/nextjs';
 
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-});
+// Redis is only instantiated if both env vars are present. In local dev
+// without Upstash credentials, rate limiting fails open (see rateLimit).
+const redisConfigured = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const redis = redisConfigured
+  ? new Redis({
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
+    })
+  : null;
 
 /**
  * Sliding-window rate limiters backed by Upstash Redis.
@@ -12,7 +18,8 @@ const redis = new Redis({
  */
 const limiters = new Map<string, Ratelimit>();
 
-function getLimiter(limit: number, windowMs: number): Ratelimit {
+function getLimiter(limit: number, windowMs: number): Ratelimit | null {
+  if (!redis) return null;
   const key = `${limit}:${windowMs}`;
   let limiter = limiters.get(key);
   if (!limiter) {
@@ -26,8 +33,14 @@ function getLimiter(limit: number, windowMs: number): Ratelimit {
   return limiter;
 }
 
+// Warn once at startup if running without Redis — visible in dev server logs.
+let warnedMissingRedis = false;
+
 /**
  * Check if a request should be allowed.
+ * Fails open on infrastructure errors: if Redis is unreachable or unconfigured,
+ * requests are allowed and the error is logged to Sentry. A broken rate limiter
+ * must never return 500 across all API routes.
  * @param key - Unique identifier (e.g., "signup:192.168.1.1")
  * @param limit - Max requests allowed in the window (default: 20)
  * @param windowMs - Time window in milliseconds (default: 60s)
@@ -35,8 +48,21 @@ function getLimiter(limit: number, windowMs: number): Ratelimit {
  */
 export async function rateLimit(key: string, limit = 20, windowMs = 60_000): Promise<boolean> {
   const limiter = getLimiter(limit, windowMs);
-  const { success } = await limiter.limit(key);
-  return success;
+  if (!limiter) {
+    if (!warnedMissingRedis) {
+      warnedMissingRedis = true;
+      // eslint-disable-next-line no-console
+      console.warn('[rate-limit] Upstash Redis not configured (KV_REST_API_URL / KV_REST_API_TOKEN missing). Rate limiting disabled.');
+    }
+    return true;
+  }
+  try {
+    const { success } = await limiter.limit(key);
+    return success;
+  } catch (err) {
+    Sentry.captureException(err, { tags: { component: 'rate-limit' } });
+    return true;
+  }
 }
 
 export const RATE_LIMITS = {
