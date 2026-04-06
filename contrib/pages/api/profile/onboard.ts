@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       faculty: input.faculty,
       year_of_study: input.year_of_study ?? null,
       avatar_url: avatarUrl,
-      role: input.role,
+      role: 'student',
     });
 
   if (insertError) {

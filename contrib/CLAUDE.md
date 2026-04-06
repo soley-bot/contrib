@@ -80,6 +80,7 @@ pages/
 | `/api/courses/[id]/reset-invite` | POST | Required (teacher) |
 | `/api/courses/[id]/delete` | DELETE | Required (teacher) |
 | `/api/profile/onboard` | POST | Required (5/min) |
+| `/api/profile/role` | POST | Required (5/min) |
 | `/api/notify` | POST | Required |
 | `/api/telegram/connect` | POST | Required |
 | `/api/telegram/disconnect` | POST | Required |

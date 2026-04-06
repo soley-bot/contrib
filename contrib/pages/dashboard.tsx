@@ -225,8 +225,8 @@ export default function Dashboard() {
                 <rect x="160" y="39" width="24" height="3" rx="1.5" fill="white" fillOpacity="0.8"/>
                 <rect x="160" y="45" width="16" height="3" rx="1.5" fill="white" fillOpacity="0.6"/>
               </svg>
-              <p className="text-[16px] font-bold text-text mb-1.5">No groups yet</p>
-              <p className="text-sm text-text-tertiary mb-6 max-w-xs mx-auto">Create your first group and invite your teammates — every contribution gets tracked.</p>
+              <p className="text-[16px] font-bold text-text mb-1.5">Start your first group</p>
+              <p className="text-sm text-text-tertiary mb-6 max-w-xs mx-auto">Invite up to 8 teammates. Log your work. Get credit for what you actually did.</p>
               <button
                 onClick={() => setShowModal(true)}
                 className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors"
@@ -361,6 +361,9 @@ export default function Dashboard() {
                 <input id="group-due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
+              <p className="text-[12px] text-text-tertiary leading-snug">
+                You can have up to 8 teammates in a group, including yourself.
+              </p>
               {enrolledCourses.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <label htmlFor="group-course" className="text-[13px] font-medium text-text-secondary">Link to course</label>
