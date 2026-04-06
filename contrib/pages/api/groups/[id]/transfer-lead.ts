@@ -38,11 +38,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Verify the group exists and caller is the current lead
   const { data: group } = await adminClient
     .from('groups')
-    .select('id, lead_id')
+    .select('id, lead_id, archived_at')
     .eq('id', groupId)
     .single();
 
   if (!group) return res.status(404).json({ error: 'Group not found.' });
+
+  if (group.archived_at) return res.status(410).json({ error: 'This group has been archived.' });
 
   if (group.lead_id !== user.id) {
     return res.status(403).json({ error: 'Only the current lead can transfer leadership.' });
