@@ -6,7 +6,18 @@ Individual effort is invisible in group work. Contrib turns it on.
 
 - After completing a task or when sub-agents finish, immediately continue working on the next item without waiting for the user to say 'continue'.
 - When reporting task completion, verify claims are accurate. Do not say a fix is done unless the specific issue has been tested or the build confirms it.
-- Always run `npm run build` after making changes to verify no TypeScript errors before committing.
+- Always run `npm run build` after making changes to verify no TypeScript errors before committing. **No exceptions** — "looks right" is not verification.
+
+## Diagnosing Auth / RLS / DB Bugs (read before proposing any fix)
+
+The most expensive failure mode in this repo is jumping to a plausible-but-wrong root cause. Before proposing ANY auth, RLS, or DB fix:
+
+1. **Read the actual current state.** Query live RLS policies via the Supabase MCP (`mcp__claude_ai_Supabase__execute_sql` against `pg_policies`) or read `database/rls-policies-live.sql`. Do not guess from memory.
+2. **Verify "typos" are actually typos.** Before claiming a function name is wrong, grep the codebase AND query `pg_proc` for it. `user_is_group_member`, `user_is_course_teacher`, etc. are real SECURITY DEFINER functions — not typos.
+3. **State the root cause in one sentence with file:line evidence** before writing a fix. If you can't, you don't understand the bug yet — keep investigating.
+4. **Reproduce with the anon key**, not service role. Service role bypasses RLS and hides the actual bug.
+
+This rule exists because of past incidents: `user_is_group_member` was misdiagnosed as a typo when it was a real function; the actual fix was a missing course-ownership check in the SELECT policy. Don't repeat that.
 
 ## Current Priority
 
@@ -225,5 +236,5 @@ npm run dev
 - LMS integration (Google Classroom)
 - Role-lock TOCTOU hardening: `/api/profile/role` and similar check-then-update endpoints (`use-role-lock.ts` pattern) are not atomic. Low severity — self-race only, RLS does not gate on `profile.role` so no data leak. Fix requires a shared `SECURITY DEFINER` SQL function + sweep of all role-locked routes. Revisit at ~50 active users or on first Sentry report of role-state inconsistency.
 - Link existing standalone group to a course (retroactive teacher adoption): lets a student who created a standalone group later attach it to a teacher's course via a course invite token. Not urgent — pilot teachers are already using Contrib so students start groups inside courses, not standalone. Build when you see viral adoption signals (student asks "how do I show my teacher what we've done?" or a teacher signs up because a student told them to). Short-term substitute: `/api/report/share` 30-day link already works as a read-only teacher view.
-- Phase 2 cache work (SWR adoption + hook migrations): full plan at `contrib/docs/superpowers/plans/2026-04-06-cache-and-cold-start.md`. Build when user count >50 or when a pilot user explicitly says the app feels laggy.
+- Phase 2 cache work (SWR adoption + hook migrations): full plan at `docs/superpowers/plans/2026-04-06-cache-and-cold-start.md`. Build when user count >50 or when a pilot user explicitly says the app feels laggy.
 - Telegram push for `group_created_in_course` notification: in-app only today. Add Telegram delivery if teachers ask for it or if you find they are not checking the bell.
