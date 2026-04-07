@@ -37,11 +37,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ ok: true, role: newRole });
     }
 
-    // Lock check: if user has group memberships, they cannot change role
+    // Lock check: if user has ACTIVE (non-archived) group memberships, they
+    // cannot change role. Archived memberships are historical and must not
+    // block the switch — matches the hook in use-role-lock.ts.
     const { count: groupCount } = await adminClient
       .from('group_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('profile_id', user.id);
+      .select('id, groups!inner(archived_at)', { count: 'exact', head: true })
+      .eq('profile_id', user.id)
+      .is('groups.archived_at', null);
 
     if ((groupCount ?? 0) > 0) {
       return res.status(409).json({

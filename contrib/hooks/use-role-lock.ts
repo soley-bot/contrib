@@ -23,11 +23,15 @@ export function useRoleLock(userId: string | undefined, role: string | undefined
     let cancelled = false;
 
     async function check() {
-      // Check group_members for student lock
+      // Check group_members for student lock. Archived-group memberships are
+      // kept for history (see /api/groups/create) and must NOT count toward the
+      // role lock — a student whose only group is archived should still be
+      // able to switch to teacher mode.
       const { count: groupCount, error: groupErr } = await supabase
         .from('group_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('profile_id', userId!);
+        .select('id, groups!inner(archived_at)', { count: 'exact', head: true })
+        .eq('profile_id', userId!)
+        .is('groups.archived_at', null);
 
       if (cancelled) return;
 

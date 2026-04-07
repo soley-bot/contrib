@@ -14,6 +14,8 @@ import ContributionSummary from '@/components/contribution-summary';
 import { formatDueDate } from '@/lib/date';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 import InlineTip from '@/components/inline-tip';
+import ConfirmModal from '@/components/confirm-modal';
+import { useToast } from '@/components/toast-provider';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -28,7 +30,11 @@ export default function Dashboard() {
   const { groups, loading: groupsLoading, refresh: refreshGroups } = useGroups(user?.id);
   const groupIds = groups.map((g) => g.id);
   const { summaries } = useDashboardSummary(groupIds, user?.id);
-  const { courses: enrolledCourses, loading: coursesLoading } = useCourseMemberships(user?.id);
+  const { courses: enrolledCourses, loading: coursesLoading, refresh: refreshCourses } = useCourseMemberships(user?.id);
+  const { showToast } = useToast();
+  const [leaveCourseId, setLeaveCourseId] = useState<string | null>(null);
+  const [leavingCourse, setLeavingCourse] = useState(false);
+  const leavingRef = useRef(false);
   const { counts: contributionCounts } = useContributionSummary(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [showPastGroups, setShowPastGroups] = useState(false);
@@ -75,11 +81,6 @@ export default function Dashboard() {
       creatingRef.current = false;
       return;
     }
-    if (enrolledCourses.length > 0 && !selectedCourseId) {
-      setFormError('Please link this group to a course.');
-      creatingRef.current = false;
-      return;
-    }
     setCreating(true);
     try {
       const resp = await fetch('/api/groups/create', {
@@ -102,6 +103,26 @@ export default function Dashboard() {
       setFormError('Failed to create group.');
       setCreating(false);
       creatingRef.current = false;
+    }
+  }
+
+  async function handleLeaveCourse() {
+    if (!leaveCourseId || leavingRef.current) return;
+    leavingRef.current = true;
+    setLeavingCourse(true);
+    try {
+      const resp = await fetch(`/api/courses/${leaveCourseId}/leave`, { method: 'POST' });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        showToast(data.error ?? 'Failed to leave course.', 'error');
+        return;
+      }
+      showToast('Left the course.', 'success');
+      setLeaveCourseId(null);
+      refreshCourses();
+    } finally {
+      leavingRef.current = false;
+      setLeavingCourse(false);
     }
   }
 
@@ -162,6 +183,12 @@ export default function Dashboard() {
                         className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[12px] font-medium rounded-md transition-colors flex-shrink-0"
                       >
                         Create group
+                      </button>
+                      <button
+                        onClick={() => setLeaveCourseId(c.id)}
+                        className="h-9 px-2.5 text-text-secondary hover:text-text hover:bg-white text-[12px] font-medium rounded-md transition-colors flex-shrink-0"
+                      >
+                        Leave
                       </button>
                     </div>
                   ))}
@@ -329,6 +356,22 @@ export default function Dashboard() {
         <IconPlus size={22} />
       </button>
 
+      {/* Leave course confirmation */}
+      {leaveCourseId && (
+        <ConfirmModal
+          title="Leave this course?"
+          message={
+            "You'll no longer see this course on your dashboard. Your past group work stays intact. You can re-join later using the course invite link."
+          }
+          confirmLabel="Leave course"
+          cancelLabel="Cancel"
+          destructive
+          loading={leavingCourse}
+          onConfirm={handleLeaveCourse}
+          onCancel={() => { if (!leavingCourse) setLeaveCourseId(null); }}
+        />
+      )}
+
       {/* New Group Modal */}
       {showModal && (
         <div
@@ -373,7 +416,7 @@ export default function Dashboard() {
                     onChange={(e) => setSelectedCourseId(e.target.value)}
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                   >
-                    <option value="">Select course…</option>
+                    <option value="">No course (standalone group)</option>
                     {enrolledCourses.map((c) => (
                       <option key={c.id} value={c.id}>{c.name} — {c.subject}</option>
                     ))}
