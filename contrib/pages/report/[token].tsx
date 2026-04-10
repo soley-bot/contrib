@@ -209,7 +209,7 @@ export default function PublicReportPage() {
 
         {/* Activity Summary */}
         <div className="bg-white border border-border rounded-xl px-4 py-3">
-          <h2 className="text-sm font-semibold text-text mb-1">Activity</h2>
+          <h2 className="text-sm font-semibold text-text mb-1">Timeline</h2>
           <p className="text-sm text-muted">
             {activity.length} activities logged
             {activity.length > 0 && (

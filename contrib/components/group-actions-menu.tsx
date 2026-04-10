@@ -68,7 +68,7 @@ export default function GroupActionsMenu({
           )}
           <div className="h-px bg-border mx-2 my-1" role="separator" />
           <button role="menuitem" onClick={() => handleAction(onExport)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
-            <IconExport size={14} /> Export PDF
+            <IconExport size={14} /> Export Contribution Record
           </button>
           <button role="menuitem" onClick={() => handleAction(onShareReport)} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg-hover hover:text-text transition-colors">
             <IconLink size={14} /> Share report
