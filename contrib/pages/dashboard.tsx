@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import StudentNav from '@/components/student-nav';
-import { IconPlus, IconChevronRight } from '@/components/icons';
+import { IconPlus, IconChevronRight, IconCrown } from '@/components/icons';
+import DashboardKpiStrip from '@/components/dashboard-kpi-strip';
 import { useUser } from '@/hooks/use-user';
 import { requireStudent } from '@/lib/supabase-server';
 import { useGroups } from '@/hooks/use-groups';
@@ -142,9 +143,6 @@ export default function Dashboard() {
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div>
             <span className="text-base font-semibold text-text">My Groups</span>
-            {profile?.name && (
-              <span className="ml-2 text-sm text-text-tertiary">— {getGreeting()}, {profile.name.split(' ')[0]}</span>
-            )}
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -156,6 +154,15 @@ export default function Dashboard() {
 
         {/* Content */}
         <div className="pt-[72px] md:pt-2 pb-4 px-4 py-4 max-w-2xl mx-auto">
+          {profile?.name && (
+            <div className="mb-4 md:mb-5">
+              <p className="text-[13px] text-muted mb-1">{getGreeting()}, {profile.name.split(' ')[0]}.</p>
+              <h1 className="text-[20px] md:text-[24px] font-extrabold tracking-[-0.3px] text-text leading-tight">Here&apos;s what needs your attention.</h1>
+            </div>
+          )}
+          <div className="mb-4 md:mb-5">
+            <DashboardKpiStrip userId={user?.id} />
+          </div>
           <InlineTip id="dashboard-telegram">Connect Telegram in your profile to get deadline reminders 24h before.</InlineTip>
           {contributionCounts.total > 0 && (
             <InlineTip id="dashboard-contribution">Your contribution summary shows completed work by type across all groups.</InlineTip>
@@ -263,11 +270,15 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
+              {activeGroups.length > 0 && (
+                <p className="text-[11px] font-bold tracking-[2px] uppercase text-text-tertiary mb-2.5 mt-2">Your groups</p>
+              )}
               {activeGroups.map((group) => {
                 const s = summaries[group.id];
                 const pct = s && s.taskTotal > 0 ? Math.round((s.taskDone / s.taskTotal) * 100) : 0;
                 const isOverdue = group.due_date && new Date(group.due_date + 'T00:00:00') < new Date(new Date().toDateString());
                 const needsReview = s?.evalOpen && !s?.evalSubmitted;
+                const isLead = !!user?.id && group.lead_id === user.id;
                 return (
                   <div
                     key={group.id}
@@ -279,21 +290,33 @@ export default function Dashboard() {
                         {group.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[15px] font-semibold text-text truncate">{group.name}</p>
-                        <p className="text-xs text-text-tertiary mt-0.5">
-                          {group.subject}{group.due_date ? ` · Due ${formatDueDate(group.due_date)}` : ''}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[15px] font-semibold text-text truncate">{group.name}</p>
+                          {isLead && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-light text-brand border border-[#C3D4FD] flex-shrink-0">
+                              <IconCrown size={10} /> Lead
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-text-tertiary mt-0.5">{group.subject}</p>
                       </div>
                       <IconChevronRight size={16} />
                     </div>
-                    {s && s.taskTotal > 0 && (
+                    {((s && s.taskTotal > 0) || group.due_date) ? (
                       <div className="mt-3 flex items-center gap-3">
-                        <div className="flex-1 h-1.5 bg-bg-hover rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#16A34A' : '#1A56E8' }} />
-                        </div>
-                        <span className="text-[11px] font-medium text-text-tertiary flex-shrink-0">{s.taskDone}/{s.taskTotal}</span>
+                        {s && s.taskTotal > 0 && (
+                          <>
+                            <div className="flex-1 h-1.5 bg-bg-hover rounded-full overflow-hidden">
+                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#16A34A' : '#1A56E8' }} />
+                            </div>
+                            <span className="text-[11px] font-semibold text-muted flex-shrink-0">{s.taskDone} of {s.taskTotal} tasks</span>
+                          </>
+                        )}
+                        {group.due_date && (
+                          <span className="text-[11px] text-text-tertiary flex-shrink-0 ml-auto">Due {formatDueDate(group.due_date)}</span>
+                        )}
                       </div>
-                    )}
+                    ) : null}
                     {(needsReview || (isOverdue && s && s.taskDone < s.taskTotal)) && (
                       <div className="mt-2 flex gap-2">
                         {needsReview && (
