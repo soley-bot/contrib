@@ -28,7 +28,7 @@ CREATE POLICY "evidence bucket insert by group member"
   WITH CHECK (
     bucket_id = 'evidence'
     AND public.user_is_group_member(
-      ((storage.foldername(name))[1])::uuid
+      ((storage.foldername(objects.name))[1])::uuid
     )
   );
 
@@ -38,7 +38,7 @@ CREATE POLICY "evidence bucket read by group member"
   USING (
     bucket_id = 'evidence'
     AND public.user_is_group_member(
-      ((storage.foldername(name))[1])::uuid
+      ((storage.foldername(objects.name))[1])::uuid
     )
   );
 
@@ -51,7 +51,7 @@ CREATE POLICY "evidence bucket read by course teacher"
       SELECT 1
       FROM public.groups g
       JOIN public.courses c ON c.id = g.course_id
-      WHERE g.id = ((storage.foldername(name))[1])::uuid
+      WHERE g.id = ((storage.foldername(objects.name))[1])::uuid
         AND c.teacher_id = auth.uid()
     )
   );
