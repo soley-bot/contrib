@@ -418,3 +418,41 @@ CREATE POLICY "Users can update their own telegram subscription"
 
 CREATE POLICY "Users can delete their own telegram subscription"
   ON public.telegram_subscriptions FOR DELETE USING (profile_id = auth.uid());
+
+-- ── storage: evidence bucket (added 2026-04-19) ────────────────────────────
+
+-- Bucket: public.storage.buckets row with id='evidence', public=false.
+
+-- INSERT: authenticated group member of the task's group
+CREATE POLICY "evidence bucket insert by group member"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'evidence'
+    AND public.user_is_group_member(
+      ((storage.foldername(name))[1])::uuid
+    )
+  );
+
+-- SELECT 1: group members can read files attached to tasks in their group
+CREATE POLICY "evidence bucket read by group member"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (
+    bucket_id = 'evidence'
+    AND public.user_is_group_member(
+      ((storage.foldername(name))[1])::uuid
+    )
+  );
+
+-- SELECT 2: course teacher can read files for groups in their course
+CREATE POLICY "evidence bucket read by course teacher"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (
+    bucket_id = 'evidence'
+    AND EXISTS (
+      SELECT 1
+      FROM public.groups g
+      JOIN public.courses c ON c.id = g.course_id
+      WHERE g.id = ((storage.foldername(name))[1])::uuid
+        AND c.teacher_id = auth.uid()
+    )
+  );
