@@ -26,10 +26,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .eq('id', id)
     .single();
 
-  if (!evidence) return res.status(404).json({ error: 'Evidence not found.' });
-  if (!evidence.file_path) return res.status(400).json({ error: 'This evidence has no uploaded file.' });
+  // Unify the "can't give you this file" responses so an unauthenticated probe
+  // cannot distinguish between "does not exist" and "exists but not yours".
+  // Once authorization succeeds, a 400 for "no file_path" is fine — the caller
+  // can legitimately see that information.
+  const notFound = () => res.status(404).json({ error: 'Evidence not found.' });
 
-  // Extract group_id from the joined task.
+  if (!evidence) return notFound();
+
   const groupId = (evidence.tasks as unknown as { group_id: string }).group_id;
 
   // Authorize: group member OR course teacher.
@@ -52,7 +56,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     authorized = teacherId === user.id;
   }
 
-  if (!authorized) return res.status(403).json({ error: 'Forbidden.' });
+  if (!authorized) return notFound();
+
+  // Caller is authorized — they may now learn this record has no file.
+  if (!evidence.file_path) return res.status(400).json({ error: 'This evidence has no uploaded file.' });
 
   const { data, error } = await adminClient.storage
     .from('evidence')

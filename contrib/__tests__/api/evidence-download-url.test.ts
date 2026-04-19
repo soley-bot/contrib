@@ -67,23 +67,29 @@ describe('GET /api/evidence/download-url', () => {
   });
 
   it('400 when evidence has no file_path (legacy URL row)', async () => {
-    mockSingle.mockResolvedValueOnce({
-      data: { id: 'e1', task_id: 't1', file_path: null, tasks: { group_id: 'g1' } },
-      error: null,
-    });
+    // Authorization runs BEFORE the file_path check, so this test needs a successful
+    // member lookup to reach the 400.
+    mockSingle
+      .mockResolvedValueOnce({
+        data: { id: 'e1', task_id: 't1', file_path: null, tasks: { group_id: 'g1' } },
+        error: null,
+      })
+      .mockResolvedValueOnce({ data: { id: 'm1' }, error: null });
     const { req, res, status } = makeReqRes('GET', { id: 'e1' });
     await handler(req, res);
     expect(status).toHaveBeenCalledWith(400);
   });
 
-  it('403 when caller is neither group member nor course teacher', async () => {
+  it('404 (unified) when caller is neither group member nor course teacher', async () => {
+    // Returns 404 instead of 403 to avoid leaking existence of evidence the caller
+    // isn't authorized to see.
     mockSingle
       .mockResolvedValueOnce({ data: { id: 'e1', task_id: 't1', file_path: 'g1/t1/e1-x.pdf', tasks: { group_id: 'g1' } }, error: null })
       .mockResolvedValueOnce({ data: null, error: null })
       .mockResolvedValueOnce({ data: null, error: null });
     const { req, res, status } = makeReqRes('GET', { id: 'e1' });
     await handler(req, res);
-    expect(status).toHaveBeenCalledWith(403);
+    expect(status).toHaveBeenCalledWith(404);
   });
 
   it('200 with signedUrl for a group member', async () => {
