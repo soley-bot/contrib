@@ -20,7 +20,7 @@ export function useGroupEvidence(taskIds: string[]): UseGroupEvidenceResult {
     if (!taskIds.length) { setEvidenceByTask({}); return; }
     supabase
       .from('evidence')
-      .select('id, task_id, type, content, uploaded_by, version_number, deleted_at, created_at, uploader:profiles!evidence_uploaded_by_fkey(id, name, avatar_url)')
+      .select('id, task_id, type, content, uploaded_by, version_number, deleted_at, created_at, file_path, file_name, file_size, mime_type, uploader:profiles!evidence_uploaded_by_fkey(id, name, avatar_url)')
       .in('task_id', taskIds)
       .order('version_number', { ascending: true })
       .then(({ data, error: fetchError }) => {

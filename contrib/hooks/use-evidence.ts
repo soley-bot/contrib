@@ -40,7 +40,7 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
   async function fetchEvidence(id: string) {
     const { data, error: fetchError } = await supabase
       .from('evidence')
-      .select(`id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, uploader:profiles!evidence_uploaded_by_fkey(${PROFILE_SELECT})`)
+      .select(`id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, file_path, file_name, file_size, mime_type, uploader:profiles!evidence_uploaded_by_fkey(${PROFILE_SELECT})`)
       .eq('task_id', id)
       .order('version_number', { ascending: true });
     if (fetchError) {
