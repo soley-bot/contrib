@@ -72,6 +72,11 @@ export interface Evidence {
   deleted_at: string | null;
   created_at: string;
   uploader?: Profile;
+  // File upload metadata — populated only when an uploaded file (not a URL) is stored.
+  file_path: string | null;
+  file_name: string | null;
+  file_size: number | null;
+  mime_type: string | null;
 }
 
 export type ActivityAction =
