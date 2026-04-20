@@ -79,14 +79,19 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
           .select('id, group_id, actor_id, action, task_id, meta, created_at, actor:profiles!activity_log_actor_id_fkey(id, name, avatar_url)')
           .eq('id', newEntry.id)
           .single()
-          .then(({ data }) => {
-            if (data) {
-              setPrepended((prev) => {
-                if (prev.some((a) => a.id === (data as unknown as ActivityLog).id)) return prev;
-                return [data as unknown as ActivityLog, ...prev];
-              });
-            }
-          });
+          .then(
+            ({ data }) => {
+              if (data) {
+                setPrepended((prev) => {
+                  if (prev.some((a) => a.id === (data as unknown as ActivityLog).id)) return prev;
+                  return [data as unknown as ActivityLog, ...prev];
+                });
+              }
+            },
+            () => {
+              // Enrichment fetch failed; row will appear on next SWR revalidation.
+            },
+          );
       })
       .subscribe();
 
