@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 
 interface GroupSummary {
@@ -31,6 +32,12 @@ async function fetchDashboardSummary(
       .in('group_id', groupIds)
       .eq('evaluator_id', userId),
   ]);
+
+  const firstError = taskRes.error ?? evalSessionRes.error ?? evalSubmitRes.error;
+  if (firstError) {
+    Sentry.captureMessage(`Failed to load dashboard summary: ${firstError.message}`, { level: 'error' });
+    throw new Error('Failed to load data.');
+  }
 
   const result: Record<string, GroupSummary> = {};
   groupIds.forEach((id) => {

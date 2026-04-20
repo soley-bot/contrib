@@ -98,11 +98,16 @@ export function useActivity(groupId: string | undefined): UseActivityResult {
     setLoadingMore(true);
     // DB offset = firstPage rows + already-loaded extra rows (prepended rows are NOT DB-paginated).
     const dbOffset = (firstPage?.length ?? 0) + extraPages.length;
-    fetchPage(groupId, dbOffset).then((entries) => {
-      setExtraPages((prev) => [...prev, ...entries]);
-      setHasMore(entries.length === PAGE_SIZE);
-      setLoadingMore(false);
-    });
+    fetchPage(groupId, dbOffset)
+      .then((entries) => {
+        setExtraPages((prev) => [...prev, ...entries]);
+        setHasMore(entries.length === PAGE_SIZE);
+        setLoadingMore(false);
+      })
+      .catch(() => {
+        // fetchPage already logged to Sentry; just unstick the loading flag.
+        setLoadingMore(false);
+      });
   }, [groupId, loadingMore, hasMore, firstPage, extraPages.length]);
 
   // Merge with dedup by id: prepended → firstPage → extraPages.
