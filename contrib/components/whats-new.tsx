@@ -13,6 +13,13 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: 6,
+    date: '2026-04-19',
+    items: [
+      { title: 'Upload real files as evidence', description: 'Upload files directly from your device — PDFs, images, slides, up to 4 MB. Links and notes still work the same way. Older Drive links keep working.' },
+    ],
+  },
+  {
     version: 5,
     date: '2026-04-06',
     items: [

@@ -73,6 +73,27 @@ export const createEvidenceSchema = z.object({
   content: z.string().trim().min(1, 'Content is required.').max(2000, 'Content must be 2000 characters or less.'),
 });
 
+// ── Evidence API (server-side, discriminated by type) ──────────────────────
+// Used by POST /api/evidence/create. The `file` branch carries no `content`
+// in the JSON part — the actual file is a multipart field.
+
+export const createEvidenceApiSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('file'),
+    task_id: z.string().uuid('Invalid task.'),
+  }),
+  z.object({
+    type: z.literal('link'),
+    task_id: z.string().uuid('Invalid task.'),
+    content: z.string().trim().url('Must be a valid URL.').max(2000, 'URL is too long.'),
+  }),
+  z.object({
+    type: z.literal('note'),
+    task_id: z.string().uuid('Invalid task.'),
+    content: z.string().trim().min(1, 'Content is required.').max(2000, 'Note is too long (max 2000).'),
+  }),
+]);
+
 // ── Evaluation ──────────────────────────────────────────────────────────────
 
 export const evaluationEntrySchema = z.object({

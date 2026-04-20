@@ -68,7 +68,7 @@ pages/
   teacher/course/[id]/group/[groupId].tsx  — group drill-down (read-only)
 ```
 
-## API Routes (26)
+## API Routes (28)
 
 | Route | Method | Auth |
 |---|---|---|
@@ -94,6 +94,8 @@ pages/
 | `/api/profile/onboard` | POST | Required (5/min) |
 | `/api/profile/role` | POST | Required (5/min) |
 | `/api/notify` | POST | Required |
+| `/api/evidence/create` | POST | Required (multipart, 4 MB cap) |
+| `/api/evidence/download-url` | GET | Required (member or course teacher; 404 unified) |
 | `/api/telegram/connect` | POST | Required |
 | `/api/telegram/disconnect` | POST | Required |
 | `/api/telegram/webhook` | POST | Webhook secret |
@@ -105,6 +107,16 @@ pages/
 `profiles` · `groups` · `group_members` · `tasks` · `evidence` · `task_comments` · `activity_log` · `courses` · `course_members` · `evaluation_sessions` · `evaluations` · `blocker_declarations` · `telegram_subscriptions` · `report_shares` · `notifications`
 
 All tables have RLS. Profiles SELECT restricted to relevant users (co-members, course peers). Courses SELECT restricted to teacher + enrolled members.
+
+### Evidence columns (since 2026-04-19)
+
+Beyond `id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at`, the `evidence` table also has `file_path | null`, `file_name | null`, `file_size | null`, `mime_type | null`. These are populated when an uploaded file (not a URL) is stored. Legacy URL-based `type='file'` rows keep `file_path = NULL`.
+
+Any hook or route that SELECTs evidence MUST include all four new columns explicitly, otherwise `as unknown as Evidence[]` casts will silently strand them as `undefined` and the UI will fall back to the legacy hyperlink renderer (known past footgun). Call sites: `hooks/use-evidence.ts`, `hooks/use-group-evidence.ts`, `pages/teacher/course/[id]/index.tsx` (PDF-prep query).
+
+### Storage buckets
+
+- `evidence` — private. Object key: `{group_id}/{task_id}/{evidence_id}-{sanitized_filename}`. RLS policies enforce group-member insert/read and course-teacher read. No UPDATE or DELETE policies (evidence immutability). The policy expressions use `storage.foldername(objects.name)[1]` — the `objects.` qualifier is required (unqualified `name` collides with `groups.name` in the teacher subquery).
 
 ### Database Change Rules (never skip these)
 
@@ -120,7 +132,7 @@ All tables have RLS. Profiles SELECT restricted to relevant users (co-members, c
 
 ## What's Built
 
-- **Student:** groups, tasks (kanban + 5 contribution types), evidence (immutable+versioned), task comments, timeline (realtime), peer review, PDF export (6 themes), shareable reports (30-day expiry), blocker declarations, in-app + Telegram notifications, course enrollment
+- **Student:** groups, tasks (kanban + 5 contribution types), evidence (immutable+versioned; real file upload via `/api/evidence/create` + Supabase Storage `evidence` bucket, or legacy URL/note), task comments, timeline (realtime), peer review, PDF export (6 themes), shareable reports (30-day expiry), blocker declarations, in-app + Telegram notifications, course enrollment
 - **Teacher:** courses, group creation (auto-transfers lead to first student), group list + progress, drill-down (read-only), course analytics, ungrouped students, course deletion (cascade)
 - **Platform:** notification preferences (4 toggles), error boundary, custom 404, privacy/terms pages, CI/CD (GitHub Actions), Upstash Redis rate limiting
 - **Real-time:** tasks, activity_log, group_members, evaluations, evidence, task_comments, courses, notifications
@@ -145,6 +157,7 @@ All tables have RLS. Profiles SELECT restricted to relevant users (co-members, c
 | `lib/validation.ts` | Zod schemas for all inputs |
 | `lib/notify.ts` | `notifyGroupMembers(groupId, text, type, excludeId)` |
 | `lib/telegram.ts` | `sendTelegramMessage(chatId, text)` |
+| `lib/evidence-upload.ts` | `sanitizeFilename`, `buildObjectKey`, `MAX_FILE_BYTES`, `ALLOWED_MIME_TYPES` |
 | `types/index.ts` | `Profile`, `Group`, `Task`, `Evidence`, `TaskComment`, `ActivityLog`, `Course`, etc. |
 
 ## API Route Template
@@ -239,3 +252,6 @@ npm run dev
 - Link existing standalone group to a course (retroactive teacher adoption): lets a student who created a standalone group later attach it to a teacher's course via a course invite token. Not urgent — pilot teachers are already using Contrib so students start groups inside courses, not standalone. Build when you see viral adoption signals (student asks "how do I show my teacher what we've done?" or a teacher signs up because a student told them to). Short-term substitute: `/api/report/share` 30-day link already works as a read-only teacher view.
 - Phase 2 cache work (SWR adoption + hook migrations): full plan at `docs/superpowers/plans/2026-04-06-cache-and-cold-start.md`. Build when user count >50 or when a pilot user explicitly says the app feels laggy.
 - Telegram push for `group_created_in_course` notification: in-app only today. Add Telegram delivery if teachers ask for it or if you find they are not checking the bell.
+- Evidence `version_number` race: `/api/evidence/create` reads `MAX(version_number)` then inserts `+1`, so concurrent uploads to the same task can produce duplicate version numbers. No `UNIQUE (task_id, version_number)` constraint exists. Fix by adding the unique index and retrying on conflict, OR by computing the next version inside the INSERT statement. Low severity at current user count (no pilot teacher has >1 student uploading to the same task simultaneously).
+- Evidence upload uses `fs.readFileSync` in `/api/evidence/create` (blocks the serverless event loop). Files cap at 4 MB so latency impact is small, but switching to `fs/promises.readFile` is a trivial win.
+- Evidence upload size cap is 4 MB (Vercel Pages Router body limit). To allow larger files, switch to pre-signed direct-to-Storage uploads from the client. Adds a round-trip and an orphan-object edge case.

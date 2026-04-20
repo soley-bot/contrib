@@ -219,7 +219,7 @@ export default function CourseDetail() {
     const taskIds = ((tasksRes.data as Task[]) ?? []).map((t) => t.id);
     const [evidenceRes, evalRes] = await Promise.all([
       taskIds.length > 0
-        ? supabase.from('evidence').select('id, task_id, uploaded_by, type, content, version_number, created_at, uploader:profiles(name)').in('task_id', taskIds)
+        ? supabase.from('evidence').select('id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, file_path, file_name, file_size, mime_type, uploader:profiles(name)').in('task_id', taskIds)
         : Promise.resolve({ data: [] as Evidence[], error: null }),
       supabase.from('evaluation_summaries').select('group_id, evaluatee_id, avg_contribution, avg_collaboration, eval_count, comments').eq('group_id', group.id),
     ]);

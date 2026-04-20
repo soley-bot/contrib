@@ -270,3 +270,68 @@ describe('validate helper', () => {
     expect(result.error!.length).toBeGreaterThan(10);
   });
 });
+
+import { createEvidenceApiSchema } from '@/lib/validation';
+
+describe('createEvidenceApiSchema', () => {
+  it('accepts a valid file payload (no content required — file is multipart)', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'file',
+      task_id: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts a valid link payload', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'link',
+      task_id: '11111111-1111-4111-8111-111111111111',
+      content: 'https://drive.google.com/abc',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepts a valid note payload', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'note',
+      task_id: '11111111-1111-4111-8111-111111111111',
+      content: 'I wrote the intro paragraph.',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('rejects link without a URL', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'link',
+      task_id: '11111111-1111-4111-8111-111111111111',
+      content: 'not a url',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('rejects note with empty content', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'note',
+      task_id: '11111111-1111-4111-8111-111111111111',
+      content: '   ',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('rejects unknown type', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'video',
+      task_id: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('rejects invalid task_id uuid', () => {
+    const r = createEvidenceApiSchema.safeParse({
+      type: 'note',
+      task_id: 'not-a-uuid',
+      content: 'hi',
+    });
+    expect(r.success).toBe(false);
+  });
+});

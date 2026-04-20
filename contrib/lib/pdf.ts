@@ -484,9 +484,16 @@ export async function generateReport(
         const taskEvidence = evidenceByTask[t.id] ?? [];
         if (taskEvidence.length > 0) {
           const latest = taskEvidence[taskEvidence.length - 1];
-          const label  = latest.type === 'note'
-            ? `[note] ${truncate(latest.content, 50)}`
-            : `[${latest.type}] ${truncate(latest.content, 45)}`;
+          let label: string;
+          if (latest.type === 'note') {
+            label = `[note] ${truncate(latest.content, 50)}`;
+          } else if (latest.type === 'file' && latest.file_path) {
+            // Uploaded file — render filename, never a raw storage path.
+            label = `[file] ${truncate(latest.file_name ?? latest.content, 45)} (uploaded)`;
+          } else {
+            // Legacy URL-based file or link.
+            label = `[${latest.type}] ${truncate(latest.content, 45)}`;
+          }
           doc.setTextColor(22, 163, 74);
           doc.text(label, PW - MR - 2, y, { align: 'right', maxWidth: 90 });
         } else {
