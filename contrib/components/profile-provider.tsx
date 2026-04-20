@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import useSWR from 'swr';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
+import { PROFILE_SELECT } from '@/lib/columns';
 import type { Profile } from '@/types';
 import type { User } from '@supabase/supabase-js';
 
@@ -17,11 +18,11 @@ const ProfileContext = createContext<ProfileContextValue | null>(null);
 async function fetchProfile(id: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, university, faculty, year_of_study, avatar_url, role, created_at')
+    .select(PROFILE_SELECT)
     .eq('id', id)
     .single();
   if (error) {
-    Sentry.captureMessage(`fetchProfile failed: ${error.message}`, 'warning');
+    Sentry.captureMessage(`fetchProfile failed: ${error.message}`, { level: 'error' });
     return null;
   }
   return data ?? null;
