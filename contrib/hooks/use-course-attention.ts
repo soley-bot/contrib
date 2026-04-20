@@ -19,19 +19,18 @@ async function fetchCourseAttention([, joinedIds]: [string, string]): Promise<Re
 
   const groupIds = groups.map((g) => g.id);
 
-  // Get task counts per group
-  const { data: tasks, error: tasksError } = await supabase
-    .from('tasks')
-    .select('group_id, status')
-    .in('group_id', groupIds)
-    .is('deleted_at', null);
-
-  // Get latest activity per group
-  const { data: latestActivity, error: activityError } = await supabase
-    .from('activity_log')
-    .select('group_id, created_at')
-    .in('group_id', groupIds)
-    .order('created_at', { ascending: false });
+  const [{ data: tasks, error: tasksError }, { data: latestActivity, error: activityError }] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('group_id, status')
+      .in('group_id', groupIds)
+      .is('deleted_at', null),
+    supabase
+      .from('activity_log')
+      .select('group_id, created_at')
+      .in('group_id', groupIds)
+      .order('created_at', { ascending: false }),
+  ]);
 
   if (tasksError || activityError) return {};
 
