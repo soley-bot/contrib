@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import useSWR from 'swr';
 import { supabase } from '@/lib/supabase';
 import type { EvaluationInsert } from '@/types';
 
@@ -9,29 +10,23 @@ interface UseEvaluationResult {
   refresh: () => void;
 }
 
+async function checkSubmitted([, groupId, userId]: [string, string, string]): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('evaluations')
+    .select('id')
+    .eq('group_id', groupId)
+    .eq('evaluator_id', userId)
+    .limit(1);
+  if (error) throw new Error(error.message);
+  return (data?.length ?? 0) > 0;
+}
+
 export function useEvaluation(
   groupId: string | undefined,
   userId: string | undefined
 ): UseEvaluationResult {
-  const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    if (!groupId || !userId) { setLoading(false); return; }
-    setLoading(true);
-    checkSubmitted(groupId, userId).finally(() => setLoading(false));
-  }, [groupId, userId, tick]);
-
-  async function checkSubmitted(gid: string, uid: string) {
-    const { data } = await supabase
-      .from('evaluations')
-      .select('id')
-      .eq('group_id', gid)
-      .eq('evaluator_id', uid)
-      .limit(1);
-    setHasSubmitted((data?.length ?? 0) > 0);
-  }
+  const key = groupId && userId ? ['eval-submitted', groupId, userId] : null;
+  const { data, isLoading, mutate } = useSWR(key, checkSubmitted);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,11 +39,11 @@ export function useEvaluation(
       if (filtered.length === 0) return;
       const { error } = await supabase.from('evaluations').insert(filtered);
       if (error) throw error;
-      setTick((t) => t + 1);
+      void mutate();
     } finally {
       setSubmitting(false);
     }
   }
 
-  return { hasSubmitted, loading, submit, refresh: () => setTick((t) => t + 1) };
+  return { hasSubmitted: data ?? false, loading: isLoading, submit, refresh: () => void mutate() };
 }

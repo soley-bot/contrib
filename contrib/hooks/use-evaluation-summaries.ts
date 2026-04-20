@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import useSWR from 'swr';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { EvaluationSummary } from '@/types';
@@ -10,19 +11,27 @@ interface UseEvaluationSummariesResult {
   refresh: () => void;
 }
 
+async function fetchSummaries([, groupId]: [string, string]): Promise<EvaluationSummary[]> {
+  const { data, error } = await supabase
+    .from('evaluation_summaries')
+    .select('group_id, evaluatee_id, avg_contribution, avg_collaboration, eval_count, comments')
+    .eq('group_id', groupId);
+  if (error) {
+    Sentry.captureMessage(`Failed to load evaluation summaries: ${error.message}`, { level: 'error' });
+    throw new Error(error.message);
+  }
+  return (data as EvaluationSummary[]) ?? [];
+}
+
 export function useEvaluationSummaries(
   groupId: string | undefined,
   enabled: boolean
 ): UseEvaluationSummariesResult {
-  const [summaries, setSummaries] = useState<EvaluationSummary[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [tick, setTick] = useState(0);
+  const key = groupId && enabled ? ['eval-summaries', groupId] : null;
+  const { data, isLoading, error, mutate } = useSWR(key, fetchSummaries);
 
   useEffect(() => {
     if (!groupId || !enabled) return;
-    setLoading(true);
-    fetchSummaries(groupId).finally(() => setLoading(false));
 
     const channel = supabase
       .channel(`evaluations:${groupId}`)
@@ -32,26 +41,17 @@ export function useEvaluationSummaries(
         table: 'evaluations',
         filter: `group_id=eq.${groupId}`,
       }, () => {
-        fetchSummaries(groupId);
+        void mutate();
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [groupId, enabled, tick]);
+  }, [groupId, enabled, mutate]);
 
-  async function fetchSummaries(id: string) {
-    const { data, error } = await supabase
-      .from('evaluation_summaries')
-      .select('group_id, evaluatee_id, avg_contribution, avg_collaboration, eval_count, comments')
-      .eq('group_id', id);
-    if (error) {
-      Sentry.captureMessage(`Failed to load evaluation summaries: ${error.message}`, { level: 'error' });
-      setError('Failed to load data.');
-      return;
-    }
-    setError(null);
-    setSummaries((data as EvaluationSummary[]) ?? []);
-  }
-
-  return { summaries, loading, error, refresh: () => setTick((t) => t + 1) };
+  return {
+    summaries: data ?? [],
+    loading: isLoading,
+    error: error ? (error as Error).message : null,
+    refresh: () => void mutate(),
+  };
 }
