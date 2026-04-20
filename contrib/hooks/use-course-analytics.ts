@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import type { EvaluationSession } from '@/types';
@@ -19,6 +19,13 @@ interface EvalScoreRow {
   collaboration_score: number;
 }
 
+interface AnalyticsData {
+  evalSessions: EvaluationSession[];
+  evalCounts: Record<string, string[]>;
+  evalScores: EvalScoreRow[];
+  latestActivity: Record<string, string>;
+}
+
 interface UseCourseAnalyticsResult {
   evalSessions: EvaluationSession[];
   evalCounts: Record<string, string[]>; // group_id -> unique evaluator_ids
@@ -29,104 +36,86 @@ interface UseCourseAnalyticsResult {
   refresh: () => void;
 }
 
-export function useCourseAnalytics(groupIds: string[]): UseCourseAnalyticsResult {
-  const [evalSessions, setEvalSessions] = useState<EvaluationSession[]>([]);
-  const [evalCounts, setEvalCounts] = useState<Record<string, string[]>>({});
-  const [evalScores, setEvalScores] = useState<EvalScoreRow[]>([]);
-  const [latestActivity, setLatestActivity] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [tick, setTick] = useState(0);
+async function fetchCourseAnalytics([, joinedIds]: [string, string]): Promise<AnalyticsData> {
+  const ids = joinedIds.split(',').filter(Boolean);
 
-  useEffect(() => {
-    if (groupIds.length === 0) {
-      setLoading(false);
-      setEvalSessions([]);
-      setEvalCounts({});
-      setEvalScores([]);
-      setLatestActivity({});
-      return;
-    }
-    setLoading(true);
-    fetchAll(groupIds).finally(() => setLoading(false));
-  }, [groupIds.join(','), tick]);
+  const [sessionsRes, evalsRes, activityRes, scoresRes] = await Promise.all([
+    supabase
+      .from('evaluation_sessions')
+      .select('id, group_id, opened_by, opened_at')
+      .in('group_id', ids),
+    supabase
+      .from('evaluations')
+      .select('group_id, evaluator_id')
+      .in('group_id', ids),
+    supabase
+      .from('activity_log')
+      .select('group_id, created_at')
+      .in('group_id', ids)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('evaluations')
+      .select('group_id, contribution_score, collaboration_score')
+      .in('group_id', ids),
+  ]);
 
-  async function fetchAll(ids: string[]) {
-    const [sessionsRes, evalsRes, activityRes, scoresRes] = await Promise.all([
-      supabase
-        .from('evaluation_sessions')
-        .select('id, group_id, opened_by, opened_at')
-        .in('group_id', ids),
-      supabase
-        .from('evaluations')
-        .select('group_id, evaluator_id')
-        .in('group_id', ids),
-      supabase
-        .from('activity_log')
-        .select('group_id, created_at')
-        .in('group_id', ids)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('evaluations')
-        .select('group_id, contribution_score, collaboration_score')
-        .in('group_id', ids),
-    ]);
-
-    if (sessionsRes.error) {
-      Sentry.captureMessage(`Failed to load evaluation sessions: ${sessionsRes.error.message}`, { level: 'error' });
-      setError('Failed to load peer review data.');
-      return;
-    }
-    if (evalsRes.error) {
-      Sentry.captureMessage(`Failed to load evaluations: ${evalsRes.error.message}`, { level: 'error' });
-      setError('Failed to load peer review data.');
-      return;
-    }
-    if (activityRes.error) {
-      Sentry.captureMessage(`Failed to load activity log: ${activityRes.error.message}`, { level: 'error' });
-      setError('Failed to load activity data.');
-      return;
-    }
-    if (scoresRes.error) {
-      Sentry.captureMessage(`Failed to load evaluation scores: ${scoresRes.error.message}`, { level: 'error' });
-      setError('Failed to load peer review scores.');
-      return;
-    }
-
-    setError(null);
-    setEvalSessions((sessionsRes.data as EvaluationSession[]) ?? []);
-
-    // Build evaluator counts per group (unique evaluator_ids)
-    const counts: Record<string, string[]> = {};
-    ids.forEach((id) => { counts[id] = []; });
-    ((evalsRes.data as EvalCount[]) ?? []).forEach((row) => {
-      if (!counts[row.group_id]) counts[row.group_id] = [];
-      if (!counts[row.group_id].includes(row.evaluator_id)) {
-        counts[row.group_id].push(row.evaluator_id);
-      }
-    });
-    setEvalCounts(counts);
-
-    // Build latest activity per group
-    const latest: Record<string, string> = {};
-    ((activityRes.data as ActivityEntry[]) ?? []).forEach((row) => {
-      // Already ordered descending, so first occurrence per group is the latest
-      if (!latest[row.group_id]) {
-        latest[row.group_id] = row.created_at;
-      }
-    });
-    setLatestActivity(latest);
-
-    setEvalScores((scoresRes.data as EvalScoreRow[]) ?? []);
+  if (sessionsRes.error) {
+    Sentry.captureMessage(`Failed to load evaluation sessions: ${sessionsRes.error.message}`, { level: 'error' });
+    throw new Error('Failed to load peer review data.');
+  }
+  if (evalsRes.error) {
+    Sentry.captureMessage(`Failed to load evaluations: ${evalsRes.error.message}`, { level: 'error' });
+    throw new Error('Failed to load peer review data.');
+  }
+  if (activityRes.error) {
+    Sentry.captureMessage(`Failed to load activity log: ${activityRes.error.message}`, { level: 'error' });
+    throw new Error('Failed to load activity data.');
+  }
+  if (scoresRes.error) {
+    Sentry.captureMessage(`Failed to load evaluation scores: ${scoresRes.error.message}`, { level: 'error' });
+    throw new Error('Failed to load peer review scores.');
   }
 
+  // Build evaluator counts per group (unique evaluator_ids)
+  const counts: Record<string, string[]> = {};
+  ids.forEach((id) => { counts[id] = []; });
+  ((evalsRes.data as EvalCount[]) ?? []).forEach((row) => {
+    if (!counts[row.group_id]) counts[row.group_id] = [];
+    if (!counts[row.group_id].includes(row.evaluator_id)) {
+      counts[row.group_id].push(row.evaluator_id);
+    }
+  });
+
+  // Build latest activity per group
+  const latest: Record<string, string> = {};
+  ((activityRes.data as ActivityEntry[]) ?? []).forEach((row) => {
+    // Already ordered descending, so first occurrence per group is the latest
+    if (!latest[row.group_id]) {
+      latest[row.group_id] = row.created_at;
+    }
+  });
+
   return {
-    evalSessions,
-    evalCounts,
-    evalScores,
-    latestActivity,
-    loading,
-    error,
-    refresh: () => setTick((t) => t + 1),
+    evalSessions: (sessionsRes.data as EvaluationSession[]) ?? [],
+    evalCounts: counts,
+    evalScores: (scoresRes.data as EvalScoreRow[]) ?? [],
+    latestActivity: latest,
+  };
+}
+
+export function useCourseAnalytics(groupIds: string[]): UseCourseAnalyticsResult {
+  const { data, isLoading, error, mutate } = useSWR(
+    groupIds.length ? ['course-analytics', groupIds.join(',')] : null,
+    fetchCourseAnalytics,
+  );
+
+  return {
+    evalSessions: data?.evalSessions ?? [],
+    evalCounts: data?.evalCounts ?? {},
+    evalScores: data?.evalScores ?? [],
+    latestActivity: data?.latestActivity ?? {},
+    loading: isLoading,
+    error: error ? (error as Error).message : null,
+    refresh: () => void mutate(),
   };
 }
