@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import useSWR from 'swr';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import { PROFILE_SELECT } from '@/lib/columns';
@@ -10,18 +11,25 @@ interface UseEvidenceResult {
   refresh: () => void;
 }
 
-export function useEvidence(taskId: string | undefined): UseEvidenceResult {
-  const [evidence, setEvidence] = useState<Evidence[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [tick, setTick] = useState(0);
+async function fetchEvidence(taskId: string): Promise<Evidence[]> {
+  const { data, error } = await supabase
+    .from('evidence')
+    .select(`id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, file_path, file_name, file_size, mime_type, uploader:profiles!evidence_uploaded_by_fkey(${PROFILE_SELECT})`)
+    .eq('task_id', taskId)
+    .order('version_number', { ascending: true });
+  if (error) {
+    Sentry.captureMessage(`Failed to load evidence: ${error.message}`, { level: 'error' });
+    throw new Error('Failed to load data.');
+  }
+  return (data as unknown as Evidence[]) ?? [];
+}
 
-  const mountedRef = useRef(true);
+export function useEvidence(taskId: string | undefined): UseEvidenceResult {
+  const key = taskId ? ['evidence', taskId] : null;
+  const { data, error, mutate } = useSWR(key, ([, id]) => fetchEvidence(id));
 
   useEffect(() => {
-    mountedRef.current = true;
-    if (!taskId) { setEvidence([]); return; }
-    fetchEvidence(taskId);
-
+    if (!taskId) return;
     const channel = supabase
       .channel(`evidence:${taskId}`)
       .on('postgres_changes', {
@@ -29,29 +37,15 @@ export function useEvidence(taskId: string | undefined): UseEvidenceResult {
         schema: 'public',
         table: 'evidence',
         filter: `task_id=eq.${taskId}`,
-      }, () => {
-        fetchEvidence(taskId);
-      })
+      }, () => { void mutate(); })
       .subscribe();
 
-    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
-  }, [taskId, tick]);
+    return () => { supabase.removeChannel(channel); };
+  }, [taskId, mutate]);
 
-  async function fetchEvidence(id: string) {
-    const { data, error: fetchError } = await supabase
-      .from('evidence')
-      .select(`id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, file_path, file_name, file_size, mime_type, uploader:profiles!evidence_uploaded_by_fkey(${PROFILE_SELECT})`)
-      .eq('task_id', id)
-      .order('version_number', { ascending: true });
-    if (fetchError) {
-      Sentry.captureMessage(`Failed to load evidence: ${fetchError.message}`, { level: 'error' });
-      if (mountedRef.current) setError('Failed to load data.');
-      return;
-    }
-    if (!mountedRef.current) return;
-    setError(null);
-    setEvidence((data as unknown as Evidence[]) ?? []);
-  }
-
-  return { evidence, error, refresh: () => setTick((t) => t + 1) };
+  return {
+    evidence: data ?? [],
+    error: error ? (error as Error).message : null,
+    refresh: () => { void mutate(); },
+  };
 }
