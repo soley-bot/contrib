@@ -593,15 +593,17 @@ follow-up using this same pattern."
 
 **This is a non-code verification step.** It must be done by a human who has access to the Vercel dashboard. Do not skip it — a disabled Fluid Compute setting would silently undo some of the server-side benefit.
 
-- [ ] **Step 1: Open the project in the Vercel dashboard**
+- [x] **Step 1: Open the project in the Vercel dashboard**
 
 Navigate to the Contrib project (the one deployed at `joincontrib.com`) at https://vercel.com/dashboard.
 
-- [ ] **Step 2: Check Settings → Functions**
+- [x] **Step 2: Check Settings → Functions**
 
 Look for the "Fluid Compute" setting. For Next.js 16 projects it should be **enabled by default**. Confirm this. If it is off, turn it on (no code change needed, no redeploy needed on most plans — verify by reading Vercel's current docs for your plan tier).
 
-- [ ] **Step 3: Record the finding**
+**Result (2026-04-20): Enabled. ✓**
+
+- [x] **Step 3: Record the finding**
 
 Add a one-line note to `contrib/CLAUDE.md` under "Git & Deployment" confirming the state:
 ```
