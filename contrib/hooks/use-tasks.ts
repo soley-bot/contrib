@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import useSWR from 'swr';
 import * as Sentry from '@sentry/nextjs';
 import { supabase } from '@/lib/supabase';
 import { PROFILE_SELECT } from '@/lib/columns';
@@ -11,20 +12,26 @@ interface UseTasksResult {
   refresh: () => void;
 }
 
-export function useTasks(groupId: string | undefined): UseTasksResult {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [tick, setTick] = useState(0);
+async function fetchTasks(groupId: string): Promise<Task[]> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select(`id, group_id, title, description, assignee_id, status, due_date, evidence_url, completed_at, contribution_type, deleted_at, created_at, assignee:profiles!tasks_assignee_id_fkey(${PROFILE_SELECT})`)
+    .eq('group_id', groupId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+  if (error) {
+    Sentry.captureMessage(`Failed to load tasks: ${error.message}`, { level: 'error' });
+    throw new Error('Failed to load data.');
+  }
+  return (data as unknown as Task[]) ?? [];
+}
 
-  const mountedRef = useRef(true);
+export function useTasks(groupId: string | undefined): UseTasksResult {
+  const key = groupId ? ['tasks', groupId] : null;
+  const { data, error, isLoading, mutate } = useSWR(key, ([, id]) => fetchTasks(id));
 
   useEffect(() => {
-    mountedRef.current = true;
-    if (!groupId) { setLoading(false); return; }
-    setLoading(true);
-    fetchTasks(groupId).finally(() => { if (mountedRef.current) setLoading(false); });
-
+    if (!groupId) return;
     const channel = supabase
       .channel(`tasks:${groupId}`)
       .on('postgres_changes', {
@@ -32,30 +39,16 @@ export function useTasks(groupId: string | undefined): UseTasksResult {
         schema: 'public',
         table: 'tasks',
         filter: `group_id=eq.${groupId}`,
-      }, () => {
-        fetchTasks(groupId);
-      })
+      }, () => { void mutate(); })
       .subscribe();
 
-    return () => { mountedRef.current = false; supabase.removeChannel(channel); };
-  }, [groupId, tick]);
+    return () => { supabase.removeChannel(channel); };
+  }, [groupId, mutate]);
 
-  async function fetchTasks(id: string) {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select(`id, group_id, title, description, assignee_id, status, due_date, evidence_url, completed_at, contribution_type, deleted_at, created_at, assignee:profiles!tasks_assignee_id_fkey(${PROFILE_SELECT})`)
-      .eq('group_id', id)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false });
-    if (error) {
-      Sentry.captureMessage(`Failed to load tasks: ${error.message}`, { level: 'error' });
-      if (mountedRef.current) setError('Failed to load data.');
-      return;
-    }
-    if (!mountedRef.current) return;
-    setError(null);
-    setTasks((data as unknown as Task[]) ?? []);
-  }
-
-  return { tasks, loading, error, refresh: () => setTick((t) => t + 1) };
+  return {
+    tasks: data ?? [],
+    loading: isLoading,
+    error: error ? (error as Error).message : null,
+    refresh: () => { void mutate(); },
+  };
 }
