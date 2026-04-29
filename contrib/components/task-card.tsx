@@ -86,10 +86,10 @@ export default function TaskCard({ task, isLead, currentUserId, evidenceCount = 
           </span>
         )}
         {evidenceCount > 0 && (
-          <span className="text-[11px] font-medium text-green">Evidence ({evidenceCount})</span>
+          <span className="text-[11px] font-medium text-green">Proof ({evidenceCount})</span>
         )}
         {task.status === 'done' && evidenceCount === 0 && (
-          <span className="text-[11px] text-text-tertiary">No evidence</span>
+          <span className="text-[11px] text-text-tertiary">No proof</span>
         )}
         <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[task.status]}`}>
           {STATUS_LABEL[task.status]}

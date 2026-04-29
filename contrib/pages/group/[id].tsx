@@ -349,7 +349,7 @@ export default function GroupPage() {
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div className="flex items-center gap-1.5 text-sm">
             <button onClick={() => router.push('/dashboard')} className="text-text-tertiary hover:text-text-secondary transition-colors">
-              My Groups
+              My Projects
             </button>
             <span className="text-[#CBD5E1]">›</span>
             <span className="font-semibold text-text">{group.name}</span>
@@ -500,7 +500,7 @@ export default function GroupPage() {
       <nav aria-label="Mobile navigation" className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-border flex"
         style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { id: 'dashboard',  label: 'Groups',   icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
+          { id: 'dashboard',  label: 'Projects', icon: <IconHome size={22} />,     action: () => router.push('/dashboard') },
           { id: 'tasks',      label: 'Tasks',    icon: <IconBoard size={22} />,    action: () => setTab('tasks') },
           { id: 'activity',   label: 'Timeline', icon: <IconActivity size={22} />, action: () => setTab('activity') },
           { id: 'members',    label: 'Members',  icon: <IconUsers size={22} />,    action: () => setTab('members') },

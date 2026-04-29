@@ -35,9 +35,9 @@ export default function GettingStartedChecklist({ groupId, hasTasks, hasTeammate
   if (dismissed) return null;
 
   const items = [
-    { done: hasTasks, label: 'Add your first task' },
+    { done: hasTasks, label: 'Add your first contribution task' },
     { done: hasTeammates, label: 'Invite a teammate' },
-    { done: hasEvidence, label: 'Log evidence on a task' },
+    { done: hasEvidence, label: 'Add work proof to a task' },
   ];
 
   const doneCount = items.filter((i) => i.done).length;

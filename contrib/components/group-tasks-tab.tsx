@@ -103,8 +103,8 @@ export default function GroupTasksTab({
         <div className="bg-white border border-border rounded-xl px-4 py-3 mb-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-text">Contribution Record</p>
-              <p className="text-[11px] text-text-tertiary mt-0.5">Share or download your group&apos;s contribution record</p>
+              <p className="text-sm font-medium text-text">Project Record</p>
+              <p className="text-[11px] text-text-tertiary mt-0.5">Share or download a portfolio-ready record of this project</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button onClick={onShareLink} disabled={shareLoading}
@@ -154,8 +154,8 @@ export default function GroupTasksTab({
         />
       )}
 
-      <InlineTip id="tasks-log-work">Mark tasks as done and log evidence to build your Contribution Record for grading.</InlineTip>
-      <InlineTip id="tasks-types">Tag tasks by type (research, meeting, coordination) to show the full picture of your contributions.</InlineTip>
+      <InlineTip id="tasks-log-work">Mark tasks as done and add work proof to build a stronger project record.</InlineTip>
+      <InlineTip id="tasks-types">Tag tasks by type (research, meeting, coordination) to show the full picture of your project contribution.</InlineTip>
 
       {/* Task board skeleton while loading */}
       {tasksLoading ? <TaskBoardSkeleton /> : <>

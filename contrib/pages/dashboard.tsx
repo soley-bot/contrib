@@ -142,13 +142,13 @@ export default function Dashboard() {
         {/* Desktop topbar */}
         <div className="hidden md:flex items-center justify-between h-14 px-6 bg-white border-b border-border">
           <div>
-            <span className="text-base font-semibold text-text">My Groups</span>
+            <span className="text-base font-semibold text-text">My Projects</span>
           </div>
           <button
             onClick={() => setShowModal(true)}
             className="h-9 px-3 bg-brand hover:bg-brand-hover text-white text-[13px] font-medium rounded-md flex items-center gap-1.5 transition-colors"
           >
-            <IconPlus size={14} /> New group
+            <IconPlus size={14} /> New project
           </button>
         </div>
 
@@ -259,19 +259,19 @@ export default function Dashboard() {
                 <rect x="160" y="39" width="24" height="3" rx="1.5" fill="white" fillOpacity="0.8"/>
                 <rect x="160" y="45" width="16" height="3" rx="1.5" fill="white" fillOpacity="0.6"/>
               </svg>
-              <p className="text-[16px] font-bold text-text mb-1.5">Start your first group</p>
-              <p className="text-sm text-text-tertiary mb-6 max-w-xs mx-auto">Invite up to 8 teammates. Log your work. Get credit for what you actually did.</p>
+              <p className="text-[16px] font-bold text-text mb-1.5">Start your first project record</p>
+              <p className="text-sm text-text-tertiary mb-6 max-w-xs mx-auto">Invite up to 8 teammates, log work proof, and build a record you can use after the class ends.</p>
               <button
                 onClick={() => setShowModal(true)}
                 className="inline-flex items-center gap-2 h-11 px-6 bg-brand hover:bg-brand-hover text-white text-[14px] font-medium rounded-md transition-colors"
               >
-                <IconPlus size={16} /> Create your first group
+                <IconPlus size={16} /> Create your first project
               </button>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 mt-2">
               {activeGroups.length > 0 && (
-                <p className="text-[11px] font-bold tracking-[2px] uppercase text-text-tertiary mb-2.5 mt-2">Your groups</p>
+                <p className="text-[11px] font-bold tracking-[2px] uppercase text-text-tertiary mb-2.5 mt-2">Your project records</p>
               )}
               {activeGroups.map((group) => {
                 const s = summaries[group.id];
@@ -339,7 +339,7 @@ export default function Dashboard() {
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className={`transition-transform ${showPastGroups ? 'rotate-90' : ''}`}>
                       <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Past groups ({pastGroups.length})
+                    Past projects ({pastGroups.length})
                   </button>
                   {showPastGroups && (
                     <div className="flex flex-col gap-2">
@@ -404,14 +404,14 @@ export default function Dashboard() {
           <div ref={modalRef} className="w-full md:max-w-[520px] bg-white rounded-t-2xl md:rounded-xl">
             <div className="w-10 h-1 rounded-full bg-[#CBD5E1] mx-auto mt-2.5 md:hidden" />
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <h2 className="text-base font-semibold text-text">New Group</h2>
+              <h2 className="text-base font-semibold text-text">New Project Record</h2>
               <button type="button" onClick={() => { if (!creating) setShowModal(false); }} className="p-1 text-text-secondary hover:text-text transition-colors">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="p-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-2">
-                <label htmlFor="group-name" className="text-[13px] font-medium text-text-secondary">Group name</label>
+                <label htmlFor="group-name" className="text-[13px] font-medium text-text-secondary">Project title</label>
                 <input id="group-name" type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Business Strategy Final"
                   aria-describedby="group-form-error"
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
@@ -428,7 +428,7 @@ export default function Dashboard() {
                   className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white" />
               </div>
               <p className="text-[12px] text-text-tertiary leading-snug">
-                You can have up to 8 teammates in a group, including yourself.
+                You can have up to 8 teammates on a project record, including yourself.
               </p>
               {enrolledCourses.length > 0 && (
                 <div className="flex flex-col gap-2">
@@ -439,7 +439,7 @@ export default function Dashboard() {
                     onChange={(e) => setSelectedCourseId(e.target.value)}
                     className="w-full border border-border rounded-md px-3 py-2.5 text-[15px] focus:border-brand outline-none bg-white"
                   >
-                    <option value="">No course (standalone group)</option>
+                    <option value="">No course (standalone project)</option>
                     {enrolledCourses.map((c) => (
                       <option key={c.id} value={c.id}>{c.name} — {c.subject}</option>
                     ))}
@@ -450,7 +450,7 @@ export default function Dashboard() {
               <div className="pt-1 border-t border-border">
                 <button type="submit" disabled={creating}
                   className="w-full h-11 bg-brand hover:bg-brand-hover text-white text-sm font-medium rounded-md transition-colors disabled:opacity-60">
-                  {creating ? 'Creating…' : 'Create group'}
+                  {creating ? 'Creating...' : 'Create project record'}
                 </button>
               </div>
             </form>

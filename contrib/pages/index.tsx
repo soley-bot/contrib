@@ -130,9 +130,9 @@ function Slide1Visual({ active }: { active: boolean }) {
           className="mx-4 mb-4 rounded-lg border border-[#EF4444]/20 bg-[#FEF2F2] px-4 py-3 text-center transition-all duration-500"
           style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.8s' : '0s' }}
         >
-          <div className="text-[11px] font-bold text-[#EF4444] uppercase tracking-widest mb-1">Final Grade</div>
-          <div className="text-[18px] font-extrabold text-text">Everyone gets B+.</div>
-          <div className="text-[12px] text-muted mt-0.5">Same grade. Different effort.</div>
+          <div className="text-[11px] font-bold text-[#1A56E8] uppercase tracking-widest mb-1">Project Proof</div>
+          <div className="text-[18px] font-extrabold text-text">Dara&apos;s work is on record.</div>
+          <div className="text-[12px] text-muted mt-0.5">Tasks, files, notes, and progress in one place.</div>
         </div>
       </div>
     </div>
@@ -161,7 +161,7 @@ function Slide2Visual({ active }: { active: boolean }) {
         style={{ opacity: active ? 1 : 0, transform: active ? 'translateX(0)' : 'translateX(24px)', transitionDelay: active ? '0.3s' : '0s' }}
       >
         <div className="bg-bg border-b border-border px-5 py-3">
-          <div className="text-[13px] font-bold text-text">Peer Review Form</div>
+          <div className="text-[13px] font-bold text-text">Team Confirmation</div>
           <div className="text-[11px] text-muted">Group Project — Marketing Plan</div>
         </div>
         <div className="px-5 py-4">
@@ -193,13 +193,13 @@ function Slide2Visual({ active }: { active: boolean }) {
           </table>
         </div>
       </div>
-      {/* FORMALITY stamp */}
+      {/* Confirmation stamp */}
       <div
         className="absolute inset-0 flex items-center justify-center transition-all duration-500 pointer-events-none"
         style={{ opacity: active ? 0.45 : 0, transitionDelay: active ? '1.1s' : '0s' }}
       >
         <div className="border-4 border-[#EF4444]/50 rounded-lg px-5 py-2 rotate-[-12deg]">
-          <span className="text-[22px] font-extrabold text-[#EF4444]/60 tracking-[0.25em] uppercase">Formality</span>
+          <span className="text-[22px] font-extrabold text-[#EF4444]/60 tracking-[0.2em] uppercase">Confirmed</span>
         </div>
       </div>
     </div>
@@ -341,7 +341,7 @@ function Slide4Visual({ active }: { active: boolean }) {
         className="mt-3 text-center text-[12px] text-muted transition-all duration-500"
         style={{ opacity: active ? 1 : 0, transitionDelay: active ? '1.8s' : '0s' }}
       >
-        Grades based on evidence, not memory.
+        A clean project record students can share after the class ends.
       </div>
     </div>
   );
@@ -364,8 +364,8 @@ const SLIDES: Slide[] = [
   {
     id: 1,
     label: 'Every semester',
-    title: 'The same thing happens.',
-    body: "A group of students gets assigned a project. Four people work. One doesn\u2019t. The deadline comes \u2014 and everyone gets the same grade.",
+    title: 'Your class projects should count later.',
+    body: 'Students already create research, presentations, campaigns, reports, and prototypes. Contrib helps turn that work into proof they can use after the grade.',
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -375,8 +375,8 @@ const SLIDES: Slide[] = [
   {
     id: 2,
     label: 'The real problem',
-    title: "Teachers know. They just can\u2019t see.",
-    body: "Peer review forms exist \u2014 but they\u2019re filled out at the end, from memory, under social pressure. The form becomes a formality.",
+    title: 'Good work gets buried in chats and files.',
+    body: 'Most project evidence lives across Telegram, Drive, slides, screenshots, and memory. By the end, it is hard to explain each contribution clearly.',
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -386,8 +386,8 @@ const SLIDES: Slide[] = [
   {
     id: 3,
     label: 'The shift',
-    title: "Make effort visible \u2014 while it\u2019s happening.",
-    body: 'Students log tasks and review each other inside Contrib. Teachers see exactly who did what.',
+    title: 'Build a project record as the team works.',
+    body: 'Students organize tasks, attach proof, and confirm contributions inside Contrib. The portfolio material is created naturally from the project.',
     bg: '#FFFFFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -397,8 +397,8 @@ const SLIDES: Slide[] = [
   {
     id: 4,
     label: 'The result',
-    title: 'The grade reflects the work.',
-    body: 'The student who carried the group gets a better grade. The teacher grades with proof, not instinct.',
+    title: 'A project page is ready when the work is done.',
+    body: 'Each project can become a clean case study with roles, contributions, evidence, teammate signals, and a shareable summary.',
     bg: '#F8FAFF',
     textColor: '#0F172A',
     labelColor: '#1A56E8',
@@ -431,9 +431,9 @@ function CTASlide({ active }: { active: boolean }) {
           </svg>
         </div>
         <h2 className="font-extrabold text-text mb-2" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.15 }}>
-          See who did what. Fairly.
+          Turn class projects into proof of your work.
         </h2>
-        <p className="text-[16px] text-muted mb-8">Contrib helps student groups track contributions — so effort matches credit. Free to use.</p>
+        <p className="text-[16px] text-muted mb-8">Contrib helps student teams organize group work, record contributions, and build portfolio-ready project pages over time. Free to use.</p>
         <Link
           href="/signup"
           className="inline-flex items-center justify-center h-13 px-8 py-3.5 text-white text-[16px] font-semibold rounded-lg transition-colors bg-brand hover:bg-brand-dark"
@@ -510,10 +510,10 @@ export default function Landing() {
   return (
     <div className="min-h-dvh bg-white overflow-hidden">
       <Head>
-        <title>Contrib — Make individual effort visible in group work</title>
-        <meta name="description" content="Contrib turns invisible individual contributions visible in group projects. Track tasks, log evidence, peer review, and export contribution records." />
-        <meta property="og:title" content="Contrib — Make individual effort visible in group work" />
-        <meta property="og:description" content="Track tasks, log evidence, peer review, and export contribution records for group projects." />
+        <title>Contrib - Turn university projects into career proof</title>
+        <meta name="description" content="Contrib helps student teams organize group work, record contributions, attach proof, and turn university projects into portfolio-ready project records." />
+        <meta property="og:title" content="Contrib - Turn university projects into career proof" />
+        <meta property="og:description" content="Organize group work, attach proof, confirm contributions, and build portfolio-ready project records from university projects." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://joincontrib.com" />
         <meta property="og:image" content="https://joincontrib.com/api/og" />

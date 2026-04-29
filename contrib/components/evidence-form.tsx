@@ -14,7 +14,7 @@ interface EvidenceFormProps {
 type TabDef = { value: EvidenceType; label: string; hint: string };
 
 const TABS: TabDef[] = [
-  { value: 'file', label: 'Upload file', hint: 'Pick a file from your device (PDF, image, docx, up to 4 MB).' },
+  { value: 'file', label: 'Upload proof', hint: 'Pick a file from your device (PDF, image, docx, up to 4 MB).' },
   { value: 'link', label: 'Link',        hint: 'Paste a shareable URL.' },
   { value: 'note', label: 'Note',        hint: 'Describe what you did.' },
 ];
@@ -67,7 +67,7 @@ export default function EvidenceForm({ taskId, taskTitle, groupId, userId, nextV
       const resp = await fetch('/api/evidence/create', { method: 'POST', body: form });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
-        setError(data.error ?? 'Failed to save evidence.');
+        setError(data.error ?? 'Failed to save work proof.');
         setSaving(false);
         return;
       }

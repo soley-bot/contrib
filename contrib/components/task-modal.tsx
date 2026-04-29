@@ -104,7 +104,7 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[13px] font-medium text-text-secondary">
-                Evidence {hasEvidence && <span className="font-normal text-green">({evidence.length} version{evidence.length !== 1 ? 's' : ''})</span>}
+                Work proof {hasEvidence && <span className="font-normal text-green">({evidence.length} version{evidence.length !== 1 ? 's' : ''})</span>}
               </p>
               {!showForm && (
                 <button type="button" onClick={() => setShowForm(true)} className="text-[12px] font-medium text-brand">
@@ -113,7 +113,7 @@ export default function TaskModal({ task, members, userId, isLead, onClose, onUp
               )}
             </div>
             {status === 'done' && !hasEvidence && !showForm && (
-              <p className="text-[12px] text-text-tertiary mb-2">Add evidence (optional but recommended)</p>
+              <p className="text-[12px] text-text-tertiary mb-2">Add work proof (optional but recommended)</p>
             )}
             {hasEvidence && <EvidenceList evidence={evidence} />}
             {showForm && (

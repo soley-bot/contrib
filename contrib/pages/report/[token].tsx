@@ -60,7 +60,7 @@ export default function PublicReportPage() {
       <div className="min-h-dvh bg-bg flex items-center justify-center">
         <div className="text-center">
           <div className="spinner mb-3" />
-          <p className="text-sm text-muted">Loading report…</p>
+          <p className="text-sm text-muted">Loading project record...</p>
         </div>
       </div>
     );
@@ -70,8 +70,8 @@ export default function PublicReportPage() {
     return (
       <div className="min-h-dvh bg-bg flex flex-col items-center justify-center gap-3 px-5 text-center">
         <span className="text-text-tertiary"><IconAlertTriangle size={32} /></span>
-        <p className="text-lg font-semibold text-text">Report not found</p>
-        <p className="text-sm text-muted">This report link is invalid or has expired.</p>
+        <p className="text-lg font-semibold text-text">Project record not found</p>
+        <p className="text-sm text-muted">This project record link is invalid or has expired.</p>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function PublicReportPage() {
         <div className="max-w-3xl mx-auto px-4 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-medium text-brand tracking-wider uppercase mb-1">Contribution Record</p>
+              <p className="text-[11px] font-medium text-brand tracking-wider uppercase mb-1">Project Record</p>
               <h1 className="text-xl font-bold text-text">{group.name}</h1>
               <p className="text-sm text-muted mt-0.5">
                 {group.subject}
@@ -138,7 +138,7 @@ export default function PublicReportPage() {
         {/* Member Contributions */}
         <div className="bg-white border border-border rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-semibold text-text">Member Contributions</h2>
+            <h2 className="text-sm font-semibold text-text">Contribution Proof</h2>
           </div>
           <table className="w-full text-sm">
             <thead>
@@ -189,8 +189,8 @@ export default function PublicReportPage() {
                     <p className={`text-sm truncate ${t.status === 'done' ? 'text-text' : 'text-muted'}`}>{t.title}</p>
                     <p className="text-[11px] text-text-tertiary">
                       {assignee?.profile?.name ?? 'Unassigned'}
-                      {t.status === 'done' && hasEvidence && ' \u00b7 Evidence attached'}
-                      {t.status === 'done' && !hasEvidence && ' \u00b7 No evidence'}
+                      {t.status === 'done' && hasEvidence && ' \u00b7 Work proof attached'}
+                      {t.status === 'done' && !hasEvidence && ' \u00b7 No work proof'}
                     </p>
                   </div>
                   <span className={`text-[11px] font-medium flex-shrink-0 ${

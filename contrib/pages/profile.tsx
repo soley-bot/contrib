@@ -316,7 +316,7 @@ export default function ProfilePage() {
           {/* Stats (student only) */}
           {isStudent && (
             <div className="mt-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">Your stats</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">Your project profile</p>
               <div className="grid grid-cols-3 gap-2.5">
                 {!statsLoaded ? (
                   [1, 2, 3].map((i) => (
@@ -327,9 +327,9 @@ export default function ProfilePage() {
                   ))
                 ) : (
                   [
-                    { label: 'Groups joined', value: groups.length },
-                    { label: 'Tasks done', value: tasksDone },
-                    { label: 'Tasks assigned', value: tasksAssigned },
+                    { label: 'Projects joined', value: groups.length },
+                    { label: 'Contributions done', value: tasksDone },
+                    { label: 'Tasks on record', value: tasksAssigned },
                   ].map((s) => (
                     <div key={s.label} className="bg-white border border-border rounded-xl px-3 py-3 text-center shadow-sm">
                       <p className="text-2xl font-bold text-text">{s.value}</p>

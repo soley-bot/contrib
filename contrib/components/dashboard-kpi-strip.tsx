@@ -17,7 +17,7 @@ export default function DashboardKpiStrip({ userId }: DashboardKpiStripProps): R
   const cells: KpiCell[] = [
     { value: tasksToday, label: 'Tasks today', color: '#1A56E8' },
     { value: overdue, label: 'Overdue', color: '#DC2626' },
-    { value: logsThisWeek, label: 'Logs this week', color: '#16A34A' },
+    { value: logsThisWeek, label: 'Proof this week', color: '#16A34A' },
   ];
 
   return (

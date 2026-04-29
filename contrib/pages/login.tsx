@@ -76,7 +76,7 @@ export default function Login() {
     <>
     <Head>
       <title>Log in — Contrib</title>
-      <meta name="description" content="Log in to Contrib. Track your group contributions and export your Contribution Record." />
+      <meta name="description" content="Log in to Contrib. Organize project work, attach proof, and build your project record." />
     </Head>
     <div className="min-h-dvh bg-bg">
       <div className={`max-w-[440px] mx-auto px-5 pt-8 pb-20 transition-opacity ${redirecting ? 'opacity-60 pointer-events-none' : ''}`}>
@@ -91,7 +91,7 @@ export default function Login() {
           </svg>
           <span className="text-xl font-extrabold text-brand">Contrib</span>
         </Link>
-        <h1 className="text-[22px] font-bold mb-1">Your work. On record.</h1>
+        <h1 className="text-[22px] font-bold mb-1">Your projects. On record.</h1>
         <p className="text-sm text-muted mb-7">Welcome back.</p>
 
         <button

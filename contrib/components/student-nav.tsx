@@ -24,8 +24,8 @@ export default function StudentNav(props: StudentNavProps) {
     <NavShell
       {...props}
       homeRoute="/dashboard"
-      sectionLabel="My Groups"
-      defaultBackLabel="Groups"
+      sectionLabel="My Projects"
+      defaultBackLabel="Projects"
     />
   );
 }
