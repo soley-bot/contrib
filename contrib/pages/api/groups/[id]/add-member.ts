@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 import { validate, addMemberSchema } from '@/lib/validation';
+import { GROUP_MAX_MEMBERS } from '@/lib/group-constants';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -108,7 +109,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(409).json({ error: 'Student is already in another active group in this course.' });
   }
 
-  // Group must not be full (max 8 members)
+  // Group must not be full.
   const { count, error: countError } = await adminClient
     .from('group_members')
     .select('id', { count: 'exact', head: true })
@@ -119,8 +120,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to check group capacity.' });
   }
 
-  if ((count ?? 0) >= 8) {
-    return res.status(400).json({ error: 'Group is full. Groups can have up to 8 members.' });
+  if ((count ?? 0) >= GROUP_MAX_MEMBERS) {
+    return res.status(400).json({ error: `Group is full. Groups can have up to ${GROUP_MAX_MEMBERS} members.` });
   }
 
   // INSERT into group_members

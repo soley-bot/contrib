@@ -22,10 +22,17 @@ const mockEq = vi.fn().mockReturnThis();
 const mockLimit = vi.fn().mockReturnThis();
 const mockOrder = vi.fn().mockReturnThis();
 const mockSelect = vi.fn(() => ({ eq: mockEq, is: mockIs, single: mockSingle, maybeSingle: mockMaybeSingle, order: mockOrder, limit: mockLimit }));
-const mockInsert = vi.fn(() => ({ select: vi.fn(() => ({ single: vi.fn().mockResolvedValue({ data: null, error: null }) })) }));
-const mockFrom = vi.fn((_table?: string) => ({ select: mockSelect, insert: mockInsert }));
+const mockInsert = vi.fn(() => ({
+  then: (resolve: (value: { data: null; error: null }) => unknown) => Promise.resolve({ data: null, error: null }).then(resolve),
+  select: vi.fn(() => ({ single: vi.fn().mockResolvedValue({ data: null, error: null }) })),
+}));
+const mockFrom = vi.fn((table?: string) => {
+  void table;
+  return { select: mockSelect, insert: mockInsert };
+});
+const mockRpc = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/supabase-admin', () => ({
-  adminClient: { from: (table: string) => mockFrom(table), storage: { from: vi.fn() } },
+  adminClient: { from: (table: string) => mockFrom(table), rpc: mockRpc, storage: { from: vi.fn() } },
 }));
 
 // Mock formidable so no real filesystem IO happens
@@ -50,6 +57,7 @@ describe('POST /api/evidence/create', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authState.user = { id: 'user-1' };
+    mockRpc.mockResolvedValue({ data: null, error: null });
   });
 
   it('returns 405 for non-POST', async () => {
@@ -79,5 +87,36 @@ describe('POST /api/evidence/create', () => {
     const { req, res, status } = makeReqRes();
     await handler(req, res);
     expect(status).toHaveBeenCalledWith(403);
+  });
+
+  it('creates note evidence through the atomic version RPC', async () => {
+    mockSingle
+      .mockResolvedValueOnce({ data: { id: 't1', group_id: 'g1', title: 'Task' }, error: null })
+      .mockResolvedValueOnce({ data: { id: 'm1' }, error: null });
+    mockRpc.mockResolvedValueOnce({
+      data: {
+        id: 'e1',
+        task_id: '11111111-1111-4111-8111-111111111111',
+        uploaded_by: 'user-1',
+        type: 'note',
+        content: 'ok',
+        version_number: 2,
+        deleted_at: null,
+        created_at: '2026-04-30T00:00:00.000Z',
+        file_path: null,
+        file_name: null,
+        file_size: null,
+        mime_type: null,
+      },
+      error: null,
+    });
+    const { req, res, status } = makeReqRes();
+    await handler(req, res);
+    expect(mockRpc).toHaveBeenCalledWith('create_evidence_with_next_version', expect.objectContaining({
+      p_uploaded_by: 'user-1',
+      p_type: 'note',
+      p_content: 'ok',
+    }));
+    expect(status).toHaveBeenCalledWith(200);
   });
 });

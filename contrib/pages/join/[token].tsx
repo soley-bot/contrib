@@ -6,6 +6,7 @@ import { useUser } from '@/hooks/use-user';
 import { supabase } from '@/lib/supabase';
 import { IconAlertTriangle, IconLink, IconCheck } from '@/components/icons';
 import type { Group } from '@/types';
+import { GROUP_MAX_MEMBERS } from '@/lib/group-constants';
 
 interface PageProps {
   group: (Pick<Group, 'id' | 'name' | 'subject' | 'lead_id'> & { memberCount: number; leadIsTeacher: boolean }) | null;
@@ -17,6 +18,7 @@ export default function JoinPage({ group }: PageProps) {
   const { user, profile, loading: userLoading } = useUser();
   const [status, setStatus] = useState<'idle' | 'already' | 'full' | 'joining' | 'joined' | 'error' | 'teacher_blocked'>('idle');
   const [joinError, setJoinError] = useState('');
+  const teacherBlocked = !userLoading && profile?.role === 'teacher' && !!group;
 
   // Once user loads, check if already a member
   useEffect(() => {
@@ -32,13 +34,6 @@ export default function JoinPage({ group }: PageProps) {
       });
   }, [group, user, userLoading]);
 
-  // Block teachers from joining student groups
-  useEffect(() => {
-    if (!userLoading && profile && profile.role === 'teacher' && group) {
-      setStatus('teacher_blocked');
-    }
-  }, [userLoading, profile, group]);
-
   async function handleJoin() {
     if (!group || !user) {
       setStatus('idle');
@@ -51,9 +46,12 @@ export default function JoinPage({ group }: PageProps) {
     setStatus('joining');
 
     try {
+      const inviteToken = typeof token === 'string' ? token : '';
       const resp = await fetch(`/api/groups/${group.id}/join`, {
         method: 'POST',
         credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviteToken }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -104,13 +102,13 @@ export default function JoinPage({ group }: PageProps) {
           <path d="M16 24h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
         </svg>
         <p className="text-lg font-semibold text-text">This group is full</p>
-        <p className="text-sm text-muted">This group already has 6 members and cannot accept new members.</p>
+        <p className="text-sm text-muted">This group already has {GROUP_MAX_MEMBERS} members and cannot accept new members.</p>
         <button onClick={() => router.push('/dashboard')} className="mt-2 h-10 px-5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover">Back to dashboard</button>
       </div>
     );
   }
 
-  if (status === 'teacher_blocked') {
+  if (teacherBlocked || status === 'teacher_blocked') {
     return (
       <div className="flex flex-col items-center justify-center min-h-dvh gap-3 px-5 text-center">
         <span className="text-text-tertiary"><IconAlertTriangle size={32} /></span>
@@ -142,7 +140,7 @@ export default function JoinPage({ group }: PageProps) {
   }
 
   const memberCount = group.memberCount ?? 0;
-  const maxMembers = 6;
+  const maxMembers = GROUP_MAX_MEMBERS;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh px-5">

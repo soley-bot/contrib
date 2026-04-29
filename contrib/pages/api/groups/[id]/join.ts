@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 import { notifyGroupMembers } from '@/lib/notify';
+import { GROUP_MAX_MEMBERS } from '@/lib/group-constants';
 
 /**
  * POST /api/groups/[id]/join
@@ -23,12 +24,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const groupId = req.query.id;
   if (typeof groupId !== 'string') return res.status(400).json({ error: 'Invalid group ID.' });
 
+  const inviteToken = typeof req.body?.inviteToken === 'string' ? req.body.inviteToken.trim() : '';
+  if (!inviteToken) return res.status(400).json({ error: 'Invite token is required.' });
+
   try {
-    // Fetch the group
+    // Fetch the group by both id and invite token so a leaked/guessed UUID is not enough to join.
     const { data: group, error: groupError } = await adminClient
       .from('groups')
       .select('id, name, lead_id, course_id, archived_at')
       .eq('id', groupId)
+      .eq('invite_token', inviteToken)
       .single();
 
     if (groupError || !group) {
@@ -93,7 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Check group is not full (max 8 members)
+    // Check group is not full.
     const { count, error: countError } = await adminClient
       .from('group_members')
       .select('id', { count: 'exact', head: true })
@@ -107,8 +112,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to check group capacity.' });
     }
 
-    if ((count ?? 0) >= 8) {
-      return res.status(400).json({ error: 'Group is full. Groups can have up to 8 members.' });
+    if ((count ?? 0) >= GROUP_MAX_MEMBERS) {
+      return res.status(400).json({ error: `Group is full. Groups can have up to ${GROUP_MAX_MEMBERS} members.` });
     }
 
     // Insert group membership

@@ -7,6 +7,7 @@ import { adminClient } from '@/lib/supabase-admin';
 import { getUserFromApiRoute } from '@/lib/supabase-server';
 import { rateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 import { validate, createEvidenceApiSchema } from '@/lib/validation';
+import type { Evidence } from '@/types';
 import {
   sanitizeFilename,
   buildObjectKey,
@@ -112,16 +113,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ error: 'You are not a member of this group.' });
   }
 
-  // Next version number for this task.
-  const { data: existing } = await adminClient
-    .from('evidence')
-    .select('version_number')
-    .eq('task_id', input.task_id)
-    .order('version_number', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const nextVersion = (existing?.version_number ?? 0) + 1;
-
   // For file uploads, upload to Storage first.
   const evidenceId = randomUUID();
   let filePath: string | null = null;
@@ -163,21 +154,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     : (input as { content: string }).content.trim();
 
   const { data: inserted, error: insertError } = await adminClient
-    .from('evidence')
-    .insert({
-      id: evidenceId,
-      task_id: input.task_id,
-      uploaded_by: user.id,
-      type: input.type,
-      content: contentForRow,
-      version_number: nextVersion,
-      file_path: filePath,
-      file_name: fileName,
-      file_size: fileSize,
-      mime_type: mimeType,
-    })
-    .select('id, task_id, uploaded_by, type, content, version_number, deleted_at, created_at, file_path, file_name, file_size, mime_type')
-    .single();
+    .rpc('create_evidence_with_next_version', {
+      p_id: evidenceId,
+      p_task_id: input.task_id,
+      p_uploaded_by: user.id,
+      p_type: input.type,
+      p_content: contentForRow,
+      p_file_path: filePath,
+      p_file_name: fileName,
+      p_file_size: fileSize,
+      p_mime_type: mimeType,
+    }) as { data: Evidence | null; error: { message: string } | null };
 
   if (insertError || !inserted) {
     if (filePath) {
@@ -192,7 +179,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   adminClient.from('activity_log').insert({
     group_id: task.group_id,
     actor_id: user.id,
-    action: nextVersion === 1 ? 'evidence_added' : 'evidence_version_added',
+    action: inserted.version_number === 1 ? 'evidence_added' : 'evidence_version_added',
     task_id: task.id,
     meta: { task_title: task.title ?? null },
   }).then(null, () => {});
