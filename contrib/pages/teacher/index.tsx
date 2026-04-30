@@ -80,8 +80,8 @@ export default function TeacherDashboard() {
   async function handleCreate() {
     setFormError('');
     if (!courseName.trim() || !subject.trim()) { setFormError('Course name and subject are required.'); return; }
-    const course = await createCourse({ name: courseName, subject, teacherId: user!.id });
-    if (!course) { setFormError('Failed to create course.'); return; }
+    const { course, error } = await createCourse({ name: courseName, subject });
+    if (!course) { setFormError(error); return; }
     refreshCourses();
     setShowModal(false); setCourseName(''); setSubject('');
     router.push(`/teacher/course/${course.id}`);

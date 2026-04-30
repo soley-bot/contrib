@@ -1,37 +1,43 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { generateInviteToken } from '@/lib/invite';
 import type { Course } from '@/types';
 
 interface CreateCourseInput {
   name: string;
   subject: string;
-  teacherId: string;
 }
 
+export type CreateCourseResult =
+  | { course: Course; error: null }
+  | { course: null; error: string };
+
 interface UseCreateCourseResult {
-  createCourse: (input: CreateCourseInput) => Promise<Course | null>;
+  createCourse: (input: CreateCourseInput) => Promise<CreateCourseResult>;
   creating: boolean;
-  error: string;
 }
 
 export function useCreateCourse(): UseCreateCourseResult {
   const [creating, setCreating] = useState(false);
-  const [error, setError] = useState('');
 
-  async function createCourse({ name, subject, teacherId }: CreateCourseInput): Promise<Course | null> {
+  async function createCourse({ name, subject }: CreateCourseInput): Promise<CreateCourseResult> {
     setCreating(true);
-    setError('');
-    const token = generateInviteToken();
-    const { data, error: dbError } = await supabase
-      .from('courses')
-      .insert({ name: name.trim(), subject: subject.trim(), teacher_id: teacherId, invite_token: token })
-      .select()
-      .single();
-    setCreating(false);
-    if (dbError || !data) { setError(dbError?.message ?? 'Failed to create course.'); return null; }
-    return data as Course;
+    try {
+      const resp = await fetch('/api/courses/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ name: name.trim(), subject: subject.trim() }),
+      });
+      const body = await resp.json().catch(() => ({}));
+      if (!resp.ok || !body.course) {
+        return { course: null, error: body.error ?? 'Failed to create course.' };
+      }
+      return { course: body.course as Course, error: null };
+    } catch (err) {
+      return { course: null, error: err instanceof Error ? err.message : 'Failed to create course.' };
+    } finally {
+      setCreating(false);
+    }
   }
 
-  return { createCourse, creating, error };
+  return { createCourse, creating };
 }
